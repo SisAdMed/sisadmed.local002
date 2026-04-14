@@ -1,0 +1,33 @@
+<!-- Modal para listar y buscar Concetpos de Nómina -->
+<div class="modal fade" id="modal_ConceptosNom">
+    <div class="modal-dialog modal-xl" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Buscar y seleccionar Conceptos de Nómina</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group col-md-12 col-sm-12 col-xs-12" id="listar_CuentasCtb_modal" name="listar_CuentasCtb_modal">
+                    <table id="tblModal_conceptos_Nom" name="tblModal_conceptos_Nom" class="display responsive nowrap table table-hover" style="width:100%">
+                         <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Concepto</th>
+                                <th>Descripción</th>
+                                <th>Tipo</th>
+                                <th>Parámetro</th>
+                                <th class="text-right">Fac/Tope/monto</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

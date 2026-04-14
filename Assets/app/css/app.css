@@ -1,0 +1,137 @@
+.invalid {
+	border: solid 1px red;
+	box-shadow: 0 0 10px red;
+	font-weight: bold;
+}
+form .error {
+	color: red;
+	display: block;
+	text-align: left;
+	font-weight: bold;
+}
+input.masked,p.shell span {
+	font-size: 16px;
+	font-family: monospace;
+	padding-right: 10px;
+	background-color: transparent;
+	text-transform: uppercase;
+}
+form .error {
+	color: #ff0000;
+}
+.dataTables_wrapper .dataTables_filter {
+	float: none;
+	text-align: center;
+}
+.select2 {
+	width:100%!important;
+}
+.loader{
+	position: absolute;
+	top: 0;
+	left: 0%;
+	width: 50%;
+	height: 50%;
+	/*yo usaré background blanco porque mi gif es blanco*/
+	/*background: #fff;*/
+	display: none;
+}
+.loader img{
+	position: absolute;
+	top: 100%;
+	left: 100%;
+	transform: translate(-50%, -50%);
+	width: 100px;
+}
+.dt-back-head {
+	background-color:blue;
+}
+.my-card{
+	width: 500px;
+	height: 500px;
+}
+#progress-container {
+  width: 500px;
+  background-color: #f3f3f3;
+  border: 1px solid #ccc;
+  height: 20px;
+  position: relative;
+  text-align: center; /* Para centrar el texto */
+}
+
+.progress-bar {
+  width: 0%; /* Ancho inicial */
+  height: 100%;
+  background-color: #4CAF50; /* Color de la barra de progreso */
+  transition: width 0.5s ease; /* Animación de transición */
+}
+
+#progress-text {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color: black;
+}
+/*Caption DataTable*/
+caption{
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	background-color: #007bff;
+	caption-side: top;
+}
+.table thead, .table tfoot {
+	background-color: #455a64;
+	color: azure;
+}
+.ui-datepicker-calendar { 
+	display: none; 
+}
+table.dataTable tbody td {
+    white-space: normal; /* Permite el salto de línea */
+}
+.tabla-fija {
+        table-layout: auto;
+        width: max-content !important; /* Clave: la tabla se estira lo que necesiten sus celdas */
+        min-width: 100%;
+        background-color: white;
+}
+.tabla-fija th, .tabla-fija td {
+	white-space: nowrap; /* Evita que el texto salte de línea, forzando el scroll horizontal */
+	padding: 10px 20px;
+}
+.tabla-fija thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #343a40; /* Color oscuro de AdminLTE */
+}
+.contenedor-scroll {
+    /* 1. Dimensiones automáticas/disponibles */
+    width: 100%; /* Opcional: ocupa todo el ancho */
+    height: 100vh; /* Ocupa todo el alto de la ventana visible */
+    
+    /* 2. Activar scroll automático (ambos ejes) */
+    overflow: auto; 
+    
+    /* Opcional: Estilos para visualizar el borde */
+    border: 2px solid black;
+    box-sizing: border-box; /* Incluye borde en el tamaño total */
+}
+/* Contenedor principal */
+.contenedor-scroll-master {
+    width: max-content;       /* Ocupa el ancho del Card de AdminLTE */
+    height:max-content;     /* Altura fija para disparar scroll vertical */
+    overflow: auto;    /* Activa scroll horizontal y vertical cuando sea necesario */
+    border: 1px solid #dee2e6;
+    position: relative;
+}
+
+/* La Tabla */
+.tabla-dimension-real {
+    width: max-content !important; /* CLAVE: La tabla se estira lo que midan sus datos */
+    min-width: 100%;               /* Si hay pocos datos, que al menos cubra el ancho */
+    table-layout: auto;            /* Deja que el navegador calcule el ancho de celdas */
+    margin-bottom: 0;
+}

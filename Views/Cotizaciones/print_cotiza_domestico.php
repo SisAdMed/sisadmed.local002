@@ -1,0 +1,273 @@
+<?php
+require(FPDF1 . 'fpdf.php');
+include_once VARTAX;
+
+//Variables
+$sub_total = 0;
+$mon_base = 0;
+$mon_exe = 0;
+$iva = 0;
+$tasa_iva;
+$total = 0;
+$filemame = $r[0]->num_tdo . '-' . $r[0]->nom_ent . '.pdf';
+$tman_letra = 7;
+$GLOBALS['moneda_cot'] = $r[0]->codigo_moneda;
+$GLOBALS['moneda_emp'] = $r[0]->moneda_emp;
+$GLOBALS['tasa_cambio'] = $r[0]->tasa_cambio;
+$GLOBALS['sub_total'] = 0;
+$GLOBALS['mon_exe'] = 0;
+$GLOBALS['mon_base'] = 0;
+$GLOBALS['note_pre'] = $r[0]->note_pre;
+$cadena = iconv("UTF-8", "ISO-8859-1", html_entity_decode($r[0]->observa));
+$GLOBALS['observa'] = $cadena;
+
+$tasa_iva_cfg = VatTaxModel::ratevatTax($r[0]->fecha_comp, 'IVA');
+$GLOBALS['tasa_iva'] = $tasa_iva_cfg[0]['txr1_iva'];
+
+
+class PDF extends FPDF{
+    public $rif_empresa, $ruta_logo, $dir_emp, $nom_ent, $fecha_comp, $rif_ent, $num_tdo, $codigo_moneda;
+    public $dir_ent, $nombre_ciudad, $nombre_edo, $nombre_pais, $postal_ent, $moneda_cot, $moneda_emp;
+    public $width, $height, $nombre_emp, $email_emp;
+    //Totales
+    public $sub_total_foot;
+
+    public function __construct($r){
+        parent::__construct();
+        $this->nombre_emp = $r[0]->nombre_emp;
+        $this->rif_empresa = $r[0]->rif_empresa;
+        $this->ruta_logo = IMG .'companies/' . $r[0]->logo;
+        $this->dir_emp = html_entity_decode($r[0]->dir_emp);
+        $this->nom_ent = html_entity_decode($r[0]->nom_ent);
+        $this->fecha_comp = formatFecha($r[0]->fecha_comp);
+        $this->rif_ent = $r[0]->rif_ent;
+        $this->num_tdo = $r[0]->num_tdo;
+        $this->codigo_moneda = $r[0]->codigo_moneda;
+        $this->dir_ent = $r[0]->dir_ent;
+        $this->nombre_ciudad = $r[0]->nombre_ciudad;
+        $this->nombre_edo = $r[0]->nombre_edo;
+        $this->nombre_pais = $r[0]->nombre_pais;
+        $this->postal_ent = $r[0]->postal_ent;
+        $this->moneda_cot = $r[0]->codigo_moneda;
+        $this->moneda_emp = $r[0]->moneda_emp;
+        $this->email_emp = $r[0]->email_emp;
+        $this->width = $this->GetPageWidth();
+        $this->height = $this->GetPageHeight();
+    }
+    // Cabecera de página
+    function Header(){
+        // Logo
+        $this->Image($this->ruta_logo,10, 8, 50, 0, 'PNG');
+        // Arial bold 15
+        $this->SetFont('Arial','B', 7);
+        // Movernos a la derecha
+        $this->Cell(100);
+        // Nombre empresa
+        $this->SetFont('Arial','B', 14);
+        $this->Cell(30,10, $this->nombre_emp,0,1,'C');
+        $this->Cell(100);
+        $this->Cell(30,10, 'RIF: '. $this->rif_empresa,0,'C' );
+        // Rif
+        $this->SetFont('Arial','B', 7);
+        //Dirección
+        $this->Cell(-60);
+        $this->MultiCell(0,4, $this->dir_emp, 0, 'C');
+        $this->Cell(100);
+        $this->Cell(30,10, $this->email_emp,0,1,'C');
+        // Salto de línea
+        $this->Ln(10);
+        //Nombre Cliente
+        $this->SetFont('Arial','',7);
+        $this->cell(20, 4, 'Nombre:');
+        $this->SetFont('Arial','B',7);
+        $this->cell(30, 4, html_entity_decode($this->nom_ent), 0);
+        //Fecha
+        $this->Cell(80);
+        $this->SetFont('Arial','',7, 0, 1);
+        $this->cell(15, 4, 'Fecha:', 0);
+        $this->SetFont('Arial','B',7);
+        $this->cell(15, 4, formatFecha($this->fecha_comp), 0, 0);
+        //Moneda
+        $this->Cell(1);
+        $this->SetFont('Arial','',7, 0, 1);
+        $this->cell(15, 4, 'Moneda:', 0);
+        $this->SetFont('Arial','B',7);
+        $this->cell(15, 4, $this->codigo_moneda, 0, 1);
+        //RIF
+        $this->SetFont('Arial','',7, 0, 1);
+        $this->cell(20, 4, 'RIF:');
+        $this->SetFont('Arial','B',7);
+        $this->cell(30, 4, html_entity_decode($this->rif_ent));
+        //Cotización
+        $this->Cell(80);
+        $this->SetFont('Arial','B',9);
+        $this->Cell(20, 4,html_entity_decode('Cotizaci&oacute;n Nro.: '. $this->num_tdo), 0,1);
+        //Tasa
+         if($this->codigo_moneda != $this->moneda_emp){
+            $this->cell(20, 4, 'Cambio Bs.: ' . number_format($this->tasa_cambio,8), 0, 1); 
+        }else{
+            $this->Ln(4);
+        }
+        //Dirección
+        $this->SetFont('Arial','',7);
+        $this->cell(20, 4, html_entity_decode(html_entity_decode('Dirección:')));
+        $this->SetFont('Arial','B',7);
+        $this->MultiCell(100, 4, html_entity_decode($this->dir_ent . ' ' . strtoupper($this->nombre_ciudad) . ' ' . strtoupper($this->nombre_edo) . ' ' . strtoupper($this->nombre_pais)));
+        $this->SetFont('Arial','',7);
+        $this->cell(20, 4, 'Zona postal:');
+        $this->SetFont('Arial','B',7);
+        $this->cell(30, 4, html_entity_decode($this->postal_ent), 0, 1);
+        //Titulos
+        $this->ln();
+        //$this->Line(10, 63, $this->width -5, 63);
+        $this->cell(100, 4, html_entity_decode('DESCRIPCION'), 0, 0, 'C');
+        $this->Cell(20);
+        $this->cell(5, 4, html_entity_decode('IVA'), 0, 0, 'C');
+        $this->cell(15, 4, html_entity_decode('CANT.'), 0, 0, 'C');
+        $this->cell(10, 4, html_entity_decode('PRECIO'), 0, 0, 'R');
+        if($this->moneda_cot != $this->moneda_emp){
+            $this->cell(20, 4, html_entity_decode('TOTAL USD'), 0, 0, 'R', );
+            $this->cell(20, 4, html_entity_decode('TOTAL VES'), 0, 0, 'R', );
+        }else{
+            $this->cell(40, 4, html_entity_decode('TOTAL VES'), 0, 0, 'R', );
+        }
+        //$this->Line(10, 66.5, $this->width -10, 66.5);
+        $this->ln(5);
+    }
+
+    // Pie de página
+    function Footer(){
+        // Posición: a 4 cm para los totales
+        //if($GLOBALS['sub_total'] != 0){
+
+        $this->SetY(-40);
+        $this->cell(100);
+        $this->SetFont('Arial','B', 7);
+        $this->cell(20, 4, html_entity_decode('Sub-Total'), 0, 0, 'L');
+        if($GLOBALS['moneda_cot'] != $GLOBALS['moneda_emp']){
+            //Sub-total
+            $this->cell(30);
+            $this->Cell(20, 4, '$ ' . number_format($GLOBALS['sub_total'], 2), 0, 0, 'R');
+            $this->Cell(20, 4, 'Bs ' . number_format($GLOBALS['sub_total'] * $GLOBALS['tasa_cambio'], 2), 0, 1, 'R');
+            //Exento
+            $this->cell(100);
+            $this->cell(20, 4, html_entity_decode('Sub-Total Exento'), 0, 0, 'L');
+            $this->cell(30);
+            $this->Cell(20, 4, '$ ' . number_format($GLOBALS['mon_exe'], 2), 0, 0, 'R');
+            $this->Cell(20, 4, 'Bs ' . number_format($GLOBALS['mon_exe'] * $GLOBALS['tasa_cambio'], 2), 0, 1, 'R');
+            //Base imponible
+            $this->cell(100);
+            $this->cell(20, 4, html_entity_decode('Sub-Total Base Imponible'), 0, 0, 'L');
+            $this->cell(30);
+            $this->Cell(20, 4, '$ ' . number_format($GLOBALS['mon_base'], 2), 0, 0, 'R');
+            $this->Cell(20, 4, 'Bs ' . number_format($GLOBALS['mon_base'] * $GLOBALS['tasa_cambio'], 2), 0, 1, 'R');
+            //IVA
+            $this->cell(100);
+            $this->cell(20, 4, '$ ' . html_entity_decode('IVA ' .number_format($GLOBALS['tasa_iva'],2,",","."). ' % sobre ') . number_format($GLOBALS['mon_base'],2), 0, 0, 'L');
+            $this->cell(30);
+            $this->Cell(20, 4, '$ ' . number_format($GLOBALS['mon_base'] * (16/100), 2), 0, 0, 'R');
+            $this->Cell(20, 4, 'Bs ' . number_format(($GLOBALS['mon_base'] * (16/100)) * $GLOBALS['tasa_cambio'], 2), 0, 1, 'R');
+            //Total
+            $this->cell(100);
+            $this->cell(20, 4, html_entity_decode('Total'), 0, 0, 'L');
+            $this->cell(30);
+            $this->Cell(20, 4, '$ ' . number_format(($GLOBALS['mon_base'] + $GLOBALS['mon_exe']) + ($GLOBALS['mon_base'] * ($GLOBALS['tasa_iva']/100)), 2), 0, 0, 'R');
+            $this->Cell(20, 4, 'Bs ' . number_format((($GLOBALS['mon_base'] + $GLOBALS['mon_exe']) + ($GLOBALS['mon_base'] * ($GLOBALS['tasa_iva']/100))) * $GLOBALS['tasa_cambio'],2), 0, 1 , 'R');
+        }else{
+            //Sub-total
+            $this->cell(50);
+            $this->Cell(20, 4, number_format($GLOBALS['sub_total'], 2), 0, 1, 'R');
+            //Exento
+            $this->cell(100);
+            $this->cell(20, 4, html_entity_decode('Sub-Total Exento'), 0, 0, 'L');
+            $this->cell(50);
+            $this->Cell(20, 4, number_format($GLOBALS['mon_exe'], 2), 0, 1, 'R');
+            //Base imponible
+            $this->cell(100);
+            $this->cell(20, 4, html_entity_decode('Sub-Total Base Imponible'), 0, 0, 'L');
+            $this->cell(50);
+            $this->Cell(20, 4, number_format($GLOBALS['mon_base'], 2), 0, 1, 'R');
+            //IVA
+            $this->cell(100);
+            $this->cell(20, 4, html_entity_decode('IVA 16.00% sobre ') . number_format($GLOBALS['mon_base'],2), 0, 0, 'L');
+            $this->cell(50);
+            $this->Cell(20, 4, number_format($GLOBALS['mon_base'] * (16/100), 2), 0, 1, 'R'); 
+             //Total
+            $this->cell(100);
+            $this->cell(20, 4, html_entity_decode('Total'), 0, 0, 'L');
+            $this->cell(50);
+            $this->Cell(20, 4, number_format(($GLOBALS['mon_base'] + $GLOBALS['mon_exe']) + ($GLOBALS['mon_base'] * (16/100)), 2), 0, 0, 'R');
+        }
+        $this->Ln(5);
+         $this->SetFont('Arial','B', 10);
+        $this->Cell(20,3, html_entity_decode($GLOBALS['note_pre']. PHP_EOL . $GLOBALS['observa']));
+        $this->SetFont('Arial','', 7);
+        //}
+        // Posición: a 1,5 cm del final
+        $this->SetY(-15);
+        // Arial italic 8
+        $this->SetFont('Arial','I', 7);
+        // Número de página
+        $this->Cell(0,10,'Page '.$this->PageNo().'/{nb}',0,0,'C');
+    }
+}
+$this->Ln(5);
+ $this->SetFont('Arial','B', 10);
+$this->Cell(20,3, html_entity_decode($GLOBALS['note_pre']));
+$this->SetFont('Arial','', 7);
+// Creación del objeto de la clase heredada
+$pdf = new PDF($r);
+$pdf->AliasNbPages();
+$pdf->AddPage('P', 'Letter');
+$pdf->SetFont('Arial','', $tman_letra);
+$rows = 0;
+for ($i = 0; $i < count($r); $i++) {
+     $nom_prod =$r[$i]->nom_prod . ' ' . $r[$i]->nom_fab . ' ' . $r[$i]->ref_prod;
+    if($r[$i]->lote_prod == 1){
+        $nom_prod = $nom_prod;
+        if($r[$i]->fec_ven >= date("Y-m-d")){
+            $nom_prod = $nom_prod . ' Fec.Venc. ' . formatFecha($r[$i]->fec_ven);
+        }
+    }
+    $pdf->MultiCell(120, 3, html_entity_decode($nom_prod), 0, 'L');
+    $pdf->ln(-3);
+    $pdf->Cell(120);
+      if($r[$i]->iva_prod == 'S') {
+        $tasa_iva =number_format($GLOBALS['tasa_iva'], 2, ",", ".");
+        $tasa_iva = number_format($tasa_iva, 2);
+    }else{
+        $tasa_iva = '(E)';
+    }
+    $pdf->Cell(5, 3, html_entity_decode($tasa_iva), 0, 0, 'C');
+    $pdf->Cell(10, 3, $r[$i]->can_det, 0, 0, 'R');
+    $pdf->Cell(15, 3, number_format($r[$i]->pre_vta, 2), 0, 0, 'R');
+    if($r[$i]->codigo_moneda != $r[$i]->moneda_emp){
+        $pdf->Cell(20, 3, number_format($r[$i]->sub_total, 2), 0, 0, 'R');
+        $pdf->Cell(20, 3, number_format($r[$i]->sub_total * $r[$i]->tasa_cambio, 2), 0, 1, 'R');
+    }else{
+        $pdf->Cell(40, 3, number_format($r[$i]->sub_total * $r[$i]->tasa_cambio, 2), 0, 1, 'R');
+    }
+    //Acumular variables
+    $sub_total += $r[$i]->sub_total;
+    if($r[$i]->iva_prod == 'S'){
+        $mon_base += $r[$i]->sub_total;
+        $mon_exe += 0;
+    }else{
+        $mon_base += 0;
+        $mon_exe += $r[$i]->sub_total;
+    }
+    //Realizar rompimiento cada 50 registros
+    $rows++;
+    if($rows == 35){
+        $rows = 0;
+        $pdf->AddPage('P', 'Letter');
+    }
+    $GLOBALS['sub_total'] = $sub_total;
+}
+$pdf->Ln(5);
+$GLOBALS['sub_total'] = $sub_total;
+$GLOBALS['mon_exe'] = $mon_exe;
+$GLOBALS['mon_base'] = $mon_base;
+
+$pdf->Output('', html_entity_decode($filemame));
+?>
