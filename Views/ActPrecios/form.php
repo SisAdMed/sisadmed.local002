@@ -1,7 +1,7 @@
 <?php
 	$readonly="";
 	if(!empty($r)){
-		$readonly = 'readonly' ;
+		$readonly = 'readonly';
 	}
 ?>
 <div class="card-body">
