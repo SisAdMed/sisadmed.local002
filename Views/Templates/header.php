@@ -2,7 +2,11 @@
 $totmsj = '';
 $totapr = '';
 $tiempo = '';
+$perfil = '';
 $date_today = date("D, j M Y H:i:s ") . 'GMT';
+if(isset($_SESSION['administrador']) && $_SESSION['administrator'] != 1){
+    $perfil = 'iframe-mode';
+}
 ?>
 <!DOCTYPE html>
     <html lang="<?= SITE_LANG ?>" style="height: auto;">
@@ -62,7 +66,7 @@ $date_today = date("D, j M Y H:i:s ") . 'GMT';
         <!-- Mis estilos -->
         <link rel="stylesheet" type="text/css" href="<?= ASSETS ?>/app/css/app.css">
     </head>
-    <body class="hold-transition sidebar-mini sidebar-collapse layout-fixed text-xs" data-sidebar-expand-on-hover="true">
+        <body class="hold-transition sidebar-mini sidebar-collapse layout-footer-fixed text-xs" data-sidebar-expand-on-hover="true">
         <div class="content" style="height: auto;">
         <!-- Navbar -->
         <nav class="main-header navbar navbar-expand navbar-white navbar-light">

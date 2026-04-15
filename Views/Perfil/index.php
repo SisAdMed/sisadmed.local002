@@ -43,7 +43,6 @@ $diferencia = str_replace('.', ',', number_format($diferencia, 4));
 $porcentual = str_replace('.', ',', number_format($porcentual, 2)) . ' %';
 ?>
 <?php if (isset($_SESSION['id_rol']) && $_SESSION['id_rol'] != 1) : ?>
-    <?php $logo = IMG . 'logo_fondo.jpg';  ?>
     <div class="content-wrapper iframe-mode" data-widget="iframe" data-loading-screen="750">
         <div class="nav navbar navbar-expand navbar-white navbar-light border-bottom p-0">
             <div class="nav-item dropdown">
