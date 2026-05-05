@@ -19,7 +19,8 @@ $(document).ready(function () {
 	$("#fec_fin").val(getLastDateofMonth());
 	//Ocultar Boton de Excel
 	$(".excel").hide();
-	//Cargar new frame
+	$('#consumo-content').hide();
+	//Cargar new frame	
 	//Cargar MArcas/Fabricante/Laboratorio
 	listar_marcas();
 	listar_grupos('', 'id_gru');
@@ -46,8 +47,10 @@ $(document).on("click", "#btnClear", function (e) {
 	//Cargar fechas de inicio y fin del mes actual
 	$("#fec_ini").val(getFirstDateofMonth());
 	$(".excel").hide();
+	$("#id_vend").empty();
 	listar_vendedores();
 	listar_grupos('', 'id_gru');
+	$('#consumo-content').hide();
 });
 //Al cambiar de empresa
 $(document).on("change", "#id_emp", function (e) {
@@ -98,7 +101,7 @@ function CargarDatosTabla_Producto_001() {
 			`<b>Empresa: ${nom_emp}<br>Fecha de inicio: ${fec_ini} Fecha de corte ${fec_fin}</b>`;
 			//$('#tabla_grafica_prod_det').append('<caption style="caption-side: top-right">' + title + '</caption>');
 			// 3. Inyección del Footer en el DOm ante de inicializar
-			let tcols = 13; //Número de columnas total de la tabla
+			let tcols = 15; //Número de columnas total de la tabla
 			let footerHtml = '<tr><th>TOTALES</th>';
 			for (let i = 1; i < tcols; i++) 	footerHtml += '<th></th>';
 			footerHtml += '</tr>';
@@ -150,7 +153,8 @@ function CargarDatosTabla_Producto_001() {
 					{ title: "Gastos", data: "gastos", render: DataTable.render.number('.', ',', 2), className: 'text-right' },
 					{ title: "Inventario PPAL.", data: "sal_inv_ppal", render: DataTable.render.number('.', ',', 2), className: 'text-right' },
 					{ title: "Inventario Consig.", data: "sal_inv_consig", render: DataTable.render.number('.', ',', 2), className: 'text-right' },
-
+					{ title: 'Cot', data: "total_cot", className: 'text-right' },
+					{ title: 'Fac.', data: "facturadas", className: 'text-right' }
 				],
 				language: {
 					url: `${base_url}/Assets/json/es-ES.json`,
@@ -167,22 +171,22 @@ function CargarDatosTabla_Producto_001() {
 					var total = 0;
 					for (let i = 1; i < tcols; i++) {
 						total = sumarColumna(parseFloat(i));
-						if(i == 3) {
-							total = sumarColumna(parseFloat(1)) + sumarColumna(parseFloat(2));							
-						}else if(i == 4) {
+						if (i == 3) {
+							total = sumarColumna(parseFloat(1)) + sumarColumna(parseFloat(2));
+						} else if (i == 4) {
 							const totalCosto = sumarColumna(parseFloat(1));
 							const totalUtilidad = sumarColumna(parseFloat(2));
 							total = (totalUtilidad / (totalCosto + totalUtilidad));
-						}else if(i == 6) {
+						} else if (i == 6) {
 							const totalAdicional = sumarColumna(parseFloat(5));
 							const totalCosto = sumarColumna(parseFloat(1));
 							const totalUtilidad = sumarColumna(parseFloat(2));
 							total = (totalAdicional / (totalCosto + totalUtilidad));
-						}else if(i == 7) {							
+						} else if (i == 7) {
 							total = sumarColumna(parseFloat(1)) + sumarColumna(parseFloat(2)) + sumarColumna(parseFloat(5));
 						}
-						$(api.column(i).footer()).html(format_number_with_dec_new(total, 2));					
-					}					
+						$(api.column(i).footer()).html(format_number_with_dec_new(total, 2));
+					}
 				},
 			});
 		},
@@ -288,13 +292,13 @@ function CargarDatosTabla_Producto_001() {
 						var total = 0;
 						for (let i = 2; i < 12; i++) {
 							total = sumarColumna(parseFloat(i));
-							if(i==5){
+							if (i == 5) {
 								total = sumarColumna(parseFloat(2)) + sumarColumna(parseFloat(3))
-							}else if(i == 6){
+							} else if (i == 6) {
 								total = sumarColumna(parseFloat(4)) / sumarColumna(parseFloat(3));
-							}else if(i == 8){
+							} else if (i == 8) {
 								total = sumarColumna(parseFloat(3)) + sumarColumna(parseFloat(4)) + sumarColumna(parseFloat(7));
-							}else if(i == 9){
+							} else if (i == 9) {
 								total = sumarColumna(parseFloat(7)) / sumarColumna(parseFloat(3));
 							}
 							$(api.column(i).footer()).html(format_number_with_dec_new(total, 2));
@@ -518,15 +522,11 @@ function CrearGrafico(titulo, cantidad, colores, tipo, head, id) {
 			],
 		},
 		options: {
-			scales: {
-				yAxes: [
-					{
-						ticks: {
-							beginAtZero: true,
-						},
-					},
-				],
+			legend: {
+				display: false,
 			},
+			responsive: true,
+			maintainAspectRatio: false,
 		},
 	});
 }
@@ -535,6 +535,7 @@ function CrearGrafico(titulo, cantidad, colores, tipo, head, id) {
 $(document).on("click", "#btnSearchConsumo", async function () {
 	ReportexConsumo();
 	$(".excel").show();
+	$('#consumo-content').show();
 });
 function ReportexConsumo() {
 	id_emp = $("#id_emp").val();
@@ -742,4 +743,656 @@ function generarReporteConsumo(rawData) {
 		],
 
 	});
+	//Llenar el select de años para la gráfica
+	actualizarComboAnios();
+	actualizarComboMarca();
+	actualizarComboTiposClientes();
+	listar_consumo_x_clientes();
+
 }
+function actualizarComboAnios() {
+	var inicio = $('#fec_ini').val();
+	var fin = $('#fec_fin').val();
+
+	if (inicio && fin) {
+		var anioInicio = new Date(inicio).getFullYear() - 2000;
+		var anioFin = new Date(fin).getFullYear() - 2000;
+
+		// Ordenar años si fin es menor que inicio
+		var min = Math.min(anioInicio, anioFin) + 1; // +1 para no incluir el año de inicio
+		var max = Math.max(anioInicio, anioFin);
+
+		var $combo = $('#sel_fecha');
+		$combo.empty(); // Limpiar opciones anteriores
+		$combo.append('<option value="">Seleccione año</option>');
+
+		// Bucle para agregar años
+		for (var i = anioInicio; i <= anioFin; i++) {
+			$combo.append('<option value="' + i + '">' + i + '</option>');
+		}
+	}
+}
+function actualizarComboMarca() {
+	$.ajax({
+		url: `${base_url}/Perfil/listar_marcas`,
+		method: "POST",
+		dataType: "json",
+		success: function (response) {
+			var $combo = $('#sel_marca');
+			$combo.empty();
+			$combo.append('<option value="">Seleccione marca(s)</option>');
+			response.forEach(marca => {
+				$combo.append('<option value="' + marca.id_fab + '">' + marca.nom_fab + '</option>');
+			});
+			//Crear Grafica de Utilidad por marca
+			var titulo = [];
+			var cantidad = [];
+			var colores = [];
+			for (i = 0; i < response.length; i++) {
+				titulo.push(response[i]["nom_fab"]);
+				cantidad.push(response[i]["total_utilidad"]);
+				colores.push(colorRGB());
+			}
+			CrearGraficoConsumo(
+				titulo,
+				cantidad,
+				colores,
+				'pie',
+				'Utilidad por marca',
+				'marcaChart',
+				response,
+				'custom-legend-marca'
+			);
+		},
+		error: function (xhr, errmsg, err) {
+			console.log(xhr.status + ": " + xhr.responseText);
+		}
+	});
+}
+function actualizarComboTiposClientes() {
+	id_emp = $("#id_emp").val();
+	fec_ini = $("#fec_ini").val();
+	fec_fin = $("#fec_fin").val();
+	id_fab = $("#id_fab").val();
+	id_cli = $("#id_cli").val();
+	id_gru = $("#id_gru").val();
+	id_vend = $("#id_vend").val();
+	id_tipocliente = $("#id_tipocliente").val();
+	var $combo = '';
+	$.ajax({
+		url: `${base_url}/Perfil/listar_tipos_clientes`,
+		method: "POST",
+		data: { id_emp: id_emp, fec_ini: fec_ini, fec_fin: fec_fin, id_fab: id_fab, id_cli: id_cli, id_gru: id_gru, id_vend: id_vend, id_tipocliente: id_tipocliente },
+		dataType: "json",
+		success: function (response) {
+			//Tipo de Clientes
+			$combo = $('#sel_tipo_cliente');
+			$combo.empty();
+			$combo.append('<option value="">Seleccione tipo(s) de cliente(s)</option>');
+			response.forEach(tipo => {
+				$combo.append('<option value="' + tipo.id + '">' + tipo.description + '</option>');
+			});
+			//Crear Grafica de Utilidad por marca	
+			var titulo = [];
+			var cantidad = [];
+			var colores = [];
+			for (i = 0; i < response.length; i++) {
+				titulo.push(response[i]["description"]);
+				cantidad.push(response[i]["utilidad"]);
+				colores.push(colorRGB());
+			}
+			CrearGraficoConsumo(
+				titulo,
+				cantidad,
+				colores,
+				'pie',
+				'Utilidad por Tipo de Cliente',
+				'tipoChart',
+				response,
+				'custom-legend-tipo-cliente'
+			);
+		},
+		error: function (xhr, errmsg, err) {
+			console.log(xhr.status + ": " + xhr.responseText);
+		}
+	});
+	$.ajax({
+		url: `${base_url}/Perfil/listar_vendedores`,
+		method: "POST",
+		data: { id_emp: id_emp, fec_ini: fec_ini, fec_fin: fec_fin, id_fab: id_fab, id_cli: id_cli, id_gru: id_gru, id_vend: id_vend, id_tipocliente: id_tipocliente },
+		dataType: "json",
+		success: function (response) {
+			//Vendedores	
+			$combo = $('#sel_vendedor');
+			$combo.empty();
+			$combo.append('<option value="">Seleccione vendedor(es)</option>');
+			response.forEach(tipo => {
+				$combo.append('<option value="' + tipo.id + '">' + tipo.nom_vend + '</option>');
+			});
+			//Crear Grafica de Utilidad por marca
+			var titulo = [];
+			var cantidad = [];
+			var colores = [];
+			for (i = 0; i < response.length; i++) {
+				titulo.push(response[i]["nom_fab"]);
+				cantidad.push(format_number_with_dec_new(response[i]["total_utilidad"], 2));
+				colores.push(colorRGB());
+			}
+			/*
+			CrearGrafico(
+				titulo,
+				cantidad,
+				colores,
+				"pie",
+				"Utilidad por marca",
+				"tipoChart",
+	
+			);
+			*/
+		},
+		error: function (xhr, errmsg, err) {
+			console.log(xhr.status + ": " + xhr.responseText);
+		}
+	});
+}
+function listar_consumo_x_clientes() {
+	id_emp = $("#id_emp").val();
+	fec_ini = $("#fec_ini").val();
+	fec_fin = $("#fec_fin").val();
+	id_fab = $("#id_fab").val();
+	id_cli = $("#id_cli").val();
+	id_gru = $("#id_gru").val();
+	id_vend = $("#id_vend").val();
+	id_tipocliente = $("#id_tipocliente").val();
+	let footerHtml = '<tr><th>TOTALES</th>';
+	for (let i = 1; i < 4; i++) footerHtml += '<th></th>';
+	footerHtml += '</tr>';
+	$('#ReportexGrafica').find('tfoot').remove(); //Limpiar si existe
+	$('#ReportexGrafica').append('<tfoot>' + footerHtml + '</tfoot>');
+	$.ajax({
+		url: `${base_url}/Perfil/listar_consumo_x_clientes`,
+		method: "POST",
+		data: { id_emp: id_emp, fec_ini: fec_ini, fec_fin: fec_fin, id_fab: id_fab, id_cli: id_cli, id_gru: id_gru, id_vend: id_vend, id_tipocliente: id_tipocliente },
+		dataType: "json",
+		success: function (response) {
+			//Clientes				
+			$("#ReportexGrafica").DataTable({
+				data: response,
+				destroy: true,
+				info: false,
+				columns: [
+					{ title: "Cliente", data: "cliente" },
+					{ title: "Consumo", data: "unidades", render: DataTable.render.number('.', ',', 0), className: 'text-right' },
+					{ title: "Ventas", data: "ventas", render: DataTable.render.number('.', ',', 2), className: 'text-right' },
+					{ title: "Utilidad", data: "utilidad", render: DataTable.render.number('.', ',', 2), className: 'text-right' }
+				],
+				footerCallback: function (row, data, start, end, display) {
+					var api = this.api();
+					var intVal = function (i) {
+						return typeof i === 'string' ?
+							i.replace(/[\$,]/g, '') * 1 :
+							typeof i === 'number' ?
+								i : 0;
+					};
+					let totalGeneralUni = api
+						.column(1)
+						.data()
+						.reduce(function (a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+
+					// 2. Calcular el Total de la Página Actual
+					let totalPaginaUni = api
+						.column(1, { page: 'current' })
+						.data()
+						.reduce(function (a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					//
+					let totalGeneralVen = api
+						.column(2)
+						.data()
+						.reduce(function (a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+
+					// 2. Calcular el Total de la Página Actual
+					let totalPaginaUti = api
+						.column(3, { page: 'current' })
+						.data()
+						.reduce(function (a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					//
+					let totalGeneralUti = api
+						.column(3)
+						.data()
+						.reduce(function (a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+
+					// 2. Calcular el Total de la Página Actual
+					let totalPaginaVen = api
+						.column(2, { page: 'current' })
+						.data()
+						.reduce(function (a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					// Actualizar el pie de página
+					$(api.column(1).footer()).html(
+						'<div style="border-bottom: 1px solid #ccc">Pag: ' + totalPaginaUni.toLocaleString('es-VE', { minimumFractionDigits: 2 }) + '</div>' +
+						'<div>Total: ' + totalGeneralUni.toLocaleString('es-VE', { minimumFractionDigits: 2 }) + '</div>'
+					);
+					//				
+					$(api.column(2).footer()).html(
+						'<div style="border-bottom: 1px solid #ccc">Pag: ' + totalPaginaVen.toLocaleString('es-VE', { minimumFractionDigits: 2 }) + '</div>' +
+						'<div>Total: ' + totalGeneralVen.toLocaleString('es-VE', { minimumFractionDigits: 2 }) + '</div>'
+					);
+					//				
+					$(api.column(3).footer()).html(
+						'<div style="border-bottom: 1px solid #ccc">Pag: ' + totalPaginaUti.toLocaleString('es-VE', { minimumFractionDigits: 2 }) + '</div>' +
+						'<div>Total: ' + totalGeneralUti.toLocaleString('es-VE', { minimumFractionDigits: 2 }) + '</div>'
+					);
+
+				},
+				language: {
+					url: `${base_url}/Assets/json/es-ES.json`,
+				},
+			});
+		},
+		error: function (xhr, errmsg, err) {
+			console.log(xhr.status + ": " + xhr.responseText);
+		}
+
+	});
+}
+function CrearGraficoConsumo(titulo, cantidad, colores, tipo, head, id, data = null, id_leyenda = null) {
+	// 1. La Data (puedes traerla de tu AJAX de DataTables)
+	const dataConsumo = {
+		labels: titulo,
+		datasets: [{
+			data: cantidad,
+			backgroundColor: colores,
+			borderWidth: 0
+		}]
+	};
+	// 2. Configuración del Gráfico
+	const config = {
+		type: tipo,
+		data: dataConsumo,
+		options: {
+			responsive: true,
+			plugins: {
+				legend: {
+					display: false // Desactivamos la leyenda original
+				}
+			},
+		}
+	};
+	// 3. Renderizar	
+	const existingChart = Chart.getChart(id);
+	if (existingChart) {
+		existingChart.destroy(); // Destroy it before making a new one
+	}
+	const myChart = new Chart(
+		document.getElementById(id),
+		config
+	);
+	//Limpiar leyendo
+	$("#" + id_leyenda).empty();
+	// 4. Generar Leyenda Dinámica
+	const legendContainer = document.getElementById(id_leyenda);
+
+	dataConsumo.labels.forEach((label, i) => {
+		const value = dataConsumo.datasets[0].data[i];
+		const color = dataConsumo.datasets[0].backgroundColor[i];
+
+		legendContainer.innerHTML += `
+		<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+			<div style="display: flex; align-items: center;">
+				<span style="width: 12px; height: 12px; background-color: ${color}; border-radius: 50%; display: inline-block; margin-right: 10px;"></span>
+				<span style="font-size: 14px; color: #555;">${label}</span>
+			</div>
+			<strong style="font-size: 14px;">${value}</strong>
+		</div>
+	`;
+	});
+}
+$("#sel_fecha, #sel_marca, #sel_tipo_cliente, #sel_vendedor").on("change", function () {
+	//Obtener valores seleccionados		
+	id_emp = $("#id_emp").val();
+	fec_ini = $("#fec_ini").val();
+	fec_fin = $("#fec_fin").val();
+	id_fab = $("#id_fab").val();
+	id_cli = $("#id_cli").val();
+	id_gru = $("#id_gru").val();
+	id_vend = $("#id_vend").val();
+	id_tipocliente = $("#id_tipocliente").val();
+	//
+	anio = '';
+	anio = $("#sel_fecha").val();
+	id_fab = $("#sel_marca").val();
+	id_tipocliente = $("#sel_tipo_cliente").val();
+	id_vend = $("#sel_vendedor").val();
+
+	//Año
+	var url1 = `${base_url}/Perfil/listar_marcas`;
+	var url2 = `${base_url}/Perfil/listar_marcas`;
+	var url3 = `${base_url}/Perfil/listar_marcas`;
+	var url4 = `${base_url}/Perfil/listar_marcas`;
+	//
+	//Ajax para Año
+	$.ajax({
+		url: url1,
+		method: 'POST',
+		dataSrc: '',
+		data: { id_fab: id_fab, anio: anio, id_tipocliente: id_tipocliente, id_vend: id_vend },
+		dataType: 'json',
+		beforeSend: function () {
+			loader.show();
+		},
+		complete: function () {
+			loader.hide();
+		},
+		error: function (PDOException) {
+			loader.hide();
+			console.log('Ha ocurrido el siguiente error:', PDOException.responseText)
+		},
+		success: function (data) {
+			marcaChart = $("#marcaChart");
+			//Actualizar grafica de marcas			
+			var titulo = [];
+			var cantidad = [];
+			var colores = [];
+			for (i = 0; i < data.length; i++) {
+				titulo.push(data[i]["nom_fab"]);
+				cantidad.push(data[i]["total_utilidad"]);
+				colores.push(colorRGB());
+			}
+			CrearGraficoConsumo(
+				titulo,
+				cantidad,
+				colores,
+				'pie',
+				'Utilidad por marca',
+				'marcaChart',
+				data,
+				'custom-legend-marca'
+			);
+		},
+	});
+})
+/* Fin Reporte por Consumo */
+/*Funcion para buscar el detallde de Cotizaciones
+* Creado el 04-05-2026 a las 09:05:00 por José Vargas
+*Para mostrar la tabla y grafica de cotizaciones
+*/
+$(document).on("click", "#btnSearchCotizaciones", function () {
+	id_emp = $("#id_emp").val();
+	fec_ini = $("#fec_ini").val();
+	fec_fin = $("#fec_fin").val();
+	var url = `${base_url}/Perfil/grafica_cotizaciones`;
+	GraficaCotizaciones(url, id_emp, fec_ini, fec_fin);
+})
+
+/**
+ * Description Function para Crear Tabla y Grafica de Cotizaciones
+ * Creado el 04-05-2026 a las 09:23:00 por José Vargas
+ *
+ * @param {*} url 
+ * @param {*} id_emp 
+ * @param {*} fec_ini 
+ * @param {*} fec_fin 
+ */
+function GraficaCotizaciones(url, id_emp, fec_ini, fec_fin) {
+	$.ajax({
+		url: url,
+		method: 'POST',
+		data: { id_emp: id_emp, fec_ini: fec_ini, fec_fin: fec_fin },
+		dataType: 'json',
+		beforeSend: function () {
+			loader.show();
+		},
+		complete: function () {
+			loader.hide();
+		},
+		error: function (PDOException) {
+			loader.hide();
+			console.log('Ha ocurrido el siguiente error:', PDOException.responseText)
+		},
+		success: function (data) {			
+			//1. Si la tabla ya existe, se destruye y se limpia el HTML
+			if ($.fn.DataTable.isDataTable("#ReportexCotizaciones")) {
+				$('#ReportexCotizaciones').DataTable().destroy();
+			}
+			//2. Mapeo para ordenamiento cronologico
+			const mesesorder = { "Ene": 1, "Feb": 2, "Mar": 3, "Abr": 4, "May": 5, "Jun": 6, "Jul": 7, "Ago": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dic": 12 };
+			//2. Identificar añio y meses
+			const periodosUnicos = [...new Set(data.map(item => `${item.anio}-${item.mes}`))].sort((a, b) => {
+				const [anioA, mesA] = a.split('-');
+				const [anioB, mesB] = b.split('-')
+				return anioA - anioB || mesesorder[mesA] - mesesorder[mesB];
+			});
+			mesesKey = periodosUnicos.map(p => p.split('-')[1]);			
+			//3. Construir el THEAD (Encabezado doble)
+			let thead = `<thead><tr><th rowspan="2" class="align-middle">Vendedor</th>`;
+			let tfoot = `<tfoot><tr class="bg-light text-bold"><td>TOTAL GENERAL</td>`;
+			periodosUnicos.forEach(p => {
+				const [anio, mes] = p.split('-');
+				thead += `<th colspan="2" class="text-center bg-lightblue">Año ${anio} ${mes}</th>`;
+				tfoot += `<th class="text-center"></th><th class="text-center"></th>`;
+			});
+			thead += `<th colspan="2" class="text-center bg-navy">Total General</th></tr><tr>`;
+			tfoot += `<th class="text-center text-primary"></th><th class="text-center text-success"</th></tr></tfoot>`;
+			periodosUnicos.forEach(() => {
+				thead += `<th class="text-center">Cotiz.</th><th class="text-center">Fact.</th>`;
+			});
+			thead += `<th class="text-center">Cotiz.</th><th class="text-center">Fact.</th></tr></thead>`;
+			//4. Procesar datos de los vendedores
+			vendedores = {};
+			data.forEach(item => {
+				if (!vendedores[item.id_user]) {
+					vendedores[item.id_user] = { vendedor: item.name_user, total_c: 0, total_f: 0 };
+					mesesKey.forEach(m => {
+						vendedores[item.id_user][m] = { c: 0, f: 0 }
+					});
+				}
+				if (!vendedores[item.id_user][item.mes]) {
+					vendedores[item.id_user][item.mes] = { c: 0, f: 0 };
+				}
+				const c = parseInt(item.total_cot || 0);
+				const f = parseInt(item.facturadas || 0);
+				vendedores[item.id_user][item.mes].c += c;
+				vendedores[item.id_user][item.mes].f += f;
+				vendedores[item.id_user].total_c += c;
+				vendedores[item.id_user].total_f += f;
+
+			});
+			generarGraficas(vendedores);
+			$("#GrafCoti").show();
+			//5. Construiir el tbody
+			let tbody = '<tbody>';
+			Object.values(vendedores).forEach(v => {
+				tbody += `<tr class="fila-seleccionada"><td>${v.vendedor}</td>`;
+				mesesKey.forEach(m => {
+					const cotizacionMes = (v[m] && v[m].c) ? v[m].c : 0;
+					const facturaMes = (v[m] && v[m].f) ? v[m].f : 0;
+					tbody += `<td class="text-center">${cotizacionMes}</td><td class="text-center">${facturaMes}</td>`;
+				});
+				tbody += `<td class="text-center text-bold">${v.total_c}</td><td class="text-center text-bold">${v.total_f}</td></tr>`;
+			});
+			tbody += '</tbody>';
+			//6. Intectar HTML e iniciar Datatables
+			$("#ReportexCotizaciones").html(thead + tbody + tfoot);
+			$("#ReportexCotizaciones").DataTable({
+				destroy: true,
+				clear: true,
+				responsive: true,
+				language: {
+					url: `${base_url}/Assets/json/es-ES.json`,
+				},
+				footerCallback: function (row, data, start, end, display) {
+					var api = this.api();
+					//sumar cada columna numérica automaticamente
+					api.columns('.text-center', { page: 'current' }).every(function () {
+						var sum = this.data().reduce(function (a, b) {
+							var x = parseInt($(a).text()) || parseInt(a) || 0;
+							var y = parseInt($(b).text()) || parseInt(b) || 0;
+							return x + y;
+						}, 0);
+						$(this.footer()).html(sum);
+					});
+				},
+				dom: 'Bfrtip',
+				buttons: [
+					{
+						extend: 'excelHtml5',
+						text: '<i class="fas fa-file-excel"></i>',
+						className: 'btn btn-success',
+						title: 'Reporte de Cotizaciones Dinámico',
+						// Esta es la clave para encabezados múltiples:
+						exportOptions: {
+							columns: ':visible',
+							header: true,
+							footer: true, //
+							format: {
+								header: function (data, columnIdx, node) {
+									// Forzamos a que mantenga el texto tal cual aparece en el nodo
+									return node.innerText;
+								}
+							},
+							// Asegura que incluya todas las filas del header
+							orthogonal: 'export'
+						},
+						customize: function (xlsx) {
+							var sheet = xlsx.xl.worksheets['sheet1.xml'];
+							// Aplicar estilos a celdas específicas (esto requiere manejo de selectores XML de DataTables)
+							// '20' suele ser el estilo azul y '28' verde en el esquema por defecto
+							$('row:first c', sheet).attr('s', '32'); // Estilo negrita y centrado para la fila 1
+							$('row:nth-child(2) c', sheet).attr('s', '32'); // Para la fila 2
+						}
+					}
+				]
+			});
+		}
+	});
+}
+// Definimos variables globales para poder destruir y recrear las gráficas
+var chartBarras = null;
+var chartTorta = null;
+
+function generarGraficas(usuarios) {
+    const nombres = Object.values(usuarios).map(u => u.vendedor);
+    const totalCotizaciones = Object.values(usuarios).map(u => u.total_c);
+    const totalFacturadas = Object.values(usuarios).map(u => u.total_f);
+
+    // --- GRÁFICO DE BARRAS ---
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    if (chartBarras) chartBarras.destroy();
+
+    chartBarras = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: nombres,
+            datasets: [
+                {
+                    label: 'Cotizaciones',
+                    backgroundColor: '#3c8dbc', // Color azul AdminLTE
+                    data: totalCotizaciones
+                },
+                {
+                    label: 'Facturadas',
+                    backgroundColor: '#28a745', // Color verde AdminLTE
+                    data: totalFacturadas
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // --- GRÁFICO DE TORTA (Basado en Facturación) ---
+    const ctxPie = document.getElementById('pieChart').getContext('2d');
+    if (chartTorta) chartTorta.destroy();
+
+    chartTorta = new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+            labels: nombres,
+            datasets: [{
+                data: totalFacturadas,
+                backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' }
+            }
+        }
+    });
+}
+// Asegúrate de que tu tabla tenga el ID #ReportexCotizaciones
+$(document).on('click', '#ReportexCotizaciones tbody tr', function () {
+   // 1. Verificar si la tabla tiene datos (evitar clics en "No hay datos")
+    if ($(this).find('td').hasClass('dataTables_empty')) return;
+
+    // 2. Obtener la instancia de la DataTable
+    var table = $('#ReportexCotizaciones').DataTable();
+    
+    // 3. Obtener los datos de la fila
+    // Si usaste objetos: table.row(this).data()
+    // Si usaste HTML plano, sacamos el nombre del primer TD:
+    var nombreVendedor = $(this).find('td:first').text().trim();
+
+    // 4. Visual: Resaltar la fila
+    $(this).addClass('fila-seleccionada').siblings().removeClass('fila-seleccionada');
+
+    // 5. Buscar los datos en tu objeto global 'vendedores'
+    // Asegúrate de que 'vendedores' sea accesible (global o pasada por parámetro)
+    if (typeof vendedores !== 'undefined' && vendedores) {
+        // Buscamos al vendedor por nombre
+        var datosVendedor = Object.values(vendedores).find(v => v.vendedor === nombreVendedor);
+        
+        if (datosVendedor) {
+            console.log("Vendedor seleccionado:", datosVendedor);
+            actualizarGraficasPorVendedor(datosVendedor);
+        }
+    } else {
+        console.error("El objeto 'vendedores' no está definido.");
+    }
+});
+function actualizarGraficasPorVendedor(vendedor) {
+    // Obtenemos los meses (claves que no son 'vendedor', 'total_c', etc.)
+    const meses = mesesKey; // Usamos el array de meses que definimos antes
+    const datosCot = meses.map(m => vendedor[m] ? vendedor[m].c : 0);
+    const datosFac = meses.map(m => vendedor[m] ? vendedor[m].f : 0);
+
+    // Actualizar Gráfico de Barras (Evolución Mensual)
+    if (chartBarras) {
+        chartBarras.data.labels = meses;
+        chartBarras.data.datasets[0].label = `Cotizaciones de ${vendedor.vendedor}`;
+        chartBarras.data.datasets[0].data = datosCot;
+        chartBarras.data.datasets[1].label = `Facturadas de ${vendedor.vendedor}`;
+        chartBarras.data.datasets[1].data = datosFac;
+        chartBarras.update();
+    }
+
+    // Actualizar Gráfico de Torta (Proporción Cotizado vs Facturado del Vendedor)
+    if (chartTorta) {
+        chartTorta.data.labels = ['Cotizaciones Totales', 'Facturadas Totales'];
+        chartTorta.data.datasets[0].data = [vendedor.total_c, vendedor.total_f];
+        chartTorta.data.datasets[0].backgroundColor = ['#3c8dbc', '#28a745'];
+        chartTorta.update();
+    }
+}
+$(document).on('click', '#ReportexCotizaciones thead', function() {
+    $('#ReportexCotizaciones tbody tr').removeClass('fila-seleccionada');
+    generarGraficas(vendedores);
+});

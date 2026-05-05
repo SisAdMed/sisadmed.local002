@@ -65,7 +65,7 @@
             <tbody>
                 <?php if (is_iterable($objeto)) : ?>
                     <?php foreach ($objeto as $r) : ?>
-                        <tr>
+                        <tr <?php if ($r->status == "0") : ?> class="registro-inactivo" <?php endif ?>>
                             <td><?php echo $r->id_prod; ?></td>
                             <td><?php echo $r->cod_prod; ?></td>
                             <td><?php echo $r->cod2_prod; ?></td>

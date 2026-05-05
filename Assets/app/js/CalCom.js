@@ -247,11 +247,12 @@ $(document).on("click", ".btn-delete", function (event) {
 //Guardar y/o Actualizar
 $("#my_form").on("submit", function (e) {
 	e.preventDefault();
-    var tblObj = $("#tblCalCom").DataTable();
-	var dattab = JSON.stringify(tblObj.rows().data().toArray());
-	if ($(this).valid()) {
-		var formData = $(this).serialize();
-        formData += '&dattab=' + dattab + '&tasa_cambio=' + formatoMoneda(tasa_cambio);
+    var tblObj = $("#tblCalCom").DataTable().rows().data().toArray();
+	//var dattab = tblObj.rows().data().toArray();        
+	if ($(this).valid()) {		
+        var formData = new FormData(this);
+        formData.append('dattab', JSON.stringify(tblObj));
+        formData.append('tasa_cambio', formatoMoneda(tasa_cambio));        
 		const url = `${base_url}/CalCom/store`;
 		$.ajax({
 			type: "POST",
@@ -259,6 +260,8 @@ $("#my_form").on("submit", function (e) {
 			dataSrc: "",
 			data: formData,
             dataType: "json",
+            contentType: false, // Fundamental
+            processData: false, // Fundamental
 			beforeSend: function () {
 				loader.show();
 			},

@@ -5,9 +5,14 @@ class Conexion
     public function __construct()
     {
         $connectionString = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+
         try {
-            $this->conect = new PDO($connectionString, DB_USER, DB_PASSWORD);
-            $this->conect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $options = [
+                PDO::ATTR_EMULATE_PREPARES => true, // Requerido para múltiples consultas en una cadena
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ];
+            $this->conect = new PDO($connectionString, DB_USER, DB_PASSWORD, $options);            
             //echo "La conexion es exitosa";
         } catch (PDOException $e) {
             echo "ERROR: " . $e->getMessage() . '\n';
@@ -31,7 +36,7 @@ class Conexion
 
         // SELECT | INSERT | UPDATE | DELETE | ALTER TABLE
         // Manejo del tipo de query
-        //SELECT * FROM table
+        //SELECT * FROM table       
         if (strpos($sql, 'SELECT') !== false) {
             return $query->rowCount() > 0 ? $query->fetchAll(PDO::FETCH_ASSOC) : false;
         }elseif(strpos($sql, 'INSERT') !== false){
@@ -48,6 +53,12 @@ class Conexion
             }
             $link->rollBack();
             return false; //no se borro nada
+        }elseif(strpos($sql, 'CREATE') !== false){
+            //$link->commit();
+            return true;    
+        }elseif(strpos($sql, 'DROP') !== false){            
+            //$link->commit();
+            return true;    
         }else {
             //alter table
             $link->commit();

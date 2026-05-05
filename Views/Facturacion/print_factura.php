@@ -118,12 +118,14 @@
         $cadena = iconv("UTF-8", "ISO-8859-1", html_entity_decode('Dirección'));
         $this->cell(20, 4, $cadena);
         $this->SetFont('Arial','',7);
-        $cadena = iconv("UTF-8", "ISO-8859-1", (($this->dir_ent) . ' ' . strtoupper($this->nombre_ciudad) . ' ' . strtoupper($this->nombre_edo) . ' ' . strtoupper($this->nombre_pais)));
+        $dir = iconv("UTF-8", "ISO-8859-1", html_entity_decode($this->dir_ent));
+        $cadena = iconv("UTF-8", "ISO-8859-1", (strtoupper($this->nombre_ciudad) . ' ' . strtoupper($this->nombre_edo) . ' ' . strtoupper($this->nombre_pais)));
         //Caso cliente Vizcaya, Exception
         if($this->id_ent == 292){
             $cadena = iconv("UTF-8", "ISO-8859-1", (($this->dir_ent) . ' ' . strtoupper($this->nombre_ciudad) . ' ' . strtoupper($this->nombre_edo) . ' ZONA POSTAL ' . strtoupper($this->postal_ent)));    
         }
-        $this->MultiCell(90, 4, $cadena);
+    
+        $this->MultiCell(90, 4, ($dir) . ' ' . $cadena);
         
         $this->SetFont('Arial','',7);
         $cadena = iconv("UTF-8", "ISO-8859-1", html_entity_decode('Condición de pago'));

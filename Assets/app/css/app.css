@@ -135,3 +135,38 @@ table.dataTable tbody td {
     table-layout: auto;            /* Deja que el navegador calcule el ancho de celdas */
     margin-bottom: 0;
 }
+.card-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Evita el scroll horizontal molesto */
+}
+/* Personalizar la barra para que se vea más fina (estilo moderno) */
+.card-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+.card-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+/* Tacha el texto y le da un tono grisáceo para que parezca deshabilitado */
+.registro-inactivo {
+    text-decoration: line-through;
+    color: #adb5bd; /* Gris de AdminLTE */
+    font-style: italic;
+}
+/* Cambia el cursor a una mano para indicar que se puede hacer clic */
+#ReportexCotizaciones tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* Efecto al pasar el mouse por encima (hover) */
+#ReportexCotizaciones tbody tr:hover {
+    background-color: rgba(60, 141, 188, 0.1) !important; /* Un azul muy suave de AdminLTE */
+}
+
+/* Clase para resaltar la fila que el usuario seleccionó */
+.fila-seleccionada {
+    background-color: #d2d6de !important; /* Gris claro de AdminLTE */
+    border-left: 4px solid #3c8dbc; /* Una línea azul a la izquierda para que resalte más */
+}

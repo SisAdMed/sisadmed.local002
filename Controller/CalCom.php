@@ -1,11 +1,14 @@
 <?php
-class CalCom extends Controller{
-   public function __construct(){
+class CalCom extends Controller
+{
+   public function __construct()
+   {
       Auth::noAuth();
       parent::__construct();
       Permisos::getPermisos(184);
    }
-   public function index()  {
+   public function index()
+   {
       if (empty($_SESSION['permisosMod']['r'])) {
          header('Location:' . base_url . '/Perfil');
       }
@@ -14,23 +17,26 @@ class CalCom extends Controller{
          'function_js' => 'CalCom.js',
       ]);
    }
-   public function cargar_screen_main(){
-      if($_SERVER['REQUEST_METHOD'] == 'POST'){
+   public function cargar_screen_main()
+   {
+      if ($_SERVER['REQUEST_METHOD'] == 'POST') {
          $r = CalComModel::all();
          echo json_encode($r, JSON_UNESCAPED_UNICODE);
       }
-   }  
-   public function new(){
-      $this->views->getView($this,"new",[
+   }
+   public function new()
+   {
+      $this->views->getView($this, "new", [
          'page_name' => "Nuevo Cálculo de Comisiones",
          'function_js' => "CalCom.js",
       ]);
-   }     
-   public function edit($id){
-      if(Permisos::read()){
-         if($id){
+   }
+   public function edit($id)
+   {
+      if (Permisos::read()) {
+         if ($id) {
             $r = CalComModel::edit($id);
-            $this->views->getView($this,"edit",[
+            $this->views->getView($this, "edit", [
                'page_name' => "Editar Cálculo de Comisiones",
                'function_js' => "CalCom.js",
                'r' => to_obj($r),
@@ -38,34 +44,35 @@ class CalCom extends Controller{
          }
       }
    }
-   public function listar_tabla(){
-      if($_SERVER['REQUEST_METHOD'] == 'POST'){
+   public function listar_tabla()
+   {
+      if ($_SERVER['REQUEST_METHOD'] == 'POST') {
          $id_emp = $_POST['id_emp'];
          $fec_ini = $_POST['fec_ini'];
          $fec_fin = $_POST['fec_fin'];
          $id_vend = '';
          $id = '';
-         if(isset($_POST['id_vend']) && $_POST['id_vend'] > 0){
+         if (isset($_POST['id_vend']) && $_POST['id_vend'] > 0) {
             $id_vend = $_POST['id_vend'];
-         }     
-         if(isset($_POST['id']) && $_POST['id'] > 0){
+         }
+         if (isset($_POST['id']) && $_POST['id'] > 0) {
             $id = $_POST['id'];
          }
-         
+
          $r = CalComModel::listar_tabla($id_emp, $fec_ini, $fec_fin, $id_vend, $id);
          echo json_encode($r, JSON_UNESCAPED_UNICODE);
       }
-   }  
-   public function store(){
-      if($_SERVER['REQUEST_METHOD'] == 'POST'){
+   }
+   public function store() {
+      if ($_SERVER['REQUEST_METHOD'] == 'POST') {         
          $modo = 'modify_user';
          $data = array();
          $dataJson = array();
-         foreach($_POST as $key => $value){
+         foreach ($_POST as $key => $value) {
             $$key =  $value;
          }
-         if(empty($id)){
-            $modo = 'create_user';            
+         if (empty($id)) {
+            $modo = 'create_user';
          }
          try {
             $data += [
@@ -76,30 +83,28 @@ class CalCom extends Controller{
                'status' => $status,
                $modo => $_SESSION['id_user']
             ];
-            if(empty($id)){
+            if (empty($id)) {
                $r = CalComModel::guardar($data);
                $id = $r;
-            }else{
+            } else {
                $r = CalComModel::actualizar($id, $data);
                $del_detail = CalComModel::delete_details($id);
             }
-           
-            if($id > 0){             
-               //Guardar detalles
-               $details = json_decode($dattab, true);
-               foreach($details as $row){
+
+            if ($id > 0) {
+               //Guardar detalles                  
+               $details = json_decode($dattab, true);               
+               foreach ($details as $row) {                  
                   $dataDetail = array();
                   $tasa_cambio = $_POST['tasa_cambio'];
                   if ($tasa_cambio === 'NaN') {
                      $tasa_cambio =  $row['tasa_cambio'];
-                     
-                  }else{
+                  } else {
                      $tasa_cambio = $_POST['tasa_cambio'];
-                     
                   }
-                  $tot_comision = ($row['sub_total'] * ($row['comi_vend'] / 100) ) * $tasa_cambio;
+                  $tot_comision = ($row['sub_total'] * ($row['comi_vend'] / 100)) * $tasa_cambio;
                   $dataDetail += [
-                     'id_calcom' => $id,                     
+                     'id_calcom' => $id,
                      'id_vend' => $row['id_vend'],
                      'fec_doc' => $row['fec_fact'],
                      'fec_pag' => $row['fec_pag'],
@@ -114,13 +119,13 @@ class CalCom extends Controller{
                   CalComModel::guardar_detalle($dataDetail);
                }
             }
-               $title = "Operación realizada con éxito";
-               $msg = "Los datos han sido almacenados correctamente.";
-               $dataJson = [
-                  'title' => $title,
-                  'icon' => 'success',
-                  'msg' => $msg
-               ];
+            $title = "Operación realizada con éxito";
+            $msg = "Los datos han sido almacenados correctamente.";
+            $dataJson = [
+               'title' => $title,
+               'icon' => 'success',
+               'msg' => $msg
+            ];
          } catch (\PDOException $e) {
             $title = "Se ha presentado un error, intente luego";
             $msg = sprintf("Error código: %s, Descripción del Error: %s", $e->getCode(), $e->getMessage());
@@ -133,15 +138,17 @@ class CalCom extends Controller{
          echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
       }
    }
-   public function show_row(){
-      if($_SERVER['REQUEST_METHOD'] == 'POST'){
+   public function show_row()
+   {
+      if ($_SERVER['REQUEST_METHOD'] == 'POST') {
          $id = $_POST['id'];
          $r = CalComModel::edit($id);
          echo json_encode($r, JSON_UNESCAPED_UNICODE);
-      }     
+      }
    }
-   public function destroy(){
-      if($_SERVER['REQUEST_METHOD'] == 'POST'){
+   public function destroy()
+   {
+      if ($_SERVER['REQUEST_METHOD'] == 'POST') {
          $dataJson = array();
          $id = $_POST['id'];
          $r = CalComModel::destroy($id);
@@ -170,9 +177,10 @@ class CalCom extends Controller{
          echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
       }
    }
-   public function report($id){
+   public function report($id)
+   {
       $r = CalComModel::report_data($id);
-      $this->views->getView($this,"report",[
+      $this->views->getView($this, "report", [
          'r' => to_obj($r),
       ]);
    }

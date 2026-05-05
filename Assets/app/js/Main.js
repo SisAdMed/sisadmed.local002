@@ -16,12 +16,12 @@ function IndexDataTable(url, table, report, xcolums, xcol_def = "") {
 	var val_url = `${base_url}/${url}/cargar_screen_main`;
 	tableIndex = $(table).DataTable({
 		destroy: true,
-		clear: true,		
+		clear: true,
 		serverside: true,
 		deferRender: true,
 		colResize: true,
-		responsive: true, 
-  		autoWidth: true,  
+		responsive: true,
+		autoWidth: true,
 		stateSave: true,
 		ajax: {
 			url: val_url,
@@ -39,14 +39,22 @@ function IndexDataTable(url, table, report, xcolums, xcol_def = "") {
 				loader.hide();
 			},
 		},
+		// Este evento se dispara por cada fila (tr) generada
+		createdRow: function (row, data, dataIndex) {
+			// Evaluamos si el estatus es 'Inactivo'
+			if (data.status === 0) {
+				// Aplicamos la clase CSS a toda la fila (tr)
+				$(row).addClass('registro-inactivo');
+			}
+		},
 		columns: xcolums,
 		language: {
 			url: `${base_url}/Assets/json/es-ES.json`,
 		},
 		// mostrar botones de exportacion
 		dom: "<'row'<'col-sm-4'l><'col-sm-4 text-center'B><'col-sm-4'f>>" +
-         		"<'row'<'col-sm-12'tr>>" +
-         		"<'row'<'col-sm-5'i><'col-sm-7'p>>",
+			"<'row'<'col-sm-12'tr>>" +
+			"<'row'<'col-sm-5'i><'col-sm-7'p>>",
 		buttons: [
 			{
 				extend: "copyHtml5",
@@ -91,81 +99,81 @@ function IndexDataTable(url, table, report, xcolums, xcol_def = "") {
 }
 //Inicio de Aplicaciones
 //Cuentas por Cobrar - Movimientos
-function initCXCMovement(){
+function initCXCMovement() {
 	const title = "Cuentas por Cobrar Movimientos";
 	const origen = "CXCMovement";
 	const id_menu = 95;
 	get_permiso(id_menu);
-		IndexDataTable(origen, tblIndexMain, title, [
-			{
-				data: null,
-				title: "Acciones",
-				className: "text-center",
-				render: function (data, type, row) {
-					var t_menu = "";
-					if (permisos_cre == 1 || permisos_upd == 1) {
-						t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id_movement}"><i class="fa fa-edit"></i></a>     `;
-					}
-					if (permisos_del == 1 && row.movem_origen === "CXC") {						
-						t_menu += `<button id="Data" data-id="${row.id_movement}" data-name="${row.des_tmocxc}" data-code = "${row.cod_tmocxc}" type="button" class="btn btn-danger btn-xs btn-delete"><i class="fa fa-trash"></i></button>     `;
-					}
-					if (permisos_cre == 1) {
-						t_menu += `<button id="Data" data-id="${row.id_movement}" data-name="${row.cod_tmocxc} - ${row.des_tmocxc}  - ${row.movem_number}" type="button" class="btn btn-primary btn-xs" onclick="print_mov(this)" title="Imprimir"><i class="fa-solid fa-print"></i></button>`;
-					}
-					return t_menu;
-				},
+	IndexDataTable(origen, tblIndexMain, title, [
+		{
+			data: null,
+			title: "Acciones",
+			className: "text-center",
+			render: function (data, type, row) {
+				var t_menu = "";
+				if (permisos_cre == 1 || permisos_upd == 1) {
+					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id_movement}"><i class="fa fa-edit"></i></a>     `;
+				}
+				if (permisos_del == 1 && row.movem_origen === "CXC") {
+					t_menu += `<button id="Data" data-id="${row.id_movement}" data-name="${row.des_tmocxc}" data-code = "${row.cod_tmocxc}" type="button" class="btn btn-danger btn-xs btn-delete"><i class="fa fa-trash"></i></button>     `;
+				}
+				if (permisos_cre == 1) {
+					t_menu += `<button id="Data" data-id="${row.id_movement}" data-name="${row.cod_tmocxc} - ${row.des_tmocxc}  - ${row.movem_number}" type="button" class="btn btn-primary btn-xs" onclick="print_mov(this)" title="Imprimir"><i class="fa-solid fa-print"></i></button>`;
+				}
+				return t_menu;
 			},
-			{
-				data: "id_movement",
-				title: "Id",
-				className: "text-right",
-				visible: false,
+		},
+		{
+			data: "id_movement",
+			title: "Id",
+			className: "text-right",
+			visible: false,
+		},
+		{ data: "nombre_emp", title: "Empresa" },
+		{ data: "cod_tmocxc", title: "Código", className: "text-center" },
+		{ data: "des_tmocxc", title: "Descripción" },
+		{ data: "movem_number", title: "Número", className: "text-right" },
+		{
+			data: "fecha_comp",
+			title: "Fecha",
+			render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN),
+		},
+		{ data: "nom_ent", title: "Cliente" },
+		{
+			data: "codigo_moneda",
+			title: "Moneda",
+			className: "text-center",
+		},
+		{
+			data: "tasa_cambio",
+			title: "Tasa",
+			className: "text-right",
+			render: $.fn.dataTable.render.number(".", ",", 8),
+		},
+		{
+			data: "movem_amount",
+			title: "Monto",
+			className: "text-right",
+			render: $.fn.dataTable.render.number(".", ",", 2),
+		},
+		{
+			data: null,
+			title: "Status",
+			className: "text-center",
+			render: function (data, type, row) {
+				if (row.status == 1) {
+					return '<span class="badge badge-success">Activo</span>';
+				} else if (row.status == 0) {
+					return '<span class="badge badge-danger">Inactivo</span>';
+				} else if (row.status == 9) {
+					return '<span class="badge badge-warning">Por aprobar</span>';
+				}
 			},
-			{ data: "nombre_emp", title: "Empresa" },
-			{ data: "cod_tmocxc", title: "Código", className: "text-center" },
-			{ data: "des_tmocxc", title: "Descripción" },
-			{ data: "movem_number", title: "Número", className: "text-right" },
-			{
-				data: "fecha_comp",
-				title: "Fecha",
-				render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN),
-			},
-			{ data: "nom_ent", title: "Cliente" },
-			{
-				data: "codigo_moneda",
-				title: "Moneda",
-				className: "text-center",
-			},
-			{
-				data: "tasa_cambio",
-				title: "Tasa",
-				className: "text-right",
-				render: $.fn.dataTable.render.number(".", ",", 8),
-			},
-			{
-				data: "movem_amount",
-				title: "Monto",
-				className: "text-right",
-				render: $.fn.dataTable.render.number(".", ",", 2),
-			},
-			{
-				data: null,
-				title: "Status",
-				className: "text-center",
-				render: function (data, type, row) {
-					if (row.status == 1) {
-						return '<span class="badge badge-success">Activo</span>';
-					} else if (row.status == 0) {
-						return '<span class="badge badge-danger">Inactivo</span>';
-					} else if (row.status == 9) {
-						return '<span class="badge badge-warning">Por aprobar</span>';
-					}
-				},
-			},
-		]);
+		},
+	]);
 }
 //Facturación - Cotizaciones
-function initCotizaciones(){
+function initCotizaciones() {
 	const title = "Cotizaciones";
 	const origen = "Cotizaciones";
 	const id_menu = 56;
@@ -228,7 +236,7 @@ function initCotizaciones(){
 	]);
 }
 //Inventarios - Almacenes
-function initAlmacenes(){
+function initAlmacenes() {
 	const title = "Inventarios - Almacenes";
 	const origen = "Almacen";
 	const id_menu = 51;
@@ -236,7 +244,7 @@ function initAlmacenes(){
 	IndexDataTable(origen, tblIndexMain, title, [
 		{
 			data: null, title: "Acciones", className: "text-center",
-			render: function(data, type, row) {
+			render: function (data, type, row) {
 				var t_menu = "";
 				if (permisos_cre == 1 && permisos_cre == 1) {
 					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id_alm}"><i class="fa fa-edit"></i></a>     `;
@@ -247,11 +255,12 @@ function initAlmacenes(){
 				return t_menu;
 			},
 		},
-		{ data: "id_alm", title: "Id", className: "text-right"},
-		{ data: "nombre_emp", title: "Empresa"},
-		{ data: "nom_alm", title: "Nombre"},
-		{ data: null, title: "Status", className: "text-center",
-			render: function(data, type, row){
+		{ data: "id_alm", title: "Id", className: "text-right" },
+		{ data: "nombre_emp", title: "Empresa" },
+		{ data: "nom_alm", title: "Nombre" },
+		{
+			data: null, title: "Status", className: "text-center",
+			render: function (data, type, row) {
 				if (row.status == 1) {
 					return '<span class="badge badge-success">Activo</span>';
 				} else if (row.status == 0) {
@@ -264,8 +273,8 @@ function initAlmacenes(){
 	]);
 }
 // Facturación Vendedores
-function initVendedoresTable(){
-	const title ="Facturación - Vendedores";
+function initVendedoresTable() {
+	const title = "Facturación - Vendedores";
 	const origen = "Vendedores";
 	const id_menu = 57;
 	get_permiso(id_menu);
@@ -286,13 +295,14 @@ function initVendedoresTable(){
 			},
 		},
 		{ data: "id_vend", title: "Id", className: "text-right" },
-		{ data: "ced_vend", title: "Cédula", className: 'text-right'},
-		{ data: "nom_vend", title: 'Nombre(s)'},
-		{ data: "ape_vend", title: "Apellido(s)"},
-		{ data: "email_vend", title: "Email"},
-		{ data: "fecing_vend", title: 'Fec. Ing', render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN)},
-		{ data: null, title: "Status", className: "text-center",
-			render: function(data, type, row){
+		{ data: "ced_vend", title: "Cédula", className: 'text-right' },
+		{ data: "nom_vend", title: 'Nombre(s)' },
+		{ data: "ape_vend", title: "Apellido(s)" },
+		{ data: "email_vend", title: "Email" },
+		{ data: "fecing_vend", title: 'Fec. Ing', render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN) },
+		{
+			data: null, title: "Status", className: "text-center",
+			render: function (data, type, row) {
 				if (row.status == 1) {
 					return '<span class="badge badge-success">Activo</span>';
 				} else if (row.status == 0) {
@@ -305,8 +315,8 @@ function initVendedoresTable(){
 	]);
 }
 // Facturación - Cálculo de Comisiones
-function initCalComTable(){
-	const title ="Facturación - Cálculo de Comisiones";
+function initCalComTable() {
+	const title = "Facturación - Cálculo de Comisiones";
 	const origen = "CalCom";
 	const id_menu = 184;
 	get_permiso(id_menu);
@@ -318,21 +328,21 @@ function initCalComTable(){
 			render: function (data, type, row) {
 				var t_menu = "";
 				if (permisos_cre == 1 && permisos_upd == 1) {
-					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id}"><i class="fa fa-edit"></i></a>     `;					
+					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id}"><i class="fa fa-edit"></i></a>     `;
 				}
 				if (permisos_del == 1) {
 					t_menu += `<button id="Data" data-id="${row.id}" data-name="${row.fec_ini} - ${row.fec_fin}" type="button" class="btn btn-danger btn-xs btn-delete-index"><i class="fa fa-trash"></i></button>     `;
 				}
-				if(permisos_cre ==1){
+				if (permisos_cre == 1) {
 					t_menu += `<button id="Data" data-id="${row.id}" data-name="${row.fec_ini} - ${row.fec_fin}" type="button" class="btn btn-success btn-xs" onclick="print_excel(this)" title="Imprimir Excel"><i class="fa-solid fa-file-excel"></i></button>     `;
 				}
 				return t_menu;
 			},
 		},
 		{ data: "id", title: "Id", className: "text-right" },
-		{ data: "nombre_emp", title: "Empresa" }, 
-		{ data: "fec_ini", title: "Fec. Inicio", render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN)},
-		{ data: "fec_fin", title: "Fec. Fin", render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN)},
+		{ data: "nombre_emp", title: "Empresa" },
+		{ data: "fec_ini", title: "Fec. Inicio", render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN) },
+		{ data: "fec_fin", title: "Fec. Fin", render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN) },
 		{ data: 'vendedor', title: 'Vendedor' },
 		{
 			data: null,
@@ -351,21 +361,21 @@ function initCalComTable(){
 	]);
 }
 //Nómina - Conceptos
-function initNomConTable(){
-	const title ="Nómina - Conceptos";
+function initNomConTable() {
+	const title = "Nómina - Conceptos";
 	const origen = "NomCon";
 	const id_menu = 144;
 	get_permiso(id_menu);
 	IndexDataTable(origen, tblIndexMain, title, [
 		{
-			data: null,	
+			data: null,
 			title: "Acciones",
 			className: "text-center",
-			render: function (data, type, row) {	
+			render: function (data, type, row) {
 				var t_menu = "";
 				if (permisos_cre == 1 && permisos_upd == 1) {
-					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id_nomcue}"><i class="fa fa-edit"></i></a>     `;					
-				}		
+					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id_nomcue}"><i class="fa fa-edit"></i></a>     `;
+				}
 				if (permisos_del == 1) {
 					t_menu += `<button id="Data" data-id="${row.id_nomcue}" data-name="${row.nombre}" data-code = "${row.codigo}" type="button" class="btn btn-danger btn-xs btn-delete-index"><i class="fa fa-trash"></i></button>`;
 				}
@@ -377,9 +387,10 @@ function initNomConTable(){
 		{ data: "nombre", title: "Nombre" },
 		{ data: "tipo", title: "Tipo", className: "text-center" },
 		{ data: "parametro", title: "Parámetro", className: "text-center" },
-		{ data: "factop", title: "Fac./Tope/Monto", className: "text-center", render: $.fn.dataTable.render.number(".", ",", 2)},
-		{ data: null, title: "Status", className: "text-center",
-			render: function(data, type, row){
+		{ data: "factop", title: "Fac./Tope/Monto", className: "text-center", render: $.fn.dataTable.render.number(".", ",", 2) },
+		{
+			data: null, title: "Status", className: "text-center",
+			render: function (data, type, row) {
 				if (row.status == 1) {
 					return '<span class="badge badge-success">Activo</span>';
 				} else if (row.status == 0) {
@@ -392,7 +403,7 @@ function initNomConTable(){
 	]);
 }
 //Nómina - Tipo de Nómina
-function initNomTipNomTable(){
+function initNomTipNomTable() {
 	const title = 'Nómina - Tipo de Nóminas';
 	const origen = 'NomTipNom';
 	const id_menu = 138;
@@ -414,7 +425,7 @@ function initNomTipNomTable(){
 			},
 		},
 		{ data: "id_nomtip", title: "Id", className: "text-right" },
-		{ data: "nombre_emp", title: "Empresa"},
+		{ data: "nombre_emp", title: "Empresa" },
 		{ data: "codigo", title: "Código", className: "text-center" },
 		{ data: "nombre", title: "Nombre" },
 		{ data: "freq", title: "Frecuencia" },
@@ -438,7 +449,7 @@ function initNomTipNomTable(){
 	]);
 }
 //Nómina - Departamentos
-function initNomDepTable(){
+function initNomDepTable() {
 	const title = 'Nómina - Departamentos';
 	const origen = 'NomDep';
 	const id_menu = 140;
@@ -460,7 +471,7 @@ function initNomDepTable(){
 			},
 		},
 		{ data: "id_nomdep", title: "Id", className: "text-right" },
-		{ data: "codigo", title: "Código"},
+		{ data: "codigo", title: "Código" },
 		{ data: "nombre", title: "Nombre" },
 		{ data: "agrupa", title: "Agrupa" },
 		{ data: "nom_aux", title: "Auxiliar" },
@@ -481,7 +492,7 @@ function initNomDepTable(){
 	]);
 }
 //General  - Zonas
-function initZonas(){
+function initZonas() {
 	const title = "General - Zonas";
 	const origen = "Zonas";
 	const id_menu = 106;
@@ -522,7 +533,7 @@ function initZonas(){
 	]);
 }
 //Configuraciónn General - Empresas
-function initEmpresas(){
+function initEmpresas() {
 	const title = "Configuración General - Empresas ";
 	const origen = "Empresas";
 	const id_menu = 22;
@@ -564,7 +575,7 @@ function initEmpresas(){
 	]);
 }
 //Obtener permisos de la aplicacion
-function get_permiso(id_menu){
+function get_permiso(id_menu) {
 	//Preparar el Loading
 	//Verificar Permisos de la Aplicación
 	url_per = `${base_url}/Usuarios/get_permisos`;
@@ -615,8 +626,8 @@ function get_empresa_config(id_emp) {
 	return config;
 }
 //Función para recargar el datatable
-$(document).on("click", ".refresh-button", function () {	
+$(document).on("click", ".refresh-button", function () {
 	// Busca la tabla por su ID de forma directa
-    var table = $('#tblIndexMain').DataTable(); 
-    table.ajax.reload(null, false);
+	var table = $('#tblIndexMain').DataTable();
+	table.ajax.reload(null, false);
 });

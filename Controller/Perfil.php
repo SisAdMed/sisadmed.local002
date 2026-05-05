@@ -82,21 +82,149 @@ class Perfil extends Controller{
     public function ReportexConsumo(){
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $id_fab = '';
+            $id_gru = '';
+            $id_vend = '';
             $id_tipocliente = '';      
             $id_emp = $_POST["id_emp"];
 	        $fec_ini = $_POST["fec_ini"];
 	        $fec_fin = $_POST["fec_fin"];
+            $id_cli = $_POST["id_cli"];
+            //
             if (isset($_POST['id_fab'])) {
                 $id_fab = implode(',', $_POST['id_fab']);
             }
-	        $id_cli = $_POST["id_cli"];
-            $id_gru = $_POST['id_gru'];
-            $id_vend = $_POST['id_vend'];
+            if(isset($_POST['id_gru'])){
+                $id_gru = implode(',', $_POST['id_gru']);
+            }            
+            if(isset($_POST['id_vend'])){
+                $id_vend = implode(',', $_POST['id_vend']);
+            }
             if(isset($_POST['id_tipocliente'])){
-                $id_tipocliente = $_POST['id_tipocliente'];
+                $id_tipocliente = implode(',', $_POST['id_tipocliente']);
             }
             $r = PerfilModel::ReportexConsumo($id_emp, $fec_ini, $fec_fin, $id_fab, $id_cli, $id_gru, $id_vend, $id_tipocliente);
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
+    }
+    public function listar_marcas(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){            
+             $id_fab = '';
+             $anio = '';
+             $id_tipocliente = '';
+            $id_vend = '';
+             if (isset($_POST['id_fab'])) {
+                $id_fab = implode(',', $_POST['id_fab']);
+            }
+            if (isset($_POST['anio'])){
+                $anio = implode(',', $_POST['anio'])    ;
+            }                        
+            if(isset($_POST['id_tipocliente'])){
+                $id_tipocliente = implode(',', $_POST['id_tipocliente']);
+            }
+            if(isset($_POST['id_vend'])){
+                $id_vend = implode(',', $_POST['id_vend']);
+            }
+            $r = PerfilModel::listar_marcas($id_fab, $anio, $id_tipocliente, $id_vend);
+            echo json_encode($r, JSON_UNESCAPED_UNICODE);
+        }           
+    }
+    public function listar_tipos_clientes(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $id_emp = $_POST['id_emp'];
+            $fec_ini = $_POST['fec_ini'];
+            $fec_fin = $_POST['fec_fin'];
+            $id_cli = $_POST["id_cli"];
+            $id_fab = '';
+            $id_gru = '';
+            $id_vend = '';
+            $id_tipocliente = '';
+            //
+            if (isset($_POST['id_fab'])) {
+                $id_fab = implode(',', $_POST['id_fab']);
+            }
+            if(isset($_POST['id_gru'])){
+                $id_gru = implode(',', $_POST['id_gru']);
+            }            
+            if(isset($_POST['id_vend'])){
+                $id_vend = implode(',', $_POST['id_vend']);
+            }
+              if(isset($_POST['id_tipocliente'])){
+                $id_tipocliente = implode(',', $_POST['id_tipocliente']);
+            }
+            $r = PerfilModel::listar_tipos_clientes($id_emp, $fec_ini, $fec_fin, $id_fab, $id_cli, $id_gru, $id_vend, $id_tipocliente);
+            echo json_encode($r, JSON_UNESCAPED_UNICODE);
+        }           
+    }
+    public function listar_vendedores(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $id_emp = $_POST['id_emp'];
+            $fec_ini = $_POST['fec_ini'];
+            $fec_fin = $_POST['fec_fin'];
+            $id_cli = $_POST["id_cli"];
+            $id_fab = '';
+            $id_gru = '';
+            $id_vend = '';
+            $id_tipocliente = '';
+            //
+            if (isset($_POST['id_fab'])) {
+                $id_fab = implode(',', $_POST['id_fab']);
+            }
+            if(isset($_POST['id_gru'])){
+                $id_gru = implode(',', $_POST['id_gru']);
+            }            
+            if(isset($_POST['id_vend'])){
+                $id_vend = implode(',', $_POST['id_vend']);
+            }
+              if(isset($_POST['id_tipocliente'])){
+                $id_tipocliente = implode(',', $_POST['id_tipocliente']);
+            }
+            $r = PerfilModel::listar_vendedores($id_emp, $fec_ini, $fec_fin, $id_fab, $id_cli, $id_gru, $id_vend, $id_tipocliente);
+            echo json_encode($r, JSON_UNESCAPED_UNICODE);
+        }           
+    }
+    public function listar_consumo_x_clientes(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $id_emp = $_POST['id_emp'];
+            $fec_ini = $_POST['fec_ini'];
+            $fec_fin = $_POST['fec_fin'];
+            $id_cli = $_POST["id_cli"];
+            $id_fab = '';
+            $id_gru = '';
+            $id_vend = '';
+            $id_tipocliente = '';
+            //
+            if (isset($_POST['id_fab'])) {
+                $id_fab = implode(',', $_POST['id_fab']);
+            }
+            if(isset($_POST['id_gru'])){
+                $id_gru = implode(',', $_POST['id_gru']);
+            }            
+            if(isset($_POST['id_vend'])){
+                $id_vend = implode(',', $_POST['id_vend']);
+            }
+              if(isset($_POST['id_tipocliente'])){
+                $id_tipocliente = implode(',', $_POST['id_tipocliente']);
+            }
+            $r = PerfilModel::listar_consumo_x_clientes($id_emp, $fec_ini, $fec_fin, $id_fab, $id_cli, $id_gru, $id_vend, $id_tipocliente);
+            echo json_encode($r, JSON_UNESCAPED_UNICODE);
+        }           
+    }
+    public function grafica_cotizaciones(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $id_emp = $_POST['id_emp'];
+            $fec_ini = $_POST['fec_ini'];
+            $fec_fin = $_POST['fec_fin'];
+            $r = PerfilModel::grafica_cotizaciones($id_emp, $fec_ini, $fec_fin);
+            echo json_encode($r, JSON_UNESCAPED_UNICODE);
+        }           
+    }
+    /* Llamada a la funcion de Gráfica de Cotizaciones 
+    * Creado el 04-05-2026 a las 08:37:00 por José Vargas    
+    */
+    public function cotizaciones(){
+        $this->views->getView($this, 'info_cotizaciones', [
+            'page_name' => 'Gráfica de Cotizaciones',
+            'function_js' => 'Perfil.js'    
+        ]);
     }
 }

@@ -583,7 +583,7 @@ class Facturacion extends Controller
                         $r = FacturacionModel::aprobacion($data_app);
                     }
 
-                    if ($tip_doc_fuente != 'Z') {
+                    if ($tip_doc_fuente != 'Z' || $id_cli == 13) {
                         //Guardar Movimiento de Inventario Encabezado
                         $tconfig_fac = FacturacionModel::tip_doc_fac($_POST['id_emp']);
                         $id_ubi = $tconfig_fac['id_ubi'];
