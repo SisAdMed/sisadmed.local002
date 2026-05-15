@@ -84,7 +84,7 @@
                     <label for="id_ubi">Ubicación</label>
                <input type="hidden" id="id_ubi" name="id_ubi">
                <div class="input-group">
-                    <input type="text" class="form-control text-xs" id="nom_ubi" name="nom_ubi" readonly>
+                    <input type="text" class="form-control text-xs" id="nom_ubi" name="nom_ubi">
                     <div class="input-group-append text-xs">
                         <span class="input-group-text  text-xs"><a href="#" data-toggle="modal" data-target="#modal-ubicaciones" title=" Buscar y seleccionar Ubicaciones"><i class="fas fa-search text-xs"></i></a></span>
                     </div>

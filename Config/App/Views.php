@@ -1,7 +1,7 @@
 <?php
 class Views
 {
-    public function getView($controlador, $vista, $data = [])
+    public function getView(object $controlador, string $vista, $data = [])
     {
         foreach($data as $key => $value){
             $$key = $value;

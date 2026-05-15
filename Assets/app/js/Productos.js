@@ -1,215 +1,486 @@
-tcosto = 0;
+//Variables
 
-$(function(){
-    $("#my_form_products").validate({
-		rules: {
-			cod_prod: "required",
-			cod2_prod: "required",
-			nom_prod: "required",
-			status: "required",
-			origen: "required",
-			alto: "required",
-			ancho: "required",
-			largo: "required",
-			id_presen1: "required",
-			id_presen2: "required",
-			uni_com_prod: "required",
-			uni_ven_prod: "required",
-			con_cons_prod: "requiere",
-			id_grupo: "requiere",
-			id_sub_grupo: "requiere",
-		},
-		messages: {
-			cod_prod: "Código es requerido",
-			cod2_prod: "Código 2 es requerido",
-			nom_prod: "Nombre es requerido",
-			status: "Status es requerido",
-			origen: "Debe especificar un origen del producto",
-			alto: "Debe especificar un alto",
-			ancho: "Debe especificar un ancho",
-			largo: "Debe especificar un largo",
-			id_presen1: "Debe especificar un empaque",
-			id_presen2: "Debe especificar una presentación por empaque",
-			uni_com_prod: "Debe especificar una Unidad de Comrpas",
-			uni_ven_prod: "Debe espeficicar una Unidad de Ventas",
-			con_cons_prod: "Debe especificar una Unidad de Consignación",
-			id_grupo: "Debe especificar un grupo",
-			id_sub_grupo: "Debe especificar un Sub Grupos",
-		},
-	});
-})
-
-$("#cod_prod").on('keyup change', function(e){
-    var datos = new FormData();
-    var cod_prod = $(this).val();
-    var id = $("#id").val();
-    cod_prod.replace(/ /g, "");
-    datos.append('cod_prod', cod_prod);
-    datos.append('id', id);
-    var url =`${base_url}/Productos/val_cod_pro`;
-    console.log(url);
-    fetch(url, {
-        method: 'POST',
-        body: datos
-    })
-    .then(response => response.json())
-    .then(data =>{
-        if(data.success == 1){
-            Swal.fire({
-                icon: "warning",
-                title: "Oops...",
-                text: "Código "+ cod_prod +" ya existe en otro producto",
+//Al iniciar la aplicación
+$(document).ready(function () {
+    //Validar datos del formulario   
+    $("#my_form").validate({
+        ignore: [],
+        rules: {
+            cod_prod: {
+                required: true,
+                minlength: 5,
+                maxlength: 150,
+            },
+            cod2_prod: {
+                required: true,
+                minlength: 5,
+                maxlength: 150,
+            },
+            nom_prod: {
+                required: true,
+                minlength: 5,
+                maxlength: 255,
+            },
+            id_presen1: "required",
+            id_presen2: "required",
+            id_pre: "required",
+            id_fab: "required",
+            id_grupo: "required",
+            id_sub_grupo: "required",
+            origen: "required",
+            alto: "required",
+            ancho: "required",
+            largo: "required",
+            uni_com_prod: "required",
+            uni_ven_prod: "required",
+            costo_prod: "required",
+            door_costo: {
+                required: function (element) {
+                    return $("#door_prod").is(":checked");
+                }
+            }
+        },
+        messages: {},
+        invalidHandler: function (event, validator) {
+            // 1. Limpiamos todos los asteriscos previos
+            $(".error-star").text("");
+            // 2. Recorremos los campos con error
+            $.each(validator.errorList, function (index, error) {
+                // Buscamos el tab-pane más cercano al input con error
+                var tabId = $(error.element).closest('.tab-pane').attr('id');
+                // Buscamos el enlace (tab) que apunta a ese ID y le ponemos el asterisco
+                $('a[href="#' + tabId + '"]').find(".error-star").text(" *");
             });
+        },
+        success: function (label, element) {
+            // Opcional: Quitar el asterisco si el campo ya es válido
+            var tabPane = $(element).closest('.tab-pane');
+            var tabId = tabPane.attr('id');
+            // Si ya no hay más inputs con clase 'error' en este panel, quitamos el asterisco
+            if (tabPane.find("input.error").length === 0) {
+                $('a[href="#' + tabId + '"]').find(".error-star").text("");
+            }
         }
     })
-    .catch(err => console.log(err))
-});
+    //Cargar el index
+    form = $("form").attr("id");
+    if (form === undefined) {
+        initProductosTable();
+    } else {
+        //Cuando es un registro nuevo
+        id = $("#id").val();
+        $(".creado_por").hide();
+        $(".modificado_por").hide();
+        if (id) {
+            dat_form(id);
+        } else {
+            //Si es copia cde un producto                
+            var jsonClonar = localStorage.getItem('data_copiar');
+            if (jsonClonar) {
+                var data = JSON.parse(jsonClonar);
+                id = data.id_prod;
+                dat_form(id, true);
+                localStorage.removeItem('data_copiar');
+            } else {
+                dat_form_new()
+                $('form:first *:input[type!=hidden]:visible:first').focus();
+                $('#door_costo').prop('readonly', true);
+            }
 
-$( "#product-photo" ).click(function() {
-    cod_prod = $("#cod_prod").val();
-    cod2_prod = $("#cod2_prod").val();
-    nom_prod = $("#nom_prod").val();
-    origen = $("#origen").val();
-    alto = $("#alto").val();
-    ancho = $("#ancho").val();
-    largo = $("#largo").val();
-    id_presen1 = $("#id_presen1").val();
-    id_presen2 = $("#id_presen2").val();
-    if(!cod_prod || !cod2_prod || !nom_prod || !origen || !alto || !ancho || !largo || !id_presen1 || !id_presen2 || !gen_prod){
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: 'Por favor complete los datos faltantes de la pestaña de "Producto", los mismos estan marcados con asterisco. Para poder continuar el proceso',
-      });
-        $('.tab-content a:first').tab('show')
-        return false;
+        }
     }
+    sumar_costo_prod();
 });
-
-$(document).ready(function(){
-    //Cargar Index
-    var tituloPagina = window.location.pathname;
-    var metodo = Object.keys(tituloPagina.split('/')).length;
-    if(metodo === 2){
-        //cargar_screen_main();
-    }
-    id = $('#id').val();
-    if(id){
-        charge_history(id);
-    }
-    if ($('#door_prod').prop('checked') ) {
-    }else{
-        $("#door_costo").val(0);
-        $("#door_costo").attr('readonly', 'readonly');;
-    }
+/*Converti en Mayusculas todos los inputs**/
+$('#my_form input[type="text"]').on('input', function () {
+    $(this).val(function (_, val) {
+        return val.toUpperCase();
+    });
 });
+/** Nuevo Registro */
+function dat_form_new() {
+    //Empaque
+    getPresentacion('', 'id_presen1');
+    //Presentacin por empaque
+    getPresentacion('', 'id_presen2');
+    //Presentacón Final
+    getPresentacion('', 'id_pre');
+    //Marca
+    getMarcas('', 'id_fab');
+    //Grupo
+    getGrupos('', 'id_grupo');
+    //Origen
+    getorigen('0');
+    //Marca para Facturacion    
+    getMarcas('', 'id_fab_fac');
+    //Status
+    listar_status(1);
 
-function charge_history(id){
-    const url = `${base_url}/Productos/charge_history`;
+}
+/**Consultar Producto */
+function dat_form(id, clonar = false) {
+    const url = `${base_url}/Productos/show_row`;
+    //Llenar Detalles de Productos    
     $.ajax({
         url: url,
-        data: {id: id},
         method: 'POST',
-        dataType: 'json',
         dataSrc: '',
-        beforeSend: function(){
-            $('.loder').show();
-        }, 
-        success: function(response){
-            table = $('#tblTableHis').DataTable({
-                aProcessing: true,
-                aServerSide: true,
-                destroy: true,
-                data:response,
-                responsive: true,
-                processing:true,
-                paging: false,
-                info: false,
-                sort:false,
-                columns: [
-                    {data: 'id', visible:false, orderable:true},
-                    {data: 'fecha', render: $.fn.dataTable.render.moment(FROM_PATTERNHH, TO_PATTERNHH)},
-                    {data: 'costo_prod', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                    {data: 'flete_prod', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                    {data: 'otros_prod', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                    {data: 'door_costo', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                    {data: 'costo1', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                    {data: 'recar_prod', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                    {data: 'ventas_prod', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                    {data: 'recar2_prod', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                    {data: 'venta2_prod', className: 'text-right', render: DataTable.render.number(".", ",", 4)},
-                ], 
-                columDefs: [{
-                    targets: [1,2,3,4,5,6,7,8,9,10],
-                    orderable: false,
-                }],
-            })
-        }, 
-        complete: function(){
-            $('.loader').hide();
+        data: { id: id },
+        dataType: 'json',
+        beforeSend: function () {
+            loader.show();
         },
-        error: function (xhr, status, error) {
-             $(".loader").hide();
-       }
+        complete: function () {
+            loader.hide();
+        },
+        error: function (PDOException) {
+            loader.hide();
+            console.log('Ha ocurrido el siguiente error:', PDOException.responseText);
+        },
+        success: function (data) {
+            $("#cod_prod").val(data[0]['cod_prod']);
+            $("#cod2_prod").val(data[0]['cod2_prod']);
+            $("#nom_prod").val(decodificarHTML(data[0]['nom_prod']));
+            $("#gen_prod").val(decodificarHTML(data[0]['gen_prod']));
+            $("#ref_prod").val(data[0]['ref_prod']);
+            //Empaque
+            getPresentacion(data[0]['id_presen1'], 'id_presen1');
+            //Presentacin por empaque
+            getPresentacion(data[0]['id_presen2'], 'id_presen2');
+            //Presentacón Final
+            getPresentacion(data[0]['id_pre'], 'id_pre');
+            //Marca
+            getMarcas(data[0]['id_fab'], 'id_fab');
+            //Grupo
+            getGrupos(data[0]['id_grupo'], 'id_grupo');
+            //Sub-Grupo
+            getSubgrupos(data[0]['id_grupo'], 'id_sub_grupo', data[0]['id_sub_grupo']);
+            //Origen
+            getorigen(data[0]['origen']);
+            $("#alto").val(data[0]['alto']);
+            $("#ancho").val(data[0]['ancho']);
+            $("#largo").val(data[0]['largo'])
+            iva_prod = data[0]['iva_prod'];
+            $('#iva_prod').prop('checked', false);
+            if (iva_prod == 1) {
+                $('#iva_prod').prop('checked', true);
+            }
+            lote_prod = data[0]['lote_prod'];
+            $('#lote_prod').prop('checked', false);
+            if (lote_prod == 1) {
+                $('#lote_prod').prop('checked', true);
+            }
+            interno_prod = data[0]['interno_prod'];
+            $('#interno_prod').prop('checked', false);
+            if (interno_prod == 1) {
+                $('#interno_prod').prop('checked', true);
+            }
+            $("#uni_com_prod").val(data[0]['uni_com_prod']);
+            $("#uni_ven_prod").val(data[0]['uni_ven_prod']);
+            $("#con_cons_prod").val(data[0]['con_cons_prod']);
+            $("#conv_prod_cons").val(data[0]['conv_prod_cons']);
+            costo_prod = data[0]['costo_prod'];
+            flete_prod = data[0]['flete_prod'];
+            otros_prod = data[0]['otros_prod'];
+            door_costo = data[0]['door_costo'];
+            $("#costo_prod").val(format_number_with_dec_new(costo_prod, 4));
+            $("#flete_prod").val(format_number_with_dec_new(flete_prod, 4));
+            $("#otros_prod").val(format_number_with_dec_new(otros_prod, 4));
+            $("#door_costo").val(format_number_with_dec_new(door_costo, 4));
+            costo1 = data[0]['costo1'];
+            recar_prod = data[0]['recar_prod'];
+            ventas_prod = data[0]['ventas_prod'];
+            recar2_prod = data[0]['recar2_prod'];
+            venta2_prod = data[0]['venta2_prod'];
+            status = data[0]['status'];
+            $("#costo1").val(format_number_with_dec_new(costo1, 4));
+            $("#recar_prod").val(format_number_with_dec_new(recar_prod, 4));
+            $("#ventas_prod").val(format_number_with_dec_new(ventas_prod, 4));
+            $("#recar2_prod").val(format_number_with_dec_new(recar2_prod, 4));
+            $("#venta2_prod").val(format_number_with_dec_new(venta2_prod, 4));
+            listar_status(status);
+            $("#stock_minimo").val(data[0]['stock_minimo']);
+            $("#stock").val(data[0]['stock']);
+            $("#des_prod").val(decodificarHTML(data[0]['des_prod']));
+            $("#commet_prod").val(decodificarHTML(data[0]['commet_prod']))
+            id_fab_fac = data[0]['id_fab_fac'];
+            //Marca para Facturacion    
+            getMarcas(id_fab_fac, 'id_fab_fac');
+            //Datos de Etiqueta
+            $("#regsan_prod").val(decodificarHTML(data[0]['regsan_prod']));
+            $("#cpe_prod").val(decodificarHTML(data[0]['cpe_prod']));
+            $("#nomcor_prod").val(decodificarHTML(data[0]['nomcor_prod']));
+            $("#marcom_prod").val(decodificarHTML(data[0]['marcom_prod']));
+            $("#fabpor_prod").val(decodificarHTML(data[0]['fabpor_prod']));
+            $("#connetpro_prod").val(decodificarHTML(data[0]['connetpro_prod']));
+            $("#connetcaj_prod").val(decodificarHTML(data[0]['connetcaj_prod']));
+            $("#uso_prod").val(decodificarHTML(data[0]['uso_prod']));
+            creado_por = data[0]['creado_por'];
+            if (creado_por) {
+                $(".creado_por").show();
+                $("#creado_por").val(creado_por);
+                $("#create_date").val(data[0]['create_date']);
+            }
+            modificado_por = data[0]['modificado_por'];
+            if (modificado_por) {
+                $(".modificado_por").show();
+                $("#modificado_por").val(modificado_por);
+                $("#modify_date").val(data[0]['modify_date']);
+            }
+        }
     })
-}
-
-function updateCost1(){
-    var costo_prod = parseFloat($("#costo_prod").val());
-    var flete_prod = parseFloat($("#flete_prod").val());
-    var otros_prod = parseFloat($("#otros_prod").val());
-    var door_costo = parseFloat($("#door_costo").val());
-    if($("#door_prod").prop('checked')){
-        $("#costo1").val(((costo_prod+flete_prod+otros_prod+door_costo)));
-    }else{
-        $("#costo1").val(((costo_prod+flete_prod+otros_prod)));
+    if (!clonar) {
+        //Llenar Historico de Precios
+        if ($.fn.DataTable.isDataTable('#tblTableHis')) {
+            $('#tblTableHis').DataTable().destroy();
+        }
+        $("#tblTableHis").DataTable({
+            ajax: {
+                url: `${base_url}/Productos/charge_history`,
+                method: 'POST',
+                data: { id: id },
+                dataSrc: '',
+                dataType: 'json'
+            },
+            columns: [
+                {
+                    data: "fecha", title: "Fecha",
+                    render: function (data) {
+                        if (!data) return "";
+                        return moment(data).format(TO_PATTERNHH);
+                    }
+                },
+                { data: "id", title: "Id", className: "text-right", visible: false },
+                { data: "costo_prod", title: "Costo", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "flete_prod", title: "Flete", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "otros_prod", title: "Otros Cargos", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "door_costo", title: "Door Cargos", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "costo1", title: "Total Costo", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "recar_prod", title: "Recarga 1", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "ventas_prod", title: "Ventas 1", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "recar2_prod", title: "Recarga Consign.", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "venta2_prod", title: "Ventas Consig.", className: "text-right", render: $.fn.dataTable.render.number(".", ",", 4) },
+                { data: "usuario", title: "Usuario" },
+            ],
+            order: [[0, 'desc']],
+            language: {
+                url: `${base_url}/Assets/json/es-ES.json`,
+            },
+        });
+        //Cargar Imaganes del producto
+        $.ajax({
+            url: `${base_url}/Productos/showImg`,
+            method: 'POST',
+            data: { id: id },
+            dataSrc: '',
+            dataType: 'json',
+            success: function (data) {
+                if (data.length > 0) {
+                    let tagHtml = '';
+                    let i = 0;
+                    imgPreview = $("#imgPreview");
+                    data.forEach(img => {
+                        i++;
+                        tagHtml += `
+                              <div class="card" id="cardimg${i}" style="display:inline-block;">
+                                <img id="img${i}" name="img${i}" width="200px" height="200px" src="${img.url_photo}" title="${img.filename}">
+                                <button id="detimg" data-id="${img.id_photo}" data-name="${img.url_photo}" data-code="${img.url_photo}" type="button" title="Eliminar imagén" class="btn btn-danger" onclick="deleteimg(this)"><i class="fa-sharp fa-solid fa-xmark"></i></i></button>
+                              </div>
+                        `;
+                    })
+                    imgPreview.html(tagHtml);
+                }
+            }
+        })
     }
-    rechargeSale(1);
 }
-function rechargeSale(modo){
-    var costo1 = parseFloat($("#costo1").val());
-    var ventas_prod = parseFloat($("#ventas_prod").val());
-    if(modo == 1){
-        var recar_prod = parseFloat($("#recar_prod").val());
-        $("#ventas_prod").val((costo1 / recar_prod).toFixed(4));
-    }else if(modo == 2){
-        $("#recar_prod").val((costo1 / ventas_prod ).toFixed(4));
-    }else if(modo == 3){
-        var recar2_prod = parseFloat($("#recar2_prod").val());
-        $("#venta2_prod").val((costo1 / recar2_prod).toFixed(4));
-    }else if(modo == 4){
-        var venta2_prod = parseFloat($("#venta2_prod").val());
-        $("#recar2_prod").val((costo1 / venta2_prod).toFixed(4));
-    }else{
-        $("#recar2_prod").val((costo1 / venta2_prod ).toFixed(4));
+//Clonar producto  
+$(document).on('click', '.btn-clonar', function (e) {
+    e.preventDefault();
+    e.stopPropagation(); // Evita que el evento suba a otros elementos
+    var table = $('#tblIndexMain').DataTable();
+    var row = $(this).closest('tr');
+    if (row.hasClass('child')) {
+        row = row.prev();
     }
-}
-//Calcular el valor del Door to Door por las dimensiones
-$(document).on('keyup', '.dimension', function(e){
-    var alto = parseFloat($("#alto").val());
-    var ancho = parseFloat($("#ancho").val());
-    var largo = parseFloat($("#largo").val());
-    const tcosto = TCostoPieINV();
-    var dimension = ((alto * ancho * largo) / `${factor}`) * `${costo}`;
-    if ($('#door_prod').prop('checked')) {
-        $("#door_costo").val(dimension);
-    }
-})
-async function TCostoPieINV (){
-    const costo = await getParam('INV');
-    tcosto = costo['costo_pie3'];
-    return tcosto;
-}
-//eliminar
-function eliminarBtn(element) {
-    //Capturar datos del producto
-    let id = element.dataset.id;
-    let name = element.dataset.name;
-    let code = element.dataset.code;
-    //Preguntar si esta seguro de eliminar el registro
+    var data = table.row(row).data();
+    let name = data.nom_prod;
+    let id = data.id_prod;
     Swal.fire({
-        icon: 'warning',
-        title: 'Está seguro de eliminar este registro?',
+        title: `Desea copiar el producto ${name} como un nuveo producto?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Copiar',
+    }).then((result) => {
+        if (result.isConfirmed) {            
+            localStorage.setItem('data_copiar', JSON.stringify(data));
+            //Redireccionamos            
+            window.location.href = `${base_url}/Productos/nuevo`;
+            
+
+        }
+    });
+});
+/**Al momento de seleccionar un Grupo se actualiza el select de SubGrupo */
+$("#id_grupo").on("change", function () {
+    id_grupo = $(this).val();
+    getSubgrupos(id_grupo, 'id_sub_grupo');
+});
+/*Validar si Usa Cargos Door to Door*/
+$("#door_prod").on("change", function () {
+    if ($(this).is(":checked")) {
+        $('#door_costo').prop('readonly', false);
+    } else {
+        $('#door_costo').val('').trigger('input');
+        $('#door_costo').prop('readonly', true);
+    }
+
+});
+/*Actualizar el campo Costo 1, con la suma de costo, fletete, otros carrgos, cargos door*/
+function sumar_costo_prod() {
+    $(".costo_prod").on("input", function () {
+        var total = 0;
+        $(".costo_prod").each(function () {
+            var v_coma = $(this).val();
+            if (v_coma.includes(',')) {
+                var valor = formatoMoneda(v_coma);
+            } else {
+                var valor = parseFloat(v_coma);
+            }
+            if (!isNaN(valor)) {
+                total += valor;
+            }
+        });
+        var costo1 = total;
+        $("#costo1").val(format_number_with_dec_new(costo1, 4));
+        recar_prod = $("#recar_prod").val();
+        if (recar_prod.includes(',')) {
+            recar_prod = formatoMoneda(recar_prod);
+            ventas_prod = format_number_with_dec_new(costo1 / recar_prod, 4);
+            $('#ventas_prod').val(ventas_prod).trigger('input');
+            $('#venta2_prod').val(ventas_prod).trigger('input');
+        }
+    });
+}
+/*Calcular Precio de Venta desde la Utilidad*/
+$("#recar_prod").on("input", function () {
+    var v_coma = $(this).val();
+    if (v_coma.includes(',')) {
+        var valor = formatoMoneda(v_coma);
+    } else {
+        var valor = parseFloat(v_coma);
+    }
+    if (valor > 0) {
+        var costo1 = formatoMoneda($("#costo1").val());
+        var ventas_prod = costo1 / valor
+        $("#ventas_prod").val(format_number_with_dec_new(ventas_prod, 4));
+    }
+});
+/*Calcular Precio de venta Consignacions desde la Utilidad Consignacion*/
+$("#recar2_prod").on("input", function () {
+    var v_coma = $(this).val();
+    if (v_coma.includes(',')) {
+        var valor = formatoMoneda(v_coma);
+    } else {
+        var valor = parseFloat(v_coma);
+    }
+    if (valor > 0) {
+        var costo1 = formatoMoneda($("#costo1").val());
+        var venta2_prod = costo1 / valor
+        $("#venta2_prod").val(format_number_with_dec_new(venta2_prod, 4));
+    }
+});
+/**Calcular el % de utilida de consginacion en caso de ambiar el valor de ventas2 */
+$("#venta2_prod").on("input", function () {
+    var v_coma = $(this).val();
+    var valor = 0;
+    if (v_coma.includes(',')) {
+        valor = formatoMoneda(v_coma);
+    } else {
+        var valor = parseFloat(v_coma);
+    }
+    if (valor > 0) {
+        var costo1 = formatoMoneda($("#costo1").val());
+        var recar2_prod = costo1 / valor;
+        $("#recar2_prod").val(format_number_with_dec_new(recar2_prod, 4));
+    }
+});
+/**Calcular el % de utilidad en caso de cambiar el valor de ventas */
+$("#ventas_prod").on("input", function () {
+    var v_coma = $(this).val();
+    var valor = 0;
+    if (v_coma.includes(',')) {
+        valor = formatoMoneda(v_coma);
+    } else {
+        var valor = parseFloat(v_coma);
+    }
+    if (valor > 0) {
+        var costo1 = formatoMoneda($("#costo1").val());
+        var recar_prod = costo1 / valor;
+        $("#recar_prod").val(format_number_with_dec_new(recar_prod, 4));
+    }
+});
+/**Guardar y/o Actualizar */
+$("#my_form").on("submit", function (e) {
+    e.preventDefault();
+    var boton = $("#btnok");
+    boton.prop('disabled', true);
+    if ($(this).valid()) {
+        var formData = new FormData(this);
+        const url = `${base_url}/Productos/store`;
+        $.ajax({
+            type: 'POST',
+            url: url,
+            dataSrc: '',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            beforeSend: function () {
+                $(".loader").show();
+            },
+            complete: function () {
+                boton.prop('disabled', false);
+                $(".loader").hide();
+            },
+            error: function (PDOException) {
+                $(".loader").hide();
+                console.log(PDOException);
+            },
+            success: function (data) {
+                Swal.fire({
+                    title: data.title,
+                    text: data.msg,
+                    icon: data.icon,
+                }).then((result) => {
+                    if (data.icon != 'error') {
+                        window.location.href = `${base_url}/Productos`;
+                    }
+                });
+            }
+        });
+    } else {
+        boton.prop('disabled', false);
+        return false
+    }
+});
+/**Elimina registro */
+$(document).on('click', '.btn-delete', function (e) {
+    //Capturar datos del producto
+    e.preventDefault();
+    e.stopPropagation(); // Evita que el evento suba a otros elementos
+    var table = $('#tblIndexMain').DataTable();
+    var row = $(this).closest('tr');
+    if (row.hasClass('child')) {
+        row = row.prev();
+    }
+    var data = table.row(row).data();
+    let id = data.id_prod;
+    let name = data.nom_prod;
+    let code = data.code;
+    Swal.fire({
+        icon: 'question',
+        title: 'Está seguro de desactivar este registro?',
         showConfirmButton: true,
         confirmButtonText: 'ELIMINAR',
         confirmButtonColor: '#3085d6',
@@ -218,213 +489,92 @@ function eliminarBtn(element) {
         cancelButtonColor: '#d33',
         buttonsStyling: true,
     }).then((result) => {
-        if (result.isConfirmed){
-            borrarprod(id, name, code);
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `${base_url}/Productos/destroy`,
+                method: 'POST',
+                data: { id: id, name: name, code: code },
+                dataType: 'json',
+                success: function (data) {
+                    Swal.fire({
+                        icon: `${data.icon}`,
+                        title: `${data.title}`,
+                        text: `${data.msg}`,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            table.ajax.reload(null, false);
+                        };
+                    });
+                }
+            })
         };
     });
-}
-//Borrar registro de la base de datos
-async function borrarprod(id, name, code){
-    const datos = new FormData();
+});
+//Validar que el código ingresado no este duplicado
+$("#cod_prod").on('input', function (e) {
+    var datos = new FormData();
+    var cod_prod = $(this).val();
+    var id = $("#id").val();
+    cod_prod.replace(/ /g, "");
+    datos.append('cod_prod', cod_prod);
     datos.append('id', id);
-    datos.append('name', name);
-    datos.append('code', code);
-    try{
-        const url =  `${base_url}/Productos/destroy`;
-        console.log(url)
-        const repuesta = await fetch(url, {
-            method:"POST",
-            body: datos,
-        });
-        const resulta = await repuesta.json();
-        console.log(resulta);
-        Swal.fire({
-            position: 'top-end',
-            icon: `${resulta.icon}`,
-            title: `${resulta.title}`,
-            text: `${resulta.msg}`,
-        }).then((result) => {
-            if (result.isConfirmed){
-                window.location.href = `${base_url}/Productos`;
-            };
-        });
-    }catch(error){
-        console.log(error);
-         Swal.fire({
-            position: 'top-end',
-            icon: 'error',
-            title: 'Error.....',
-            text: 'No se pudo eliminar ya que se encuentra asociada a otros registros'
-        });
-    }
-}
-//Imprimir etiquetas
-$(document).on('click','#btn_print',function(e){
-   funcion = "print_labels";
-});
-$( document ).on( 'click', '.door_prod', function(){
-    let val = $(this).val();
-    if( $( this ).is( ':checked' ) ){
-        $("#door_costo").removeAttr('readonly');
-    }else{
-        $("#door_costo").val(0);
-        $("#door_costo").attr('readonly', 'readonly');
-    }
-});
-
-var tblMain = $("#tblTable_prod").DataTable({
-    aProcessing: true,
-    aServerSide: true,
-    order: [[3, 'asc']],
-    language: {
-        url :`${base_url}/Assets/json/es-ES.json`,
-    },
-    columnDefs: [
-        {
-            targets: 0,
-            visible: false,
-            searchable: false,
-        }
-    ],
-     // mostrar botones de exportacion
-            dom: "lBfrtip",
-            buttons: [
-                {
-                    extend: "copyHtml5",
-                    text: "<i class='fa fa-copy'></i>",
-                    titleAttr: "Copiar",
-                    className: "btn btn-secondary"
-                },
-                {
-                    extend: "excelHtml5",
-                    text: "<i class='fa fa-file-excel'></i>",
-                    titleAttr: "Exportar a Excel",
-                    className: "btn btn-warning"
-                },
-                {
-                    extend: "pdfHtml5",
-                    text: "<i class='fa fa-file-pdf'></i>",
-                    titleAttr: "Exportar a PDF",
-                    className: "btn btn-danger"
-                },
-                {
-                    extend: "csvHtml5",
-                    text: "<i class='fa fa-file-text'></i>",
-                    titleAttr: "Exportar a CSV",
-                    className: "btn btn-primary",
-                },
-            ],
-});
-function cargar_screen_main(){
-    div_loading();
-    const url = `${base_url}/Productos/`;
-    $.ajax({
-        url: url,
+    var url = `${base_url}/Productos/val_cod_pro`;
+    fetch(url, {
         method: 'POST',
-        dataSrc: '',
-        data: {},
-        beforeSend: function(){
-            $('.loader').show();
-        },
-        success: function(resultado){
-        tab = '';
-        if(resultado){
-            response = JSON.parse(resultado);
-           $.each(data, function(i, main) {
-                //Status
-                if(main.status == 1){
-                    status = '<td class="text-center"><span class="badge badge-success">Activo</span></td>';
-                }else{
-                    status = '<td class="text-center"><span class="badge badge-danger">Inactivo</span></td>';
-                }
-                //Acciones
-                acciones = `
-                    <td class="text-center">
-                        <a type="button" class="btn btn-warning btn-xs" href="${base_url + '/BanMovim/edit/' +  main.id_banmov}"><i class="fa fa-edit"></i></a>
-                        <button id="Data" data-id="${main.id_banmov}" data-name="${main.nombre_emp}" data-code = "${main.nombre_emp}" type="button" class="btn btn-danger btn-xs" onclick="eliminarBtn(this)"><i class="fa fa-trash"></i></button>
-                        <button id="Data" data-id="${main.id_banmov}" data-code = "${main.num_banmov}" type="button" class="btn btn-primary btn-xs" onclick="print_mov(this)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
-                    </td>`;
-                xfecha = main.fecha_comp.split('-')
-                tab += `<tr>
-                    <td>${main.id_banmov}</td>
-                    <td>${main.nombre_emp}</td>
-                    <td>${main.nom_bantmo}</td>
-                    <td>${main.bancue}</td>
-                    <td class="text-right">${main.num_banmov}</td>
-                    <td>${xfecha[2]+'-'+xfecha[1]+'-'+xfecha[0]}</td>
-                    <td>${main.id_moneda}</td>
-                    ${status}
-                    ${acciones}
-                </tr>`;
+        body: datos
+    }).then(response => response.json())
+        .then(data => {
+            if (data.success == 1) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Oops...",
+                    text: "Código " + cod_prod + " ya existe en otro producto",
+                });
+            }
+        })
+        .catch(err => console.log(err))
+});
+/**Mostratr modal de Fotos */
+$(document).on('click', '.btn-ver-fotos', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    // Capturamos el ID directamente del atributo data-id del botón
+    var idProducto = $(this).data('id');
+    var code = $(this).data('code');
+    var name = $(this).data('name');
+    // 1. Limpiar el contenido viejo del modal inmediatamente
+    $('#sortable-galeria').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>');
+    // 2. Actualizar el título del modal con el nombre del producto
+    $('#tituloModalFotos').html(`<i class="fas fa-images"></i> Fotos de: <span class="text-warning">${name} ${code}</span>`);
+    // 1. Cargar las fotos vía AJAX
+    $.ajax({
+        url: `${base_url}/Productos/showImg`,
+        type: 'POST',
+        data: { id: idProducto },
+        dataType: 'json',
+        success: function (fotos) {
+            let html = '';
+            fotos.forEach(foto => {
+                html += `
+                <div class="col-md-3 col-sm-4 col-6 mb-4 item-foto" data-id="${foto.id_prod}">
+                    <div class="card h-100">
+                        <div class="card-body p-1 text-center">
+                            <img src="${foto.url_photo}" class="img-fluid rounded">
+                        </div>
+                    </div>
+                </div>`;
             });
-        }
-        if(tab){
-            document.getElementById('tbody').innerHTML = tab;
-        }
-        var tblMain = $("#tblTablebanMovim").DataTable({
-            aProcessing: true,
-            aServerSide: true,
-            language: {
-                url :`${base_url}/Assets/json/es-ES.json`,
-            },
-            columnDefs: [
-                {
-                    targets: 0,
-                    visible: false,
-                    searchable: false,
-                },
-            ],
-        });
-    },
-    complete: function(){
-        $('.loader').hide();    
-    },
-    error: function (xhr, status, error) {
-        $(".loader").hide();
-    }
-    })
-}
-//Copiar producto crear un nuevo producto dfe uno ya existente
-function copiarBtn(e){
-    let id = e.dataset.id;
-    let name = e.dataset.name;
-    Swal.fire({
-        title: "Desea copiar el producto " + name + " como un nuevo producto?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Copiar",
-    }).then((result) => {
-        /* Read more about isConfirmed, isDenied below */
-        if (result.isConfirmed) {
-            window.location.href = `${base_url}/Productos/edit/`+id+'-N';
-             $('#id').val('');
+            $('#sortable-galeria').html(html);
+
+            // 2. Activar la función de "Arrastrar y Soltar" (Sortable)
+            $("#sortable-galeria").sortable({
+                placeholder: "ui-sortable-placeholder col-md-3 col-sm-4 col-6 mb-4",
+                update: function (event, ui) {
+                    // Si el usuario mueve algo, mostramos el botón de guardar orden
+                    $('#btnGuardarOrden').fadeIn();
+                }
+            });
+            $("#modalGaleria").modal("show");
         }
     });
-}
-//Al seleccionar un Grupo actualizar el  Seletc del Sub-Grupo
-$('#id_grupo').on('change', function(e){
-    div_loading();
-    $("#id_sub_grupo").empty();
-    id_grupo = $(this).val();
-    const url = `${base_url}/SubGrupos/listar_sub_grupo`;
-    $.ajax({
-        type: 'POST',
-        url: url,
-        data: {id_grupo:id_grupo},
-        dataSrc: '',
-        dataType: 'json',
-        beforeSend: function(){
-            $('.loader').show();
-        },
-        success: function(data){
-             listar_sub_grupo(id_grupo);
-        },
-        complete: function(){
-            $('.loader').hide();
-        },
-        error: function(xhr){
-            $('.loader').hide();
-            console.log(xhr.statusText + ' ' + xhr.responseText);
-        }
-    })
-})
+});

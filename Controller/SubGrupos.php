@@ -145,10 +145,10 @@ class SubGrupos extends Controller
             echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function listar_sub_grupo(){
+    public function getSubgrupos(){
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id = $_POST['id_grupo'];
-            $r = SubGruposModel::listar_sub_grupo($id);
+            $id = $_POST['id'];
+            $r = SubGruposModel::getSubgrupos($id);
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }

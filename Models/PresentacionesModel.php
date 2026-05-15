@@ -29,4 +29,8 @@ class PresentacionesModel extends DB
     static function borrar($id, $cod){       
       return $id = DB::delete('f4004', ['id_pre' => $id], 1);       
     }
+    static function getPresentacion(){
+        $sql = "SELECT id_pre, nom_pre FROM f4004 WHERE status = 1 ORDER BY nom_pre";
+        return $r = DB::query($sql);
+    }
 }

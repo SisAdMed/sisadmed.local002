@@ -1,8 +1,6 @@
 <?php
-class DB extends Conexion
-{
-    public static function consultarSQL($query)
-    {
+class DB extends Conexion{
+    public static function consultarSQL(string $query){
         $link = new Conexion();
         $link = $link->conect();
         $resultado = $link->query($query);
@@ -17,13 +15,12 @@ class DB extends Conexion
      * Consultar de forma plana un SQL
      *@param string
      */
-    public static function SQL($query){
+    public static function SQL(string $query){
         $resultado = self::consultarSQL($query);
         return $resultado;
     }
     /*Listar registros desde la base de datos o un solo registro*/
-    public static function listEqual($table, $params = [], $limit = null)
-    {
+    public static function listEqual(string $table, $params = [], $limit = null){
         $cols_Values = "";
         $limits = "";
         if (!empty($params)) {
@@ -44,8 +41,7 @@ class DB extends Conexion
         return $limit === 1 ? $rows[0] : $rows;
     }
     /*JOIN*/
-    public static function join($table1, $table2, $val1, $val2, $params = [], $limit = null)
-    {
+    public static function join(string $table1, string $table2, string $val1, string $val2, $params = [], $limit = null){
         $cols_Values = "";
         $limits = "";
         if (!empty($params)) {
@@ -75,8 +71,7 @@ class DB extends Conexion
         return $limit === 1 ? $rows[0] : $rows;
     }
     /*INSERTAR REGISTROS*/
-    public static function insert($table, $params)
-    {
+    public static function insert( string $table, array $params){
         $cols = "";
         $placeholders = "";
         foreach ($params as $key => $values) { //INSERT INTO table (campo1, campo2) VALUES (:placeholder, :placeholder)
@@ -93,8 +88,7 @@ class DB extends Conexion
         }
     }
     /*UPDATE REGISTROS*/
-    public static function update($table, $params = [], $id = [])
-    {
+    public static function update(string $table, $params = [], $id = []){
         //UPDATE $table SET campo1 = :campo1, campo2 = :campo2 WHERE idProducto = 1 AND status = 1
         $cols = "";
         $placeholders = "";
@@ -119,8 +113,7 @@ class DB extends Conexion
         return true;
     }
     /*DELETE REGISTROS*/
-    public static function delete($table, $params = [], $limit = 1)
-    {
+    public static function delete(string $table, $params = [], $limit = 1){
         $cols_values = "";
         $limits = "";
         if(!empty($params)){

@@ -9,19 +9,18 @@ class Presentaciones extends Controller
    }
    public function index()
    {
-      if(empty($_SESSION['permisosMod']['r'])){
+      if (empty($_SESSION['permisosMod']['r'])) {
          header('Location:' . base_url . '/Perfil');
       }
-
       $objeto = PresentacionesModel::all();
-
       $this->views->getView($this, "index", [
          'page_name' => "Presentaciones",
          'function_js' => 'Presentaciones.js',
          'objeto' => to_obj($objeto),
       ]);
    }
-   public function nuevo(){ 
+   public function nuevo()
+   {
       $this->views->getView($this, "nuevo", [
          'page_name' => "Nueva Presentación",
          'function_js' => "Presentaciones.js"
@@ -32,50 +31,52 @@ class Presentaciones extends Controller
       $codigo = $_POST;
       $totreg = 0;
       $jsonData = array();
-      if(!empty($codigo['cod_pre'])){
+      if (!empty($codigo['cod_pre'])) {
          $rows = PresentacionesModel::validar($codigo['cod_pre']);
          $totreg = $rows;
       }
-      if($totreg <= 0){
+      if ($totreg <= 0) {
          $jsonData['success'] = 0;
-         $jsonData['message'] = '';         
-      }else{
+         $jsonData['message'] = '';
+      } else {
          $jsonData['success'] = 1;
          $jsonData['message'] = 'Registro ya existe...';
       }
       echo json_encode($jsonData, JSON_UNESCAPED_UNICODE);
    }
-   public function store(){
-      if ($_SERVER['REQUEST_METHOD'] == 'POST'){
+   public function store()
+   {
+      if ($_SERVER['REQUEST_METHOD'] == 'POST') {
          $modo = 'modify_user';
          $codigo = '';
          $data = array();
-         if(empty($_POST['id'])){            
-            $data = ['cod_pre' => limpiar($_POST['cod_pre'])];            
-            $modo = 'create_user'; 
+         if (empty($_POST['id'])) {
+            $data = ['cod_pre' => limpiar($_POST['cod_pre'])];
+            $modo = 'create_user';
          }
-         try {   
-            
-            $data += [                  
-               'nom_pre' => limpiar($_POST['nom_pre']),               
+         try {
+
+            $data += [
+               'nom_pre' => limpiar($_POST['nom_pre']),
                'status' => limpiar($_POST['status']),
                $modo => $_SESSION['id_user'],
-            ];                 
-            if(empty($_POST['id'])){               
+            ];
+            if (empty($_POST['id'])) {
                $id = PresentacionesModel::guardar($data);
                Alertas::new(sprintf('El registro %s se ha creado exitosamente con el id %s', $data['nom_pre'], $id));
-            }else{       
+            } else {
                $id = PresentacionesModel::actualizar($_POST['id'], $data);
                Alertas::new(sprintf('El registro %s se ha modificado exitosamente con el id %s', $data['nom_pre'], $_POST['id']));
-            }      
-            header('Location:' . base_url . '/Presentaciones');      
+            }
+            header('Location:' . base_url . '/Presentaciones');
          } catch (\PDOException $e) {
             Alertas::new($e->getMessage(), 'danger');
             header('Location:' . base_url . '/Presentaciones');
          }
       }
    }
-   public function edit($id){
+   public function edit($id)
+   {
       if (Permisos::read()) {
          $id = intval(limpiar($id));
          if ($id > 0) {
@@ -97,7 +98,8 @@ class Presentaciones extends Controller
       Alertas::new('No tiene permiso para realizar esta acción', 'warning');
       header('Location:' . base_url . '/Presentaciones');
    }
-   public function destroy(){
+   public function destroy()
+   {
       $dataJson = [];
       if (empty($_POST['id'])) {
          $dataJson = [
@@ -107,22 +109,28 @@ class Presentaciones extends Controller
          ];
       } else {
          $id = intval(limpiar($_POST['id']));
-         $cod = limpiar($_POST['cod']);            
-         $ide = PresentacionesModel::borrar($id, $cod);       
-         if($ide){
+         $cod = limpiar($_POST['cod']);
+         $ide = PresentacionesModel::borrar($id, $cod);
+         if ($ide) {
             $dataJson = [
                'status' => true,
                'type' => 'success',
                'msg' => sprintf('El registro %s, con la descripción %s se ha eliminado correctamente', $_POST['cod'], $_POST['name'])
             ];
-         }else{
+         } else {
             $dataJson = [
                'status' => false,
                'type' => 'warning',
                'msg' => sprintf('No se puede elimiar el registro %s con la descripción %s, motivado a que tienes registros hijos y/o posee movimientos', $_POST['cod'], $_POST['name'])
             ];
-         }            
-      }        
+         }
+      }
       echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
+   }
+   public function getPresentacion(){
+    if($_SERVER["REQUEST_METHOD"] == 'POST'){
+        $r = PresentacionesModel::getPresentacion();
+        echo json_encode($r, JSON_UNESCAPED_UNICODE);
+    }
    }
 }

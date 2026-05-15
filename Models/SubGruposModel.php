@@ -24,10 +24,9 @@
             $r = DB::query($sql);
             return $r[0];
         }
-        static function listar_sub_grupo($id){
-            $sql = "SELECT * FROM f40071 WHERE id_grupo = {$id} AND status = 1";
-            $r = DB::query($sql);
-            return $r;
+        static function getSubgrupos(int $id){
+            $sql = "SELECT id, sub_grupo_nombre FROM f40071 WHERE id_grupo = {$id} AND status = 1 ORDER BY sub_grupo_nombre";
+            return $r = DB::query($sql);            
         }
     }
 ?>

@@ -22,7 +22,7 @@
             $r = DB::query("SELECT nom_prod, sum(sub_total) sub_total FROM `grafica_001` GROUP BY nom_prod ORDER BY 2 DESC LIMIT 10");
             return $r;
         }
-        static function DatosTabla_001($fec_ini, $fec_fin, $id_emp){
+        static function DatosTabla_001(string $fec_ini, string $fec_fin, int $id_emp){
             $filter = '';
             if($id_emp != 0){
                 $filter = " AND b.id_emp = {$id_emp}";
@@ -32,7 +32,7 @@
             $r = DB::query($sql);
             return $r;
         }
-        static function DatosTabla_001_det($fec_ini, $fec_fin, $id_emp){
+        static function DatosTabla_001_det(string $fec_ini, string $fec_fin, int $id_emp){
             $filter = '';
             if($id_emp != 0){
                 $filter = " AND id_emp = {$id_emp}";
@@ -40,10 +40,21 @@
             $r = DB::query("SELECT * FROM table_graphic WHERE status = 1 AND fecha_comp BETWEEN '".$fec_ini."' AND '".$fec_fin."' ".$filter);
             return $r;
         }
-        static function DatosTabla_001_det_cli($fec_ini, $fec_fin, $id_emp){
+        static function DatosTabla_001_det_cli(string $fec_ini, string $fec_fin, int $id_emp){
             $sql = "SELECT c.id_emp, c.nombre_emp, e.id_ent, e.nom_ent, SUM(CASE WHEN b.id_cli = 11 AND e.c_consig = 1 AND b.id_moneda = c.id_moneda AND b.tasa_cambio != 1 THEN a.sub_total / b.tasa_cambio WHEN b.id_moneda = c.id_moneda AND b.tasa_cambio = 1 THEN a.sub_total / GetExchangeRateVal(b.fecha_comp, 2) WHEN b.id_moneda = c.id_moneda AND b.tasa_cambio != 1 THEN a.sub_total / b.tasa_cambio ELSE a.sub_total END) sub_total, SUM(a.costo) costo, SUM(a.utilidad) utilidad, (SUM(CASE WHEN b.id_cli = 11 AND e.c_consig = 1 AND b.id_moneda = c.id_moneda AND b.tasa_cambio != 1 THEN a.sub_total / b.tasa_cambio WHEN b.id_moneda = c.id_moneda AND b.tasa_cambio = 1 THEN a.sub_total / GetExchangeRateVal(b.fecha_comp, 2) WHEN b.id_moneda = c.id_moneda AND b.tasa_cambio != 1 THEN a.sub_total / b.tasa_cambio ELSE a.sub_total END)) - (SUM(a.costo) + SUM(a.utilidad)) adicional, sal_cxc_graphic_fin(b.id_emp, '$fec_fin', 1, b.id_cli) mon_cxc, sal_cxc_graphic_fin(b.id_emp, '$fec_fin', 2, b.id_cli) mon_iva FROM f60031 a INNER JOIN f6003 b ON b.id_cot = a.id_cot INNER JOIN f0011 c ON c.id_emp = b.id_emp INNER JOIN f4005 d ON d.id_prod = a.id_prod INNER JOIN f0014 e ON e.id_ent = b.id_cli INNER JOIN f6001 f ON f.id_tdoc = b.id_tdo INNER JOIN f0012a g ON g.id_motcam = e.id_motcam INNER JOIN f0005 h ON h.id_moneda = b.id_moneda INNER JOIN f6001 i ON i.id_tdoc = b.id_tdo INNER JOIN f4999 j ON j.id_emp = b.id_emp AND ((i.id_tdoc = j.id_tdoc_not_no_fis AND IFNULL(e.c_consig,0) = 0) OR(i.id_tdoc != j.id_tdoc_not_no_fis)) AND (i.id_tdoc <> j.id_tdoc_not) INNER JOIN f4003 k ON k.id_fab = d.id_fab LEFT OUTER JOIN f60061 l ON l.id_cot = a.id_cot LEFT OUTER JOIN f6006 m ON m.id_movement = l.movem_id WHERE b.status = 1 AND b.fecha_comp BETWEEN '$fec_ini' AND '$fec_fin'  AND b.id_emp = {$id_emp} GROUP by c.id_emp, c.nombre_emp, e.id_ent, e.nom_ent";
             return $r = DB::query($sql);
         }
+        /**
+         * @param int $id_emp
+         * @param string $fec_ini
+         * @param string $fec_fin
+         * @param string|null $id_fab
+         * @param int|null $id_cli
+         * @param string|null $id_gru
+         * @param string|null $id_vend
+         * @param string|null $id_tipocliente
+         * @return mixed
+         */
         static function ReportexConsumo($id_emp, $fec_ini, $fec_fin, $id_fab, $id_cli, $id_gru, $id_vend, $id_tipocliente){
             $filter = "";
             if($id_fab){                
@@ -75,7 +86,7 @@
             $sql = "SELECT id_prod, cod_prod, cod2_prod, nom_prod, nom_fab, ref_prod, anio, mes, stock, SUM(tot_row) AS tot_row FROM temp_reporte_consumo GROUP BY id_prod, cod_prod, cod2_prod, nom_prod, nom_fab, ref_prod, anio, mes, stock";            
             return $r = DB::query($sql);            
         }
-        static function listar_marcas($id_fab, $anio, $id_tipocliente, $id_vend){
+        static function listar_marcas(?string $id_fab, ?string $anio, ?string $id_tipocliente, ?string $id_vend){
              $filter = '';  
             if($id_fab){                
                 $filter .= " WHERE id_fab IN ($id_fab)";
@@ -96,7 +107,7 @@
             $sql = "";       
             return $r = DB::query($sql);
         }
-        static function listar_tipos_clientes($id_emp, $fec_ini, $fec_fin, $id_fab, $id_cli, $id_gru, $id_vend, $id_tipocliente){
+        static function listar_tipos_clientes(int $id_emp, string $fec_ini, string $fec_fin, ?string $id_fab, ?string $id_cli, ?string $id_gru, ?string $id_vend, ?string $id_tipocliente){
              $filter = '';
             if($id_fab){                
                 $filter .= " AND e.id_fab IN ($id_fab)";
@@ -121,7 +132,7 @@
             SELECT i.id, i.description, b.utilidad FROM f6003 a INNER JOIN f60031 b ON b.id_cot = a.id_cot INNER JOIN f4005 d ON d.id_prod = b.id_prod INNER JOIN f4003 e ON e.id_fab = d.id_fab INNER JOIN f0011 f ON f.id_emp = a.id_emp INNER JOIN f4999 g ON g.id_emp = f.id_emp INNER JOIN f0014 h ON h.id_ent = a.id_cli INNER JOIN f4014 i On i.id = h.id_tipocliente INNER JOIN f6001 j ON j.id_tdoc = a.id_tdo INNER JOIN f0016 k ON k.id_vend = h.id_vend WHERE a.id_emp = $id_emp AND a.fecha_comp BETWEEN '$fec_ini' AND '$fec_fin' AND a.status = 1  AND h.c_consig != 1 $filter) AS union_table GROUP BY id, description ORDER BY description";     
             return $r = DB::query($sql);
         }   
-        static function listar_vendedores($id_emp, $fec_ini, $fec_fin, $id_fab, $id_cli, $id_gru, $id_vend, $id_tipocliente){
+        static function listar_vendedores(int $id_emp, string $fec_ini, string $fec_fin, ?string $id_fab, ?string $id_cli, ?string $id_gru, ?string $id_vend, ?string $id_tipocliente){
              $filter = '';
             if($id_fab){                
                 $filter .= " AND e.id_fab IN ($id_fab)";
@@ -146,7 +157,7 @@
             SELECT k.id_vend id, CONCAT(k.nom_vend, ' ', k.ape_vend) nom_vend FROM f6003 a INNER JOIN f60031 b ON b.id_cot = a.id_cot INNER JOIN f4005 d ON d.id_prod = b.id_prod INNER JOIN f4003 e ON e.id_fab = d.id_fab INNER JOIN f0011 f ON f.id_emp = a.id_emp INNER JOIN f4999 g ON g.id_emp = f.id_emp INNER JOIN f0014 h ON h.id_ent = a.id_cli INNER JOIN f4014 i On i.id = h.id_tipocliente INNER JOIN f6001 j ON j.id_tdoc = a.id_tdo INNER JOIN f0016 k ON k.id_vend = h.id_vend WHERE a.id_emp = $id_emp AND a.fecha_comp BETWEEN '$fec_ini' AND '$fec_fin' AND a.status = 1  AND h.c_consig != 1 $filter) AS union_table GROUP BY id, nom_vend ORDER BY nom_vend";     
             return $r = DB::query($sql);
         }  
-        static function listar_consumo_x_clientes($id_emp, $fec_ini, $fec_fin, $id_fab, $id_cli, $id_gru, $id_vend, $id_tipocliente){
+        static function listar_consumo_x_clientes(int $id_emp, string $fec_ini, string $fec_fin, ?string $id_fab, ?string $id_cli, ?string $id_gru, ?string $id_vend, ?string $id_tipocliente){
              $filter = '';
             if($id_fab){                
                 $filter .= " AND e.id_fab IN ($id_fab)";
@@ -171,7 +182,7 @@
             SELECT h.nom_ent cliente, b.can_det unidades, (b.can_det * b.sub_total) ventas, b.utilidad FROM f6003 a INNER JOIN f60031 b ON b.id_cot = a.id_cot INNER JOIN f4005 d ON d.id_prod = b.id_prod INNER JOIN f4003 e ON e.id_fab = d.id_fab INNER JOIN f0011 f ON f.id_emp = a.id_emp INNER JOIN f4999 g ON g.id_emp = f.id_emp INNER JOIN f0014 h ON h.id_ent = a.id_cli INNER JOIN f4014 i On i.id = h.id_tipocliente INNER JOIN f6001 j ON j.id_tdoc = a.id_tdo INNER JOIN f0016 k ON k.id_vend = h.id_vend WHERE a.id_emp = $id_emp AND a.fecha_comp BETWEEN '$fec_ini' AND '$fec_fin' AND a.status = 1  AND h.c_consig != 1 $filter GROUP BY h.nom_ent) AS union_table GROUP BY cliente ";     
             return $r = DB::query($sql);
         }  
-        static function grafica_cotizaciones($id_emp, $fec_ini, $fec_fin){
+        static function grafica_cotizaciones(int $id_emp, string $fec_ini, string $fec_fin){
             $sql = "SELECT b.id_user, CONCAT(b.name_user, ' ', b.last_user) name_user, DATE_FORMAT(a.fecha_comp, '%y') anio, ELT(MONTH(a.fecha_comp), 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic') mes, COUNT(a.id_cot) as total_cot, (SUM(CASE WHEN c.id_cont IS NOT NULL THEN 1 ELSE 0 END) ) facturadas FROM f4008 a INNER JOIN f0002 b ON b.id_user = a.create_user LEFT JOIN f6003 c ON c.id_emp = a.id_emp AND c.id_cont = CONCAT('CO', '-', a.num_tdo) WHERE a.id_emp = {$id_emp} AND a.fecha_comp BETWEEN '$fec_ini' AND '$fec_fin' AND EXISTS(SELECT * FROM f40081 WHERE id_cot = a.id_cot) GROUP BY b.id_user, CONCAT(b.name_user, ' ', b.last_user), DATE_FORMAT(a.fecha_comp, '%y'), ELT(MONTH(a.fecha_comp), 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic')";
              return $r = DB::query($sql);
         }

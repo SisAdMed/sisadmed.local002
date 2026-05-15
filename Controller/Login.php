@@ -18,11 +18,11 @@ class Login extends Controller{
         $usuario = [];
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $val = new Validations();
-            $val->name('usuario')->value(limpiar($_POST['usuario']))->required();
-            $val->name('password')->value(limpiar($_POST['password']))->min(5)->max(20)->required();
-            if ($val->isSuccess()) {
+            $usuarioValue = isset($_POST['usuario']) ? limpiar($_POST['usuario']) : '';
+            $passwordValue = isset($_POST['password']) ? limpiar($_POST['password']) : '';          
+            if (isset($usuarioValue) && isset($passwordValue)) {
                 //Loguearse
-                $usuario = LoginModel::login(limpiar($_POST['usuario']), hash("sha256", limpiar($_POST['password'])));
+                $usuario = LoginModel::login($usuarioValue, hash("sha256", $passwordValue));
                 if (empty($usuario)) {
                     $arrJson = ['error' => 'Estas credenciales no existen en el sistema o el usuario no existe'];
                 }elseif ($usuario['status_user'] != 1){

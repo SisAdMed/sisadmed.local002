@@ -170,3 +170,26 @@ table.dataTable tbody td {
     background-color: #d2d6de !important; /* Gris claro de AdminLTE */
     border-left: 4px solid #3c8dbc; /* Una línea azul a la izquierda para que resalte más */
 }
+/*Marcar error en los tab si no es valido*/
+.error-star {
+    font-weight: bold;
+    color: #e74c3c; /* Rojo */
+    font-size: 1.2em;
+}
+#sortable-galeria .card {
+    transition: transform .3s;
+    cursor: move; /* Indica que se puede arrastrar */
+}
+
+#sortable-galeria .card:hover {
+    transform: scale(1.1); /* Efecto de zoom */
+    z-index: 10;
+    box-shadow: 0 10px 20px rgba(0,0,0,.2);
+}
+
+.ui-sortable-placeholder {
+    border: 2px dashed #ccc;
+    background: #f9f9f9;
+    visibility: visible !important;
+    height: 150px !important;
+}

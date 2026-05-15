@@ -25,5 +25,10 @@
             $r = DB::query($sql);
             return $r[0];
         }
+    
+        static function getGrupos(){
+            $sql = "SELECT id_grupo, grupo_nombre FROM f4007 WHERE status = 1 ORDER BY grupo_nombre";
+            return $r = DB::query($sql);
+        }
     }
 ?>

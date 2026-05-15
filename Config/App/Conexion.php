@@ -1,11 +1,8 @@
 <?php
-class Conexion
-{
-    private $conect;
-    public function __construct()
-    {
+class Conexion{
+    private PDO $conect;
+    public function __construct(){
         $connectionString = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-
         try {
             $options = [
                 PDO::ATTR_EMULATE_PREPARES => true, // Requerido para múltiples consultas en una cadena
@@ -18,12 +15,10 @@ class Conexion
             echo "ERROR: " . $e->getMessage() . '\n';
         }
     }
-    public function conect()
-    {
+    public function conect(){
         return $this->conect;
     }
-    public static function query($sql, $params = [])
-    {
+    public static function query(string $sql, array $params = []){
         $db = new Conexion();
         $link = (object)$db->conect();
         $link->beginTransaction(); //por cualquier error, checkpoint
@@ -33,7 +28,6 @@ class Conexion
             $error = $query->errorInfo();
             throw new Exception($error[2]);
         }
-
         // SELECT | INSERT | UPDATE | DELETE | ALTER TABLE
         // Manejo del tipo de query
         //SELECT * FROM table       

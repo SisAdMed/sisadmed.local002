@@ -1,0 +1,32 @@
+[14-May-2026 11:50:16 America/Caracas] PHP Warning:  Trying to access array offset on value of type bool in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Models/FacturacionModel.php on line 131
+[14-May-2026 11:50:16 America/Carac as] PHP Warning:  Trying to access array offset on value of type null in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Controller/Facturacion.php on line 354
+[14-May-2026 11:50:16 America/Caracas] PHP Warning:  Trying to access array offset on value of type null in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Controller/Facturacion.php on line 354
+[14-May-2026 12:02:06 America/Caracas] PHP Fatal error:  Uncaught ValueError: PDO::prepare(): Argument #1 ($query) cannot be empty in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php:25
+Stack trace:
+#0 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php(25): PDO->prepare()
+#1 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Models/PerfilModel.php(108): Conexion::query()
+#2 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Controller/Perfil.php(127): PerfilModel::listar_marcas()
+#3 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/index.php(42): Perfil->listar_marcas()
+#4 {main}
+  thrown in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php on line 25
+[14-May-2026 12:08:40 America/Caracas] PHP Warning:  Undefined array key "id_user" in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Auth.php on line 22
+[14-May-2026 12:09:12 America/Caracas] PHP Fatal error:  Uncaught ValueError: PDO::prepare(): Argument #1 ($query) cannot be empty in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php:25
+Stack trace:
+#0 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php(25): PDO->prepare()
+#1 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Models/PerfilModel.php(108): Conexion::query()
+#2 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Controller/Perfil.php(127): PerfilModel::listar_marcas()
+#3 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/index.php(42): Perfil->listar_marcas()
+#4 {main}
+  thrown in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php on line 25
+[14-May-2026 12:13:49 America/Caracas] PHP Fatal error:  Uncaught ValueError: PDO::prepare(): Argument #1 ($query) cannot be empty in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php:25
+Stack trace:
+#0 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php(25): PDO->prepare()
+#1 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Models/PerfilModel.php(108): Conexion::query()
+#2 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Controller/Perfil.php(127): PerfilModel::listar_marcas()
+#3 /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/index.php(42): Perfil->listar_marcas()
+#4 {main}
+  thrown in /home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/App/Conexion.php on line 25
+[14-May-2026 13:45:27 America/Caracas] PHP Warning:  Undefined array key "administrator" in C:\wampNEW64\www\sisadmed.local.002\Views\Productos\form.php on line 15
+[14-May-2026 13:45:27 America/Caracas] PHP Warning:  Undefined array key "administrator" in C:\wampNEW64\www\sisadmed.local.002\Views\Productos\form.php on line 134
+[14-May-2026 13:45:27 America/Caracas] PHP Warning:  Undefined array key "administrator" in C:\wampNEW64\www\sisadmed.local.002\Views\Productos\form.php on line 154
+[14-May-2026 13:45:27 America/Caracas] PHP Warning:  Undefined array key "administrator" in C:\wampNEW64\www\sisadmed.local.002\Views\Productos\form.php on line 283

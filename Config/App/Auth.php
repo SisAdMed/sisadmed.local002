@@ -1,8 +1,6 @@
 <?php
-class Auth
-{
-    public static function sessionUser(int $id_user)
-    {
+class Auth{
+    public static function sessionUser(int $id_user){
         $repuesta = DB::SQL("SELECT * FROM f0002 u INNER JOIN f0007 r ON u.id_rol = r.id_rol WHERE u.id_user = {$id_user}");
         $_SESSION['user_data'] = $repuesta[0];
         return $repuesta[0];
@@ -11,14 +9,12 @@ class Auth
      * @void sessions
      *
      */
-    public static function noAuth()
-    {
+    public static function noAuth(){
         if (!isset(($_SESSION['login']))) {
             header('Location:' . base_url . '/');
         }
     }
-    public static function logout()
-    {
+    public static function logout(){
         /**
          * Actualizar la fecha del ultimo login
          */

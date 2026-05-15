@@ -9,10 +9,10 @@ $().ready(function(){
             id_emp: "required",
             con_purcon: "required",
             tdoc_pur: "required",
-            tdoc_purord: "required",
+            //tdoc_purord: "required",
             tdoc_purcrenot: "required",
-            tdoc_purdelnot: "required",
-            tdoc_purretnot: "required",
+            //tdoc_purdelnot: "required",
+            //tdoc_purretnot: "required",
             
             id_typmovinwar: "required",
             id_typmovoutwar: "required",
@@ -24,10 +24,10 @@ $().ready(function(){
             id_emp: "Debe especificar una Empresa",
             con_purcon: "Debe especificar un Concepto de Comrpas",
             tdoc_pur: "Debe especificar Tipo de Documento de Facturas",
-            tdoc_purord: "Debe especificar un Tipo de Documento de Ordenes de Compras",
+            //tdoc_purord: "Debe especificar un Tipo de Documento de Ordenes de Compras",
             tdoc_purcrenot: "Debe especificar un Tipo de Documento de Notas de Crédito",
-            tdoc_purdelnot: "Debe especificar un Tipo de Documento Notas de Entregas",
-            tdoc_purretnot: "Debe especificar un Tipo de Documento Notas de Devolución",
+            //tdoc_purdelnot: "Debe especificar un Tipo de Documento Notas de Entregas",
+            //tdoc_purretnot: "Debe especificar un Tipo de Documento Notas de Devolución",
             
             id_typmovinwar: "Debe especificar un Tipo de Movimiento Entrada al Almacén",
             id_typmovoutwar: "Tipo de Movimiento Salida del Almacén",
@@ -63,7 +63,7 @@ async function dat_form(id){
 
    //Tipo de Documento Factura "M"
     tdoc_pur = data_form['tdoc_pur'];
-    listar_tipos_documentos_CXP(id_emp, 'M', tdoc_pur, true, 'tdoc_pur');
+    listar_tipos_documentos_CXP(id_emp, 'M', tdoc_pur, false, 'tdoc_pur');
 
     //Tipo de Documento Nota de Crédito "A"
     tdoc_purcrenot = data_form['tdoc_purcrenot'];

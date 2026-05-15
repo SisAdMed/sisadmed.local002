@@ -33,4 +33,8 @@ class FabricantesModel extends DB{
         $r = DB::query("SELECT * from f4003 WHERE id_fab = {$id}");
         return $r;
     }
+    static function getMarcas(){
+        $sql = "SELECT id_fab, nom_fab FROM f4003 WHERE status = 1 ORDER BY nom_fab";
+        return $r = DB::query($sql);
+    }
 }

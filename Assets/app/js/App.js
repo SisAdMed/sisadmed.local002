@@ -66,6 +66,28 @@ let efe_bantmo = "X";
 //Contador de Contactos
 let item_det = 0;
 let miTabledet_con;
+clonar_prod = false;
+$(document).ready(function() {
+    // 1. Seleccionar el texto al ganar el foco (para Tab o Click)
+    $('input').on('focus', function() {
+        $(this).select();
+    });
+
+    // 2. Saltar al siguiente input al presionar Enter
+    $('input').on('keypress', function(e) {
+        if (e.which === 13) { // 13 es el código de la tecla Enter
+            e.preventDefault(); // Evita que el formulario se envíe
+            
+            // Busca el siguiente input en el DOM
+            var nextInput = $(this).closest('form').find(':input:visible');
+            var nextIndex = nextInput.index(this) + 1;
+
+            if (nextIndex < nextInput.length) {
+                nextInput.eq(nextIndex).focus();
+            }
+        }
+    });
+});
 //
 let AutoConfig = {
 	decimalPlaces: 2,
@@ -275,6 +297,7 @@ $(document).ready(async function () {
 	//Perparar Loading
 	div_loading();
 	//Evitar la ejecución de la techa enter
+	/*
 	$(document).on("keydown", function (e) {
 		// Verifica si la tecla presionada es Enter (keyCode 13)
 		if (e.keyCode === 13) {
@@ -282,6 +305,7 @@ $(document).ready(async function () {
 			e.preventDefault();
 		}
 	});
+	*/
 	//Mostrar Notificaciones y alertas el Sistema al iniciar el sistema
 	//show_notification();
 	//actualizarNotificaciones();
@@ -3239,9 +3263,7 @@ async function ConsultarProducto(
 		const resultado = await respuesta.json();
 		if (resultado) {
 			monto = 0;
-			noadic = resultado["noadic"];
-			console.log(resultado);
-			
+			noadic = resultado["noadic"];						
 			//Nombre Producto
 			$("#nom_prod" + item).val(resultado["nom_prod"]);
 			var nom_prod_encodeStr = (resultado["nom_prod"]);
@@ -3899,13 +3921,13 @@ async function recorreTable_com(tasa_cambio = 1) {
 	}
 	xtasa = parseFloat(tasa_cambio);
 	if (xbase != 0) {
-		if (xtasavatTax_val){
+		//if (xtasavatTax_val){
 			fecha = $("#fecha_comp").val();
 			xtasavatTax = await xvatTax(fecha, "IVA");
 			xtasaIVA = parseFloat(xtasavatTax[0]["txr1_iva"]);
 			iva = parseFloat(xbase * (xtasaIVA / 100));
 			xtasavatTax_val = true;
-		}
+		//}
 		
 	}
 	const xtotal_form = subTotal + iva;
@@ -7106,10 +7128,6 @@ $("#tblSeatDetail tbody").on("change", ".fila-input-ret", function () {
 $(document).on("keydown", ".camponumero", function (e) {
 	var valor = $(this).val();
 	soloNumerosConSignoYDecimal(e, this.id);
-	//if (!isNaN(valor)) {
-	//		$(this).val(format_number_with_dec_new(valor, 2));
-	//	}
-
 });
 $(document).on("blur", ".camponumero", function (e) {
 	var valor = ($(this).val());
@@ -7117,13 +7135,25 @@ $(document).on("blur", ".camponumero", function (e) {
 		$(this).val(format_number_with_dec_new(valor, 2));
 	}
 });
+$(document).on("keydown", ".camponumero6", function (e) {
+	var valor = $(this).val();
+	soloNumerosConSignoYDecimal(e, this.id);	
+});
 $(document).on("blur", ".camponumero6", function (e) {
 	var valor = ($(this).val());
 	if (!isNaN(valor)) {
 		$(this).val(format_number_with_dec_new(valor, 6));
-	} else {
-		$(this).val(format_number_with_dec_new(0, 6));
 	}
+});
+$(document).on("keydown", ".camponumero4", function (e) {
+	var valor = $(this).val();
+	soloNumerosConSignoYDecimal(e, this.id);
+});
+$(document).on("blur", ".camponumero4", function (e) {
+	var valor = ($(this).val());
+	if (!isNaN(valor)) {
+		$(this).val(format_number_with_dec_new(valor, 4));
+	} 
 });
 /**
  * Permite solo números (positivos o negativos) y un punto decimal en un campo de entrada.
@@ -7508,3 +7538,9 @@ function listar_roles(id) {
 		},
 	});
 }
+/*
+* Activar Tooltip
+*/
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})

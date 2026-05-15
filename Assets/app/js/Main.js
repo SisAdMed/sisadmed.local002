@@ -8,10 +8,11 @@ let permisos_rea = '';
 let permisos_upd = '';
 let permisos_del = '';
 let id_menu;
+let admin = '';
 //Cargar confiuraciones generales
 //Atributos de DataTable de Index
 
-function IndexDataTable(url, table, report, xcolums, xcol_def = "") {
+function IndexDataTable(url, table, report, xcolums, xcol_def = "", xInit = "") {
 	//Crear DataTable
 	var val_url = `${base_url}/${url}/cargar_screen_main`;
 	tableIndex = $(table).DataTable({
@@ -21,8 +22,7 @@ function IndexDataTable(url, table, report, xcolums, xcol_def = "") {
 		deferRender: true,
 		colResize: true,
 		responsive: true,
-		autoWidth: true,
-		stateSave: true,
+		autoWidth: true,		
 		ajax: {
 			url: val_url,
 			method: "POST",
@@ -42,12 +42,14 @@ function IndexDataTable(url, table, report, xcolums, xcol_def = "") {
 		// Este evento se dispara por cada fila (tr) generada
 		createdRow: function (row, data, dataIndex) {
 			// Evaluamos si el estatus es 'Inactivo'
-			if (data.status === 0) {
+			if (data.status === 0 || data.status === "0") {
 				// Aplicamos la clase CSS a toda la fila (tr)
 				$(row).addClass('registro-inactivo');
 			}
 		},
 		columns: xcolums,
+		columnDefs: xcol_def,
+		initComplete: xInit,
 		language: {
 			url: `${base_url}/Assets/json/es-ES.json`,
 		},
@@ -631,3 +633,9 @@ $(document).on("click", ".refresh-button", function () {
 	var table = $('#tblIndexMain').DataTable();
 	table.ajax.reload(null, false);
 });
+//Decodificar valroes con caracteres especiales
+function decodificarHTML(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}

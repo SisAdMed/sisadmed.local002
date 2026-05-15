@@ -13,14 +13,13 @@
             </div>
         </div>
     </section>
-    <section class="content">
-        <?php echo Alertas::mostrarAlerta() ?>
-        <form action="<?php echo base_url ?>/Productos/store" method="POST" class="form-horizontal form-label-left"     enctype="multipart/form-data" name="my_form_products" id="my_form_products" >
+    <section class="content">        
+        <form id="my_form" name="my_form" method="POST" class="form-horizontal form-label-left" enctype="multipart/form-data">
             <div lass="row d-flex justify-content-ceter">
                 <?php include_once __DIR__ . "/form.php" ?>
                 <div class="card-footer">
                     <?php if(Permisos::updater()) : ?>
-                        <input type="submit" id="btnok" name="btnok" class="btn btn-success" value="Actualizar" />
+                        <input type="submit" id="btnok" name="btnok" class="btn btn-success btn-xs" value="Actualizar" />
                     <?php endif ?>
                 </div>
             </div>

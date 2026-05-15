@@ -179,7 +179,7 @@ class Empresas extends Controller
                     'msg' => $msg
                 ];
             }
-            //echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
+            echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
         }
     }
     public function get_empresa_config(){

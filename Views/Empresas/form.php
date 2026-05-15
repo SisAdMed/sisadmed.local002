@@ -136,7 +136,7 @@
                 <div class="col-lg-4">
                     <h1 class="text-primary">Subir imagen</h1>
                     <div class="form-group">
-                        <label for="logo">Seleccione una imagen</label>
+                        <label for="lourl_photogo">Seleccione una imagen</label>
                         <input type="file" accept="image/*" name="url_photo" id="url_photo" onchange="previewImage(event, '#imgPreview')">
                     </div>
                 </div>

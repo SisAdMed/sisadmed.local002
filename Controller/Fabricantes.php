@@ -146,4 +146,10 @@ class Fabricantes extends Controller
          echo json_encode($r, JSON_UNESCAPED_UNICODE);
       }
    }
+   public function getMarcas(){
+    if($_SERVER["REQUEST_METHOD"] == 'POST'){
+        $r = FabricantesModel::getMarcas();
+        echo json_encode($r, JSON_UNESCAPED_UNICODE);
+    }
+   }
 }

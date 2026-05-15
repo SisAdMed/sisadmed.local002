@@ -1,6 +1,5 @@
 <?php
-class Validations
-{
+class Validations{
     /**
      * @var array $patterns 
      */
@@ -24,8 +23,7 @@ class Validations
     public $name = '';
     public $value = '';
 
-    public function name($name)
-    {
+    public function name(string $name){
         $this->name = $name;
         return $this;
     }
@@ -34,13 +32,11 @@ class Validations
      * @param string $value
      * @return $value
      */
-    public function value($value)
-    {
+    public function value($value){
         $this->value = $value;
         return $this;
     }
-    public function pattern($name)
-    {
+    public function pattern( string $name){
         if ($name == 'array') {
             if (!is_array($this->value)) {
                 $this->errors[] = nl2br("Formato del campo " . $this->$name . " no es válido.\n");
@@ -58,8 +54,7 @@ class Validations
      * @param string $pattern
      * return $this
      * */
-    public function customPattern($pattern)
-    {
+    public function customPattern($pattern){
         $regex = '/^(' . $pattern . ')$/u';
         if ($this->value != '' && !preg_match($regex, $this->value)) {
             $this->errors[] = nl2br('Formato del campo ' . $this->name . " no es válido.\n");
@@ -70,8 +65,7 @@ class Validations
      * Campos obligatorios
      * @return $this
      */
-    public function required()
-    {
+    public function required(){
         if ($this->value  == '' || $this->value == null) {
             $this->errors[] = nl2br("El campo " . $this->name . " es requerido.\n");
         }
@@ -79,11 +73,10 @@ class Validations
     }
     /**
      * Validar el minimo de un campo
-     * @param int $min
+     * @param int $length
      * return $this
      */
-    public function min($length)
-    {
+    public function min(int $length){
         if (is_string($this->value)) {
             if (strlen($this->value) < $length) {
                 $this->errors[] = nl2br('El campo ' . $this->name . " es inferior al valor mínimo permitido.\n");
@@ -97,11 +90,10 @@ class Validations
     }
     /**
      * Validar caracteres en campo maximo
-     * @param int $max
+     * @param int $length
      * return $this
      */
-    public function max($length)
-    {
+    public function max($length){
         if (is_string($this->value)) {
             if (strlen($this->value) > $length) {
                 $this->errors[] = nl2br('El campo ' . $this->name . " es mayor al valor máximo permitido.\n");
@@ -118,8 +110,7 @@ class Validations
      * @param mixed $value
      * return $this
      */
-    public function equal($value)
-    {
+    public function equal($value){
         if ($this->value != $value) {
             $this->errors[] = nl2br('El valor del campo ' . $this->name . " no coincide.\n");
         }
@@ -130,8 +121,7 @@ class Validations
      * @param mixed $value
      * return boolean 
      */
-    public function is_int($value)
-    {
+    public function is_int($value){
         if (filter_var($value, FILTER_VALIDATE_INT)) {
             return true;
         }
@@ -141,8 +131,7 @@ class Validations
      * @param mixed $value
      * return boolean 
      */
-    public function is_alpha($value)
-    {
+    public function is_alpha($value){
         if (filter_var($value, FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => "/^[a-zA-Z]+$/")))) {
             return true;
         }
@@ -152,8 +141,7 @@ class Validations
      * @param mixed $value
      * return boolean 
      */
-    public function is_alphanum($value)
-    {
+    public function is_alphanum($value){
         if (filter_var($value, FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => "/^[a-zA-Z0-9]+$/")))) {
             return true;
         }
@@ -163,8 +151,7 @@ class Validations
      * @param mixed $value
      * return boolean 
      */
-    public function is_email($value)
-    {
+    public function is_email($value){
         if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
             return true;
         }
@@ -176,8 +163,7 @@ class Validations
      * Validado
      * @parama boolea
      */
-    public function isSuccess()
-    {
+    public function isSuccess(){
         if (empty($this->errors)) {
             return true;
         }
@@ -186,8 +172,7 @@ class Validations
      * Devolver errores
      * return arrray $this->errors|
      */
-    public function getErrors()
-    {
+    public function getErrors(){
         if (!$this->isSuccess()) {
             return $this->errors;
         }
@@ -196,8 +181,7 @@ class Validations
      * Visualiza los errores en HTML
      * return string html
      */
-    public function _displayErrors()
-    {
+    public function _displayErrors(){
         $html = '<ul>';
         foreach ($this->getErrors() as $error) {
             $html += '<li>' . $error . '</li>';
@@ -209,8 +193,7 @@ class Validations
      * Devuelve los errores en string puro
      * return boolean|string
      */
-    public function result()
-    {
+    public function result(){
         if (!$this->isSuccess()) {
             foreach ($this->getErrors() as $error) {
                 echo "$error\n";

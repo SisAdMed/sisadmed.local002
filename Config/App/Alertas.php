@@ -1,17 +1,14 @@
 <?php
-class Alertas
-{
+class Alertas{
     private $validar_type = [];
-    private $default = null;
+    private ?string $default = null;
     private $type = null;
     private $msg = null;
-    function __construct()
-    {
+    function __construct(){
         $this->default = 'success';
         $this->validar_type = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'ligth', 'dark'];
     }
-    public static function new($msg, $type = null)
-    {
+    public static function new(string $msg, $type = null){
         $self = new self();
         if ($type == null) {
             $self->type = $self->default;
@@ -26,23 +23,19 @@ class Alertas
         $_SESSION[$self->type][] = $msg;
         return true;
     }
-    static function error(string $msg)
-    {
+    static function error(string $msg){
         self::new($msg, 'danger');
         return true;
     }
-    static function info(string $msg)
-    {
+    static function info(string $msg){
         self::new($msg, 'info');
         return true;
     }
-    static function success(string $msg)
-    {
+    static function success(string $msg){
         self::new($msg, 'success');
         return true;
     }
-    public static function mostrarAlerta()
-    {
+    public static function mostrarAlerta(){
         $self = new self();
         $placeholder = '';
         $output = '';

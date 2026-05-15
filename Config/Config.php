@@ -2,7 +2,7 @@
 const base_url = 'http://sisadmed.local002';
 //const base_url = 'https://sisadmed.corp-mmq.com';
 //QA
-//const base_url = 'https://qasisamed.josvarsistemas.com.ve';
+//const base_url = 'https://sisadmed.josvarsistemas.com.ve';
 //Establecer zona
 date_default_timezone_set("America/Caracas");
 //Definir lenguaje
@@ -38,7 +38,7 @@ const DB_CHARSET = "utf8";
 /*----------------------------------------------------*/
 define('SITE_NAME', 'SisAdMed');
 define('SITE_CHARSET', 'UTF-8');
-define('SITE_VERSION', '1.1.98');
+define('SITE_VERSION', '1.1.115');
 define('SITE_LOGO', 'logo.png');
 define('SITE_FAVICON', 'favicon.ico');
 define('SITE_DESC', 'Sistema Administrativo y Médico' .' - ' . SITE_NAME);
@@ -85,3 +85,25 @@ define('FAVICON', ASSETS. '/favicon/');
 define('CONTROLLER_DEFAULT', 'Login');
 define('METHOD_DEFAULT', 'index');
 define('CONTROLLER_ERROR', 'Error404');
+/*----------------------------------------------------*/
+/*           DEFINE UNA LLAVE SECRETA UNICA           */
+/*----------------------------------------------------*/
+// Define una llave secreta única para tu proyecto
+define('METODO_CIFRADO', 'AES-256-CBC');
+define('LLAVE_SECRETA', 'RI9AfsEFL9qEakxa4DLHyuuCWQ2sB5GYnCqDEv0odQxQ0aKhWEhSqeig3DFCzko7IXxOgHBkUN5S6q4w44OrjQvUyhAGooMsM3kG3shzhNvW5TMmhGiAZiQFgaECyYA0Y4msreRrz6XMeqRnOzxGZU86YHmLuxz3QjxKxn0JXaGz7iUTszbPYeIlpaXaSROSaQCCZSif'); // Cambia esto por algo complejo
+define('IV_SECRETO', '4081541229806746'); // Debe ser de 16 caracteres
+function encriptar_url(string $data) {
+    // Convertimos el array de datos en un string (ej: "editar-5")
+    $dato_serializado = is_array($data) ? json_encode($data) : $data;
+    $encriptado = openssl_encrypt($dato_serializado, METODO_CIFRADO, LLAVE_SECRETA, 0, IV_SECRETO);
+    // Usamos urlencode para que sea seguro pasarlo por la barra de direcciones
+    return urlencode(base64_encode($encriptado));
+}
+
+function desencriptar_url(string $token) {
+    $token_base64 = base64_decode(urldecode($token));
+    $desencriptado = openssl_decrypt($token_base64, METODO_CIFRADO, LLAVE_SECRETA, 0, IV_SECRETO);
+    // Intentamos decodificar si era un JSON, si no, devolvemos el string
+    $resultado = json_decode($desencriptado, true);
+    return $resultado ? $resultado : $desencriptado;
+}
