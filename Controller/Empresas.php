@@ -104,7 +104,7 @@ class Empresas extends Controller
         }
     }
     public function store(){
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {        
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {      
             $modo = "modify_user";
             $data = array();
             //Asignar valores a variables
@@ -130,6 +130,55 @@ class Empresas extends Controller
                         ];
                     }
                 }
+                //Valores para el contenido web (Nosotros)
+                $valoresArray = [];
+                if(isset($_POST['val_titulo'])){
+                    for($i= 0; $i < count($_POST['val_titulo']); $i++){
+                        //Validar que los campos no estén vacíos antes de agregarlos al array
+                        if (!empty(trim($_POST['val_titulo'][$i]))){
+                            $valoresArray[] = [
+                                'icono' => !empty($_POST['val_icono'][$i]) ? trim($_POST['val_icono'][$i]) : 'fa-check',
+                                'titulo' => $_POST['val_titulo'][$i],
+                                'descripcion' => $_POST['val_desc'][$i]
+                            ];
+                        }                        
+                    }
+                }
+                //Cifras para el contenido web (Nosotros)
+                $cifrasArray = [];
+                if(isset($_POST['cifra_num'])){
+                    for($i = 0; $i < count($_POST['cifra_num']); $i++){
+                        if (!empty(trim($_POST['cifra_num'][$i]))){
+                            $cifrasArray[] = [
+                                'numero' => $_POST['cifra_num'][$i],
+                                'etiqueta' => $_POST['cifra_txt'][$i]
+                            ];
+                        }
+                    }
+                }
+                // Redes Sociales: Mantener siempre los 5 slots fijos
+                $redesSociales = [];
+                if (isset($_POST['red_nombre']) && is_array($_POST['red_nombre'])) {
+                    for ($i = 0; $i < 5; $i++) {
+                        $valor = isset($_POST['red_nombre'][$i]) ? trim($_POST['red_nombre'][$i]) : '';        
+                        $redesSociales[] = [
+                            'nombre' => !empty($valor) ? $valor : null
+                        ];
+                    }
+                }
+
+                // Convertir a JSON para almacenar en la BD
+                $jsonRedes = !empty($redesSociales) ? json_encode($redesSociales, JSON_UNESCAPED_UNICODE) : null;                    
+                
+                //Footer
+                $footerArray = [];
+                $footerArray = [                    
+                    'city' => limpiar($_POST['footer_city'][0] ?? ""),
+                    'tel' => limpiar($_POST['footer_tel'][0] ?? ""),
+                    'email' => limpiar($_POST['footer_email'][0] ?? ""),    
+                    'desc' => limpiar($_POST['footer_desc'][0] ?? ""),
+                    'horario' => limpiar($_POST['footer_horario'][0] ?? "")
+                ];                         
                 $data += [
                     'cod_emp' => limpiar($cod_emp),
                     'nombre_emp' => limpiar($nombre_emp),
@@ -155,7 +204,14 @@ class Empresas extends Controller
                     'id_iva' => $id_iva,
                     'especial_contrib' => $especial_contrib,
                     'iva_deb_fis' => $iva_deb_fis,
-                    'iva_cre_fis' => $iva_cre_fis
+                    'iva_cre_fis' => $iva_cre_fis,
+                    'historia' => $historia,
+                    'mision' => $mision,
+                    'vision' => $vision,
+                    'valores' => json_encode($valoresArray, JSON_UNESCAPED_UNICODE),
+                    'cifras' => json_encode($cifrasArray, JSON_UNESCAPED_UNICODE),
+                    'redes' => json_encode($redesSociales, JSON_UNESCAPED_UNICODE),
+                    'footer' => json_encode($footerArray, JSON_UNESCAPED_UNICODE)
                 ];
                 if (empty($id)) {
                     $r = EmpresasModel::guardar($data);
@@ -188,5 +244,5 @@ class Empresas extends Controller
             $r = EmpresasModel::get_empresa_config($id_emp);
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
-    }
+    }    
 }

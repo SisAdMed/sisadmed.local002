@@ -13,18 +13,20 @@ class Cotizaciones extends Controller {
         $objeto = CotizacionesModel::all();
         $this->views->getView($this, 'index', [
             'page_name' => 'Consulta de Cotizaciones',
-            'function_js' => 'Cotizaciones.js',
+            'function_js' => 'Cotizaciones.js?v=' . SITE_VERSION,
             'objeto' => to_obj($objeto),
         ]);
     }
     public function nuevo() {
         $this->views->getView($this, 'nuevo', [
             'page_name' => 'Nueva Cotización',
-            'function_js' => 'Cotizaciones.js',
+            'function_js' => 'Cotizaciones.js?v=' . SITE_VERSION,
         ]);
     }
     public function store(){
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            debug($_POST);
+            /*
             $modo = 'modify_user';
             $data = array();
             $dataJson = array();
@@ -134,9 +136,10 @@ class Cotizaciones extends Controller {
                 ];
             }
             echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
+            */
         }
     }
-    public function edit($id){
+    public function edit(int $id){
       if(Permisos::read()){
          $id = intval(limpiar($id));
          if ($id > 0) {
@@ -147,7 +150,7 @@ class Cotizaciones extends Controller {
             }
             $this->views->getView($this, "edit", [
                'page_name' => "Editando la cotización Nro. " . $r['num_tdo'],
-               'function_js' => "Cotizaciones.js",
+               'function_js' => "Cotizaciones.js?v=" . SITE_VERSION,
                'r' => to_obj($r)
             ]);
          } else {
@@ -180,7 +183,7 @@ class Cotizaciones extends Controller {
             echo json_encode($objeto);
         }
    }
-   public function print_cotiza($id){
+   public function print_cotiza(int $id){
       if(Permisos::read()){
          $id = intval(limpiar($id));
          if ($id > 0) {
@@ -200,7 +203,7 @@ class Cotizaciones extends Controller {
       //Alertas::new('No tiene permiso para realizar esta acción', 'warning');
       //header('Location:' . base_url . '/Cotizaciones');
    }
-   public function print_cotiza_foranea($id_ori){
+   public function print_cotiza_foranea(int $id_ori){
       if(Permisos::read()){
         $idori = explode('|', $id_ori);
         $ori = $idori[1];
@@ -229,8 +232,7 @@ class Cotizaciones extends Controller {
       header('Location:' . base_url . '/Cotizaciones');
    }
     //Exportar a Excel Cotización
-    public function print_cotiza_excel($id)
-    {
+    public function print_cotiza_excel($id){
         if (Permisos::read()) {
             $id = intval(limpiar($id));
             if ($id > 0) {
@@ -250,7 +252,7 @@ class Cotizaciones extends Controller {
         //Alertas::new('No tiene permiso para realizar esta acción', 'warning');
         //header('Location:' . base_url . '/Cotizaciones');
     }
-   public function destroy(){
+    public function destroy(){
         $dataJson = [];
         $id = intval(limpiar($_POST['id']));
         $num_tdo = $_POST['num_tdo'];
@@ -270,22 +272,23 @@ class Cotizaciones extends Controller {
         }
         echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
    }
-   public function create_express(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function create_express(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){            
             $id_fab = implode(',', $_POST['id_fab']);
-            $id_ent = $_POST['id_ent'];
-            $objeto = CotizacionesModel::create_express($id_fab, $id_ent);
-            echo json_encode($objeto, JSON_UNESCAPED_UNICODE);
-        }
-   }
-   public function listar_cotizacones(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
-            $id_emp = $_POST['id_emp'];
-            $r = CotizacionesModel::listar_cotizacones($id_emp);
+            $id_ent = $_POST['id_cli'];            
+            $r = CotizacionesModel::create_express($id_fab, $id_ent);            
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
    }
-   public function listar_entidad_modal(){
+    public function listar_cotizacones(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){            
+            $id_emp = $_POST['id_emp'];
+            $id_cli = $_POST['id_cli'];
+            $r = CotizacionesModel::listar_cotizacones($id_emp, $id_cli);
+            echo json_encode($r, JSON_UNESCAPED_UNICODE);
+        }
+   }
+    public function listar_entidad_modal(){    
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $tipo = $_POST['tipo'];
             $id = $_POST['id'];
@@ -296,6 +299,16 @@ class Cotizaciones extends Controller {
     public function cargar_screen_main(){
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $r = CotizacionesModel::all();
+            echo json_encode($r, JSON_UNESCAPED_UNICODE);
+        }
+    }    
+    public function obtener_precio_producto(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $id_prod = $_POST['id_prod'];
+            $id_cli = $_POST['id_cli'];
+            $id_moneda = $_POST['id_moneda'];
+            $tasa_cambio = $_POST['tasa_cambio'];
+            $r = CotizacionesModel::obtener_precio_producto($id_prod, $id_cli, $id_moneda, $tasa_cambio);            
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }

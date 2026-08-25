@@ -1,8 +1,17 @@
 <?php
-const base_url = 'http://sisadmed.local002';
-//const base_url = 'https://sisadmed.corp-mmq.com';
+// URL Base del proyecto (cambia esto cuando lo subas a producción)
+define('base_url', 'https://sisadmed.local002');
+define('DB_NAME', "josvarsi_db_sisadmed_20072026");
+
+//define('base_url', 'https://sisadmed.corp-mmq.com');
+//define('DB_NAME', "josvarsi_db_sisadmed");
+
+//define('base_url', 'https://sisadmed.josvarsistemas.com.ve');
+//define('DB_NAME', "josvarsi_db_sisadmed");
+
+
 //QA
-//const base_url = 'https://sisadmed.josvarsistemas.com.ve';
+
 //Establecer zona
 date_default_timezone_set("America/Caracas");
 //Definir lenguaje
@@ -24,21 +33,17 @@ const PRODUCTOS = 26;
 /*----------------------------------------------------*/
 const DB_HOST = "localhost";
 //Main
-const DB_NAME = "josvarsi_db_sisadmed";
 const DB_USER = "josvarsi_usersisadmed";
-//QA
-//const DB_NAME = "josvarsi_db_qa_sisadmed";
-//const DB_USER = "josvarsi_usersisadmed";
 
 const DB_PASSWORD = "SaimiCaimi96.";
 const DB_PORT = "3306";
-const DB_CHARSET = "utf8";
+const DB_CHARSET = "utf8mb4";
 /*----------------------------------------------------*/
 /*  INFORMACION DEL SITIO*                            */
 /*----------------------------------------------------*/
 define('SITE_NAME', 'SisAdMed');
 define('SITE_CHARSET', 'UTF-8');
-define('SITE_VERSION', '1.1.115');
+define('SITE_VERSION', trim(file_get_contents(dirname(__DIR__ ). '/VERSION')));
 define('SITE_LOGO', 'logo.png');
 define('SITE_FAVICON', 'favicon.ico');
 define('SITE_DESC', 'Sistema Administrativo y Médico' .' - ' . SITE_NAME);
@@ -77,8 +82,10 @@ define('CSS', ASSETS. '/css');
 define('JS', ASSETS. '/js');
 define('PLUGINS', ASSETS. '/plugins');
 define('IMG', ASSETS. '/img/');
+define('RUTA_PDF_GRO', ASSETS . '/pdf/groups');
 define('UPLOADS', ASSETS. '/uploads');
 define('FAVICON', ASSETS. '/favicon/');
+define('IMG_CARRUSEL', IMG . 'carousel/');
 /*----------------------------------------------------*/
 /*  CONTANTES CONTROLLER - METHODO ERROR POR DEFAULT  */
 /*----------------------------------------------------*/
@@ -92,18 +99,10 @@ define('CONTROLLER_ERROR', 'Error404');
 define('METODO_CIFRADO', 'AES-256-CBC');
 define('LLAVE_SECRETA', 'RI9AfsEFL9qEakxa4DLHyuuCWQ2sB5GYnCqDEv0odQxQ0aKhWEhSqeig3DFCzko7IXxOgHBkUN5S6q4w44OrjQvUyhAGooMsM3kG3shzhNvW5TMmhGiAZiQFgaECyYA0Y4msreRrz6XMeqRnOzxGZU86YHmLuxz3QjxKxn0JXaGz7iUTszbPYeIlpaXaSROSaQCCZSif'); // Cambia esto por algo complejo
 define('IV_SECRETO', '4081541229806746'); // Debe ser de 16 caracteres
-function encriptar_url(string $data) {
-    // Convertimos el array de datos en un string (ej: "editar-5")
-    $dato_serializado = is_array($data) ? json_encode($data) : $data;
-    $encriptado = openssl_encrypt($dato_serializado, METODO_CIFRADO, LLAVE_SECRETA, 0, IV_SECRETO);
-    // Usamos urlencode para que sea seguro pasarlo por la barra de direcciones
-    return urlencode(base64_encode($encriptado));
-}
 
-function desencriptar_url(string $token) {
-    $token_base64 = base64_decode(urldecode($token));
-    $desencriptado = openssl_decrypt($token_base64, METODO_CIFRADO, LLAVE_SECRETA, 0, IV_SECRETO);
-    // Intentamos decodificar si era un JSON, si no, devolvemos el string
-    $resultado = json_decode($desencriptado, true);
-    return $resultado ? $resultado : $desencriptado;
-}
+//Notificaciones Push
+// Reemplaza con tus claves VAPID generadas previamente
+define('VAPID_PUBLIC_KEY', 'BGhSxPWMmmWwhGtTvzaE_nCe6q96yIYZu10dpEAQWP5XFH1-Hdo7sQw-oFWSNF9aep8aOoMpeSC_A8T6TBedaes');
+define('VAPID_PRIVATE_KEY', 'iLMJfGz_d9BKufRi1lX8SDGWaBtzDfPAHewyT60W8f0');
+define('VAPID_SUBJECT', 'mailto:cheovargas@gmail.com'); // Correo o URL de contacto del sistema
+

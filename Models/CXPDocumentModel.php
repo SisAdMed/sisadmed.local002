@@ -55,7 +55,7 @@ class CXPDocumentModel extends DB{
         $r = DB::query("SELECT em.nombre_emp nombre_emp, em.rif_empresa rif_empresa, em.dir_emp dir_emp, em.tel_emp tel_emp, em.email_emp email_emp, en.nom_ent nom_ent, en.rif_ent rif_ent, en.dir_ent dir_ent, en.postal_ent postal_ent, pa.nombre_pais nombre_pais, es.nombre_edo nombre_edo,  ci.nombre_ciudad nombre_ciudad, c.fecha_comp fecha_comp, c.id_cot id_cot, c.tasa_cambio tasa_cambio, c.num_tdo num_tdo, tdo.nom_tdoc nom_tdoc,  em.logo logo, moc.codigo_moneda codigo_moneda, moe.codigo_moneda moneda_emp, con.nombre_con, dc.mon_iva, dc.monto FROM f3004 c INNER JOIN f3001 tdo ON tdo.id_tdoc = c.id_tdo INNER JOIN f30041 dc ON dc.id_cot = c.id_cot INNER JOIN f0011 em ON em.id_emp = c.id_emp INNER JOIN f0014 en ON en.id_ent = c.id_cli INNER JOIN f0004 pa ON pa.id_pais = en.id_pais INNER JOIN f00041 es ON es.id_edo = en.id_edo INNER JOIN f00042 ci ON ci.id_ciudad = en.id_ciudad INNER JOIN f0005 moc ON moc.id_moneda = c.id_moneda INNER JOIN f0005 moe ON moe.id_moneda = em.id_moneda INNER JOIN f3003 con ON con.id = dc.id_concxp WHERE c.id_cot = {$id_cot}");
         return $r;
     }
-    static function val_tdo($id){
+    static function val_tdo_CXP($id){
         $r = DB::query("SELECT * FROM f3001 WHERE id_tdoc = {$id}");
         return $r[0];
     }

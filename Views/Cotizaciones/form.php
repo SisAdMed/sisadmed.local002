@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="form-group col-md-2 col-sm-2 col-xs-12">
-                <label for="id_fab">Marca</label> 
+                <label for="id_fab">Marca</label>
                 <select name="id_fab" id="id_fab" class="select2 select2bs4 text-xs" multiple style="width:100%">
                 </select>
             </div>
@@ -54,7 +54,7 @@
             </div>
             <div class="form-group col-md-6 col-sm-6 col-xs-12">
                 <label for="observa">Observaciones</label>
-                <textarea name="observa" id="observa" class="form-control" cols="50"></textarea>
+                <textarea name="observa" id="observa" class="form-control text-xs" cols="50"></textarea>
             </div>
         </div>
         <div class="row">
@@ -99,43 +99,11 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
-        <div class="card card-primary">
-            <div class="card-header">
-                <h3 class="card-title text-xs text-center">Detalle de Cotización</h3>
-            </div>
-        </div>
-        <input type="hidden" id="item" name="item">
+    <div class="card-body">        
         <div class="row">
             <div class="form-group col-md-12 col-sm-12 col-xs-12 text-xs">
-                <table id="tblDetalle" name="tblDetalle" class="table table-striped table-bordered table-condensed table-hover text-xs compact" style="width:100%;">
-                    <thead>
-                        <th class="text-right">Item</th>
-                        <th>Descripción</th>
-                        <th class="text-right">Cantidad</th>
-                        <th class="text-right">Stock</th>
-                        <th class="text-right">Uni.Vta</th>
-                        <th class="text-right">PVP Uni.</th>
-                        <th class="text-right">Precio Vta</th>
-                        <th class="text-right">Descuento</th>
-                        <th style="width:10%" class="text-center">IVA</th>
-                        <th class="text-right">Sub-Total</th>
-                        <th class="text-center">Acción</th>
-                    </thead>
-                    <tbody id="cuerpoTablaDetalle" name="cuerpoTablaDetalle"></tbody>
-                    <tfooter>
-                        <th class="text-right">Item</th>
-                        <th>Descripción</th>
-                        <th class="text-right">Cantidad</th>
-                        <th class="text-right">Stock</th>
-                        <th class="text-right">Uni.Vta</th>
-                        <th class="text-right">PVP Uni.</th>
-                        <th class="text-right">Precio Vta</th>
-                        <th class="text-right">Descuento</th>
-                        <th style="width:10%" class="text-center">IVA</th>
-                        <th class="text-right">Sub-Total</th>
-                        <th class="text-center">Acción</th>
-                    </tfooter>
+                <input type="hidden" id="item" name="item">
+                <table id="tblDetalle" name="tblDetalle" class="display responsive nowrap table table-hover text-xs compact" style="width:100%">
                 </table>
             </div>
         </div>
@@ -143,7 +111,7 @@
     <div class="card-footer">
         <div class="row">
             <div class="center">
-                <button type="button" class="btn btn-primary btn-sm" onclick="agregarDetalleProductos('P');">+ Nuevo producto</button>
+            <button type="button" class="btn btn-primary btn-sm text-xs" id="btnAgregarFila">+ Agregar Detalle</button>
             </div>
         </div>
     </div>

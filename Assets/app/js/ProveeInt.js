@@ -19,7 +19,7 @@ jQuery(document).ready(function() {
     if(id){
         cargar_data(id);
     }else{
-        listar_status();
+        listar_status(1);
     }
     //Formato de  número de teléfono
     jQuery("#telf_provint").mask("+999 (999) 999-99-99");

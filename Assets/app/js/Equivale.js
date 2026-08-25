@@ -1,6 +1,6 @@
 //Variables
 let item = 0;
-let tipo_fac = '';
+tipo_fac = '';
 let handling_conver = '';
 stock = '';
 equivale = true;

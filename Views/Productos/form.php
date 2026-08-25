@@ -48,9 +48,13 @@
                     <label for="gen_prod">Nombre Genérico</label>
                     <input type="text" class="form-control text-xs" id="gen_prod" name="gen_prod" placeholder="Ingrese nombre genérico">
                 </div>
-                <div class="form-group col-md-6 col-sm-6 col-xs-12">
+                <div class="form-group col-md-4 col-sm-4 col-xs-12">
                     <label for="ref_prod">Referencia</label>
                     <input type="text" class="form-control text-xs" id="ref_prod" name="ref_prod" placeholder="Indique Referencia">
+                </div>
+                <div class="form-group col-md-2 col-sm-2 col-xs-12">
+                    <label for="estado_id">Estado del producto</label>
+                    <select name="estado_id" id="estado_id" class="form-control text-xs"></select>
                 </div>
             </div>
             <div class="row">
@@ -289,7 +293,7 @@
                     </div>
                 </div>
             </div>
-            <div class="tab-pnae fade" id="product-change" role="tabpanel" aria-labelledby="product-change-tab">
+            <div class="tab-pane fade" id="product-change" role="tabpanel" aria-labelledby="product-change-tab">
                 <div class="row">
                     <div class="form-group col-md-12 col-sm-12 col-xs-12">
                         <table id="tblTableHis" class="display responsive nowrap table table-hover" style="width:100%">

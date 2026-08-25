@@ -6,7 +6,7 @@
                 <div class="col-sm-12">
                     <h1><?php echo $data['page_name']; ?>
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="<?= base_url ?>/Delnotnotfis" title="Lista de menú"><i class="fa fa-reply"></i></a></li>
+                            <li class="breadcrumb-item"><a href="<?= base_url ?>/Delnotnotfis?ori=<?= $_SESSION['ori'] ?>" title="Lista de menú"><i class="fa fa-reply"></i></a></li>
                         </ol>
                     </h1>
                 </div>
@@ -15,11 +15,11 @@
     </section>
     <section class="content">
         <?php echo Alertas::mostrarAlerta() ?>
-        <form action="<?php echo base_url ?>/Delnotnotfis/store" method="POST" class="form-horizontal form-label-left" enctype="multipart/form-data">
+        <form method="POST" class="form-horizontal form-label-left" enctype="multipart/form-data" id="my_form" name="my_form">
             <div lass="row d-flex justify-content-ceter text-xs">
                 <?php include_once __DIR__ . "/form.php" ?>
                 <div class="card-footer">
-                    <input type="submit" id="btnok" name="btnok" class="btn btn-success" value="Guardar" />
+                    <input type="submit" id="btnok" name="btnok" class="btn btn-success btn-xs" value="Guardar" />
                 </div>
             </div>
         </form>

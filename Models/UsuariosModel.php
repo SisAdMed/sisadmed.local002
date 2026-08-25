@@ -36,28 +36,39 @@ class UsuariosModel extends DB{
         return $r[0];
     }
     public static function save_not($data){
-        $r = DB::insert('fgenmsg', $data);
+        $r = DB::insert('f0025', $data);
+        return $r;
+    }
+    public static function upd_not($id, $data){
+        $r = DB::update('f0025', $data, ['id' => $id]);
         return $r;
     }
     public static function pend_not_win(){
-        $id_rol = $_SESSION['id_rol'];
-        $sql = "SELECT * FROM `fgenmsg` WHERE is_read = 0 AND user_notifi = $id_rol AND status = 1";
+        $id_user = $_SESSION['id_user'];
+        $sql = "SELECT DISTINCT tipo, url_destino FROM `f0025` WHERE leido = 0 AND id_receptor = $id_user";
         $r = DB::query($sql);
         return ($r);
     }
-    public static function pend_not($tipo){
-        $id_rol = $_SESSION['id_rol'];
-        if($tipo == 1){
-            $sql = "SELECT count(*) totmsj FROM `fgenmsg` WHERE is_read = 0 AND user_notifi = $id_rol LIMIT 1";
-            $r = DB::query($sql);
-            return $r[0];
-        }else if($tipo == 2){
-            $sql = "SELECT count(*) totmsj, tipo_fgenmsgcol, CASE WHEN tipo_fgenmsgcol = 1 THEN 'Aprob. Notas de Crédito' ELSE '' END tipo, TIMESTAMPDIFF(MINUTE, fecha_genmsgcol, NOW()) tiempo FROM `fgenmsg` WHERE is_read = 0 AND user_notifi = $id_rol AND status = 1 GROUP BY  tipo_fgenmsgcol, CASE WHEN tipo_fgenmsgcol = 1 THEN 'Aprob. Notas de Crédito' ELSE '' END, TIMESTAMPDIFF(MINUTE, fecha_genmsgcol, NOW())";
-            $r = DB::query($sql);
-            return $r;
-        }
+    public static function pend_not(){
+        $id_user = $_SESSION['id_user'];
+        $sql = "SELECT COUNT(*) AS totmsj FROM (SELECT tipo FROM `f0025`  WHERE leido = 0 AND id_receptor = $id_user GROUP BY tipo, id_receptor ) AS subconsulta;";
+        $r = DB::query($sql);
+        return $r[0];
     }
-    public static function read_notify($id){
+    public static function read_notify( int $id){
         return $r = DB::query("UPDATE fgenmsg SET is_read = 1 WHERE id_fgenmsg = {$id}");
     }
+    public static function get_notification(){
+        $id_user = $_SESSION['id_user'];
+        $sql = "SELECT DISTINCT a.id_origen id, a.create_date, CONCAT(b.name_user, ' ', b.last_user) create_for, a.tipo, a.mensaje, a.leido, a.motivo, a.url_destino, a.approved FROM f0025 a INNER JOIN f0002 b ON b.id_user = a.id_receptor WHERE b.id_user = {$id_user} AND a.approved = 0 AND a.leido = 0
+        UNION
+        SELECT DISTINCT a.id_origen id, a.create_date, CONCAT(b.name_user, ' ', b.last_user) create_for, a.tipo, a.mensaje, a.leido, a.motivo, a.url_destino, a.approved FROM f0025 a INNER JOIN f0002 b ON b.id_user = a.id_receptor WHERE b.id_user = {$id_user} AND a.approved = 1 AND a.leido = 0";
+        $r = DB::query($sql);
+        return ($r);
+    }
+    static function users_approve(){
+        $sql = "SELECT id_user FROM f0002 WHERE status_user = 1 AND appdis = 1";
+        $r = DB::query($sql);
+        return $r;
+    }       
 }

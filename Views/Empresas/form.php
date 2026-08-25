@@ -15,6 +15,9 @@
                     <li class="nav-item">
                         <a class="nav-link" id="companies-correo-tab" data-toggle="pill" href="#companies-correo" role="tab" aria-controls="companies-correo" aria-selected="true">Configuración de correo</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="companies-web-tab" data-toggle="pill" href="#companies-web" role="tab" aria-controls="companies-web" aria-selected="false"><i class="fas fa-globe"></i> Contenido Web</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -176,8 +179,169 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/Views/CuentasCtb/modal_CuentasCtb.php';
-?>
+        <div class="tab-pane fade" id="companies-web" role="tabpanel" aria-labelledby="companies-web-tab">
+            <div class="row mt-2">
+
+                <div class="col-5 col-sm-3">
+                    <div class="nav flex-column nav-tabs h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
+                        <a class="nav-link active text-xs" id="web-info-tab" data-toggle="pill" href="#web-info" role="tab" aria-controls="web-info" aria-selected="true">Institucional (Misión/Visión)</a>
+                        <a class="nav-link text-xs" id="web-valores-tab" data-toggle="pill" href="#web-valores" role="tab" aria-controls="web-valores" aria-selected="false">Valores Corporativos</a>
+                        <a class="nav-link text-xs" id="web-cifras-tab" data-toggle="pill" href="#web-cifras" role="tab" aria-controls="web-cifras" aria-selected="false">Cifras de Éxito</a>
+                        <a class="nav-link text-xs" id="web-redes-tab" data-toggle="pill" href="#web-redes" role="tab" aria-controls="web-redes" aria-selected="false">Redes Sociales</a>
+                        <a class="nav-link text-xs" id="web-footer-tab" data-toggle="pill" href="#web-footer" role="tab" aria-controls="web-footer" aria-selected="false">Pie de Página</a>
+                    </div>
+                </div>
+
+                <div class="col-7 col-sm-9" style="border-left: 1px solid #dee2e6;">
+                    <div class="tab-content" id="vert-tabs-tabContent">
+
+                        <div class="tab-pane text-left fade show active" id="web-info" role="tabpanel" aria-labelledby="web-info-tab">
+                            <div class="row pt-2">
+                                <div class="form-group col-md-12">
+                                    <label for="historia">Nuestra Empresa / Reseña Histórica <span class="text-danger">*</span></label>
+                                    <textarea name="historia" id="historia" class="form-control summernote"></textarea>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label for="mision">Misión <span class="text-danger">*</span></label>
+                                    <textarea name="mision" id="mision" class="form-control summernote-short"></textarea>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label for="vision">Visión <span class="text-danger">*</span></label>
+                                    <textarea name="vision" id="vision" class="form-control summernote-short"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="web-valores" role="tabpanel" aria-labelledby="web-valores-tab">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3 pt-2">
+                                <h6 class="text-primary m-0"><i class="fas fa-list-ol"></i> Lista de Valores Corporativos</h6>
+
+                                <button type="button" class="btn btn-success btn-xs" id="btn-add-valor">
+                                    <i class="fas fa-plus"></i> Agregar Valor
+                                </button>
+                            </div>
+
+                            <div id="contenedor-valores">
+
+                                <div class="row fila-valor align-items-center mb-2">
+                                    <div class="form-group col-md-2 mb-0">
+                                        <label class="text-muted text-xxs mb-1 d-block">Icono FontAwesome</label>
+                                        <input type="text" name="val_icono[]" class="form-control text-xs" placeholder="fa-star" value="fa-check">
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0">
+                                        <label class="text-muted text-xxs mb-1 d-block">Título del Valor</label>
+                                        <input type="text" name="val_titulo[]" class="form-control text-xs" placeholder="Ej: Integridad">
+                                    </div>
+                                    <div class="form-group col-md-6 mb-0">
+                                        <label class="text-muted text-xxs mb-1 d-block">Descripción</label>
+                                        <input type="text" name="val_desc[]" class="form-control text-xs" placeholder="Breve descripción del valor...">
+                                    </div>
+                                    <div class="col-md-1 text-center">
+                                        <button type="button" class="btn btn-danger btn-xs btn-remove-fila" style="margin-top: 18px;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="web-cifras" role="tabpanel" aria-labelledby="web-cifras-tab">
+                            <h5 class="text-primary mb-3 pt-2">Contadores Animados (Módulo de Impacto)</h5>
+
+                            <div id="contenedor-cifras">
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label>Cifra 1 (Número)</label>
+                                        <input type="text" name="cifra_num[]" class="form-control text-xs" placeholder="Ej: 15">
+                                        <label class="mt-1">Etiqueta</label>
+                                        <input type="text" name="cifra_txt[]" class="form-control text-xs" placeholder="Ej: Años de Experiencia">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Cifra 2 (Número)</label>
+                                        <input type="text" name="cifra_num[]" class="form-control text-xs" placeholder="Ej: 500">
+                                        <label class="mt-1">Etiqueta</label>
+                                        <input type="text" name="cifra_txt[]" class="form-control text-xs" placeholder="Ej: Clientes Satisfechos">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Cifra 3 (Número)</label>
+                                        <input type="text" name="cifra_num[]" class="form-control text-xs" placeholder="Ej: 200">
+                                        <label class="mt-1">Etiqueta</label>
+                                        <input type="text" name="cifra_txt[]" class="form-control text-xs" placeholder="Ej: Insumos Certificados">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="web-redes" role="tabpanel" aria-labelledby="web-redes-tab">
+                            <h5 class="text-primary mb-3 pt-2">Redes Sociales</h5>
+
+                            <div id="contenedor-redes">
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label>Instagram <i class="fa-brands fa-instagram"></i></label>
+                                        <input type="text" name="red_nombre[]" class="form-control text-xs" placeholder="Ej: Instagram">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Facebook <i class="fa-brands fa-facebook"></i></label>
+                                        <input type="text" name="red_nombre[]" class="form-control text-xs" placeholder="Ej: Facebook">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Twitter <i class="fa-brands fa-twitter"></i></label>
+                                        <input type="text" name="red_nombre[]" class="form-control text-xs" placeholder="Ej: Twitter">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label>LinkedIn <i class="fa-brands fa-linkedin"></i></label>
+                                        <input type="text" name="red_nombre[]" class="form-control text-xs" placeholder="Ej: LinkedIn">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>WhatsApp <i class="fa-brands fa-whatsapp"></i></label>
+                                        <input type="text" name="red_nombre[]" class="form-control text-xs" placeholder="Ej: WhatsApp">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="tab-pane fade" id="web-footer" role="tabpanel" aria-labelledby="web-footer-tab">
+                            <h5 class="text-primary mb-3 pt-2">Información de Pie de Página</h5>
+
+                            <div id="contenedor-footer">
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label>Ciudad Pais</label>
+                                        <input type="text" name="footer_city[]" id="footer_city" class="form-control text-xs" placeholder="Ej: Caracas, Venezuela">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Teléfono</label>
+                                        <input type="text" name="footer_tel[]" id="footer_tel" class="form-control text-xs" placeholder="Ej: +58(212)   XXX-XXXX">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Correo Electrónico</label>
+                                        <input type="text" name="footer_email[]" id="footer_email" class="form-control text-xs" placeholder="Ej: info@empresa.com">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label>Horario</label>
+                                        <input type="text" name="footer_horario[]" id="footer_horario" class="form-control text-xs" placeholder="Ej: Lunes a Viernes 9:00 - 18:00">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>Reseña</label>
+                                        <textarea name="footer_desc[]" id="footer_desc" class="form-control text-xs" placeholder="Breve reseña o descripción para el pie de página..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        require_once $_SERVER['DOCUMENT_ROOT'] . '/Views/CuentasCtb/modal_CuentasCtb.php';
+        ?>

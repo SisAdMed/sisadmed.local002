@@ -70,7 +70,7 @@ class BanMovimModel extends DB{
         return $r;
     }
     static function print_mov($id){
-        $r = DB::query("SELECT row_number() OVER (ORDER BY b.id_bandet) item, c.id_emp, c.nombre_emp, d.id_bantmo, d.cod_bantmo, d.nom_bantmo, d.acc_bantmo, f.cod_banco, f.nombre_banco, e.id_bancue, e.cuenta_bancue, a.fecha_comp, a. num_banmov, a.id_moneda, a.tasa_cambio, a.benef_banmov, a.des_banmov, a.monto_nac, a.monto_for, CONCAT(j.name_user, ' ', j.last_user) user_create, h.cod_bancon, h.nom_bancon, i.cod_cta, i.nombre_cta, k.cod_aux, k.nombre_aux, b.monto_nac, b.monto_for, g.codigo_moneda, g.nombre_moneda, c.logo, c.rif_empresa, a.id_banmov, d.efe_bantmo 
+        $sql = "SELECT row_number() OVER (ORDER BY b.id_bandet) item, c.id_emp, c.nombre_emp, d.id_bantmo, d.cod_bantmo, d.nom_bantmo, d.acc_bantmo, f.cod_banco, f.nombre_banco, e.id_bancue, e.cuenta_bancue, a.fecha_comp, a. num_banmov, a.id_moneda, a.tasa_cambio, a.benef_banmov, a.des_banmov, a.monto_nac, a.monto_for, CONCAT(j.name_user, ' ', j.last_user) user_create, h.cod_bancon, h.nom_bancon, i.cod_cta, i.nombre_cta, IFNULL(k.cod_aux, l.cod_aux) cod_aux, IFNULL(k.nombre_aux, l.nombre_aux) nombre_aux, b.monto_nac, b.monto_for, g.codigo_moneda, g.nombre_moneda, c.logo, c.rif_empresa, a.id_banmov, d.efe_bantmo 
         FROM `f5006` a
         INNER JOIN f50061 b ON b.id_banmov = a.id_banmov
         INNER JOIN f0011 c ON c.id_emp = a.id_emp
@@ -82,8 +82,10 @@ class BanMovimModel extends DB{
         INNER JOIN f0010 i ON i.id_cta = h.id_ctb
         INNER JOIN f0002 j ON j.id_user = a.create_user
         LEFT OUTER JOIN f0009 k ON k.id_aux = h.id_aux
+        LEFT OUTER JOIN f0009 l ON l.id_aux = b.id_aux
         WHERE a.id_banmov = {$id} 
-        ORDER BY b.id_bandet");
+        ORDER BY b.id_bandet";        
+        $r = DB::query($sql);
         return $r;
     }
     static function banmov_cuentas($id_emp, $fec_ini, $fec_fin, $id_bancue, $id_bancon){

@@ -84,10 +84,10 @@ class CXPDocument extends Controller{
         Alertas::new('No tiene permiso para realizar esta acción', 'warning');
         header('Location:' . base_url . '/CXPDocument');
     }
-    public function val_tdo($id){
+    public function val_tdo_CXP($id){
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $id = $_POST['id'];
-            $r = CXPDocumentModel::val_tdo($id);
+            $r = CXPDocumentModel::val_tdo_CXP($id);
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
@@ -228,7 +228,7 @@ class CXPDocument extends Controller{
         echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
     }
     public function store(){
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {            
             $modo = 'modify_user';
             $data = array();
             $dataJson = array();
@@ -236,19 +236,22 @@ class CXPDocument extends Controller{
             foreach($_POST as $key => $value){
                 $$key = $value;
             }
+            $id_tdo = $_POST['id_tdo_cxp'];
             if(empty($id)){
                 $modo = "create_user";
             }
             //Validar si usa Consecutivo
             $tip_doc_cons = false;
             try {
-                $r = to_obj(CXPDocumentModel::val_tdo($_POST['id_tdo']));
-                if ($r->con_tdoc == 1) {
-                    $r = to_obj(CXPDocumentModel::nextNumber($_POST['id_emp'], $_POST['id_tdo']));
-                    $num_tdo = intval($r->num_tdoc);
-                    //Validar si usa Consecutivo
-                    $tip_doc_cons = true;
-                }
+                if(empty($id)){
+                    $r = to_obj(CXPDocumentModel::val_tdo_CXP($_POST['id_tdo_cxp']));
+                    if ($r->con_tdoc == 1 ) {
+                        $r = to_obj(CXPDocumentModel::nextNumber($_POST['id_emp'], $_POST['id_tdo_cxp']));
+                        $num_tdo = intval($r->num_tdoc);
+                        //Validar si usa Consecutivo
+                        $tip_doc_cons = true;
+                    }
+                }                
                 //Congifuracion de Empresa
                 $id_emp = $_POST['id_emp'];
                 $id_con_emp = EmpresasModel::edit($id_emp);
@@ -264,8 +267,7 @@ class CXPDocument extends Controller{
                     'fecha_comp' => $fecha_comp,
                     'fecha_venci' => $fecha_venci,
                     'id_moneda' => $id_moneda,
-                    'tasa_cambio' => $xtasa,
-                    'descrip_cot' => $descrip_cot,
+                    'tasa_cambio' => $xtasa,                    
                     'num_control' => $num_control,
                     'status' => $status,
                     'id_retiva' => $id_retiva ?? 0,
@@ -305,7 +307,7 @@ class CXPDocument extends Controller{
                 //Valor del Iva
                 $xvatTax = xvatTax($fecha_comp, "IVA");
                 $xtasaIVA = floatval($xvatTax[0]["txr1_iva"]);
-                //Recorrer detalles, 
+                //Recorrer detalles,                
                 for($i = 0; $i < $itemTotal; $i++){
                     $id_concxc = $_POST["id_con"][$i];
                     if($id_concxc != $config_cxp["id_retiva"] && $id_concxc != $config_cxp["id_retislr"]){
@@ -321,7 +323,7 @@ class CXPDocument extends Controller{
                         $mon_doc += ($monto + $mon_iva);
                         //Verificar si llega Ret de ISLR el concepto
                         
-                        $val_concepto = ConcepCXPModel::ret_islr($id_concxc);
+                        $val_concepto = ConcepCXPModel::ret_islr($id_concxc);                        
                         if($val_concepto){
                             $xarrayISLR = [
                                 "monto" => $monto,
@@ -397,7 +399,7 @@ class CXPDocument extends Controller{
                         "por_retiva" => $por_retiva,
                         $modo => $_SESSION['id_user']
                     ];
-                    //Guardar Retencion
+                    //Guardar Retencion Retención de IVA
                     if(empty($id)){
                         $r = CXPDocumentModel::save_retiva($data);
                         //Creado por
@@ -444,7 +446,7 @@ class CXPDocument extends Controller{
                 if($item){
                     //Borrar registor en caso de que exista
                     CXPDocumentModel::destroy_retislr($id_emp, $id_det_doc);
-                    $total_retenido = 0;
+                    $total_retenido = 0;                    
                     foreach($item as $row){
                         $data = [
                             "id_emp" => $id_emp,
@@ -458,9 +460,12 @@ class CXPDocument extends Controller{
                             'deducible' => $row['deducible'],
                             'total_retenido' => $row['total_retenido'],
                             'create_user' => $_SESSION['id_user'],
-                        ];
+                            'create_date' => getAuditoria(),
+                        ];                        
                         $total_retenido += $row['total_retenido'];                        
+                        $ins_ret = CXPDocumentModel::save_retislr($data);                        
                     }
+                    //Guardar ISLR en la Tabla f3007                    
                     //Guardar concepto de retencion de ISLR en el detalle del documento
                     $id_con_retislr = $config_cxp["id_retislr"];
                     $data = [
@@ -470,8 +475,8 @@ class CXPDocument extends Controller{
                         "monto" => $total_retenido * -1,
                         "mon_iva" => 0,
                         "create_user" => $_SESSION["id_user"],
-                    ];
-                    $id_det = CXPDocumentModel::guardarDetDocument($data);
+                    ];          
+                    $id_det = CXPDocumentModel::guardarDetDocument($data);         
                 }
                 //Actualizar monto y saldo del documento
                 $r = CXPDocumentModel::upd_mon_sal_doc($id_det_doc);
@@ -489,7 +494,7 @@ class CXPDocument extends Controller{
                     'icon' => "success",
                     'msg' => $msg
                 ];
-            } catch (\PDOException $e) {
+            } catch (\PDOException $e) {                
                 $title = "Se ha presentado un error, intente luego";
                 $msg = sprintf("Error códoigo: %s, Descripción del Error %s", $e->getCode(), $e->getMessage());
                 $dataJson = [

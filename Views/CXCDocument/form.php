@@ -4,13 +4,13 @@
         <div class="row">
             <div class="form-group col-md-12 col-sm-12 col-xs-12">
                 <label for="id_emp">Empresa <span class="required">*</span></label>
-                <select class="form-control text-xs select2" name="id_emp" id="id_emp"></select>
+                <select class="form-control text-xs select2" name="id_emp" id="id_emp" style="width: 100%;"></select>
             </div>
         </div>
         <div class="row">
             <div class="form-group col-md-2 col-sm-2 col-xs-12">
                 <label for="id_tdo">Tipo de Documento</label>
-                <select name="id_tdo" id="id_tdo" class="form-control text-xs select2"></select>
+                <select name="id_tdo" id="id_tdo" class="form-control text-xs select2" style="width: 100%;"></select>
             </div>
             <div class="form-group col-md-2 col-sm-2 col-xs-12">
                 <label for="num_tdo">Número de Documento</label>
@@ -42,7 +42,7 @@
         <div class="row">
             <div class="form-group col-md-1 col-sm-1 col-xs-12">
                 <label for="id_moneda">Moneda</label>
-                <select class="form-control text-xs select2" name="id_moneda" id="id_moneda"></select>
+                <select class="form-control text-xs select2" name="id_moneda" id="id_moneda" style="width: 100%;"></select>
             </div>
             <div class="form-group col-md-2 col-sm-2 col-xs-12">
                 <label for="tasa_cambio">Tasa de cambio</label>
@@ -64,7 +64,7 @@
             </div>
             <div class="form-group col-md-2 col-sm-2 col-xs-12">
                 <label for="status">Estatus</label>
-                <select class="form-control text-xs select2" name="status" id="status"></select>
+                <select class="form-control text-xs select2" name="status" id="status" style="width: 100%;"></select>
             </div>
         </div>
         <div class="row">
@@ -108,6 +108,12 @@
                 <input type="text" name="total_frml" id="total_frml" class="form-control text-right text-xs" readonly>
             </div>
         </div>
+        <div class="row motivo">
+            <div class="form-group col-md-12 col-sm-12 col-xs-12">
+                <label for="motivo">Motivo</label>
+                <input type="text" id="motivo" name="motivo" class="form-control text-xs">
+            </div>
+        </div>
     </div>
     <div class="card-body">
         <div class="card card-primary">
@@ -117,7 +123,7 @@
         </div>
         <div class="form-group col-md-12 col-sm-12 col-xs-12">
             <input type="number" name="item" id="item" value="0" hidden >
-            <table id="tblDetalle" name="tblDetalle" class="table table-striped table-bordered table-condensed table-hover text-xs compact" style="width:100%;">
+            <table id="tblCxcDocument" name="tblCxcDocument" class="table table-striped table-bordered table-condensed table-hover text-xs compact" style="width:100%;">
                 <thead>
                     <th class="text-right">Item</th>
                     <th>Concepto</th>
@@ -128,7 +134,7 @@
                     <th>Total</th>
                     <th class="text-center">Acción</th>
                 </thead>
-                <tbody id="tblCxcDocument"></tbody>
+                <tbody id="tblDetalle"></tbody>
             </table>
         </div>       
     </div>

@@ -29,29 +29,35 @@ if (isset($_GET['tipo'])) {
 }
 class Facturacion extends Controller
 {
-    public function __construct(){
+    public function __construct()
+    {
         Auth::noAuth();
         parent::__construct();
         Permisos::getPermisos(72);
     }
-    public function index(){
+    public function index()
+    {
         if (empty($_SESSION['permisosMod']['r'])) {
             header('Location:' . base_url . '/Perfil');
         }
         $objeto = FacturacionModel::all($_SESSION['tipo_fact']);
         $this->views->getView($this, 'index', [
             'page_name' => 'Consulta de ' . $_SESSION['page_name'],
-            'function_js' => 'Facturacion.js',
+            'function_js' => 'Facturacion.js?v=' . SITE_VERSION,
+            'function_js_mod' => 'FACFun.js?v=' . SITE_VERSION,
             'objeto' => to_obj($objeto),
         ]);
     }
-    public function nuevo(){
+    public function nuevo()
+    {
         $this->views->getView($this, 'nuevo', [
             'page_name' => 'Nueva '  . $_SESSION['page_name'],
-            'function_js' => 'Facturacion.js',
+            'function_js' => 'Facturacion.js?v=' . SITE_VERSION,
+            'function_js_mod' => 'FACFun.js?v=' . SITE_VERSION,
         ]);
     }
-    public function edit($id){
+    public function edit($id)
+    {
         if (Permisos::read()) {
             $id = intval(limpiar($id));
             if ($id > 0) {
@@ -62,7 +68,8 @@ class Facturacion extends Controller
                 }
                 $this->views->getView($this, "edit", [
                     'page_name' => "Editando la factura Nro. " . $r['num_tdo'],
-                    'function_js' => "Facturacion.js",
+                    'function_js' => 'Facturacion.js?v=' . SITE_VERSION,
+                    'function_js_mod' => 'FACFun.js?v=' . SITE_VERSION,
                     'r' => to_obj($r)
                 ]);
             } else {
@@ -73,7 +80,8 @@ class Facturacion extends Controller
         Alertas::new('No tiene permiso para realizar esta acción', 'warning');
         header('Location:' . base_url . '/Facturacion');
     }
-    public function consultar_factura(){
+    public function consultar_factura()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id_cot'];
             if ($id > 0) {
@@ -82,7 +90,8 @@ class Facturacion extends Controller
             }
         }
     }
-    public function consulta_adic01(){
+    public function consulta_adic01()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_emp = $_POST['id_emp'];
             $fecha_precio = $_POST['fecha_precio'];
@@ -90,14 +99,16 @@ class Facturacion extends Controller
             echo json_encode($objeto);
         }
     }
-    public function consulta_adic02(){
+    public function consulta_adic02()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_cli = $_POST['id_cli'];
             $objeto = FacturacionModel::consulta_adic02($id_cli);
             echo json_encode($objeto);
         }
     }
-    public function print_factura($id){
+    public function print_factura($id)
+    {
         if (Permisos::read()) {
             $id = intval(limpiar($id));
             if ($id > 0) {
@@ -117,7 +128,8 @@ class Facturacion extends Controller
         Alertas::new('No tiene permiso para realizar esta acción', 'warning');
         header('Location:' . base_url . '/Facturacion');
     }
-    public function print_factura_metro($id){
+    public function print_factura_metro($id)
+    {
         if (Permisos::read()) {
             $id = intval(limpiar($id));
             if ($id > 0) {
@@ -137,52 +149,63 @@ class Facturacion extends Controller
         Alertas::new('No tiene permiso para realizar esta acción', 'warning');
         header('Location:' . base_url . '/Facturacion');
     }
-    public function destroy(){
-        $dataJson = [];
-        $id = intval(limpiar($_POST['id']));
-        $r = FacturacionModel::selectEncyDetmovinv($id);
-        foreach ($r as $key) {
-            $id_movinv = $key['id_movinv'];
-            $r1 = FacturacionModel::borrarEncyDetmovinv($id_movinv);
+    public function destroy()
+    {
+        if ($_SERVER["REQUEST_METHOD"] == 'POST') {
+            $dataJson = [];
+            $id = $_POST["id"];
+            $r = FacturacionModel::selectEncyDetmovinv($id);
+            $data = [];
+            foreach ($r as $key) {
+                $data[] = [
+                    'id_movinv' => $key['id_movinv']
+                ];
+            }
+            try {
+                $r = FacturacionModel::borrarEncyDetmovinv($data, $id);
+                $dataJson = [
+                    'title' => "Registro Eliminado",
+                    'icon' => 'success',
+                    'msg' => 'El registro se ha eliminado satisfactoriamente'
+                ];
+            } catch (\PDOException $e) {
+                $title = "Se ha presentado un error, intente luego";
+                $msg = sprintf("Error código: %s, Descripción del Error %s", $e->getCode(), $e->getMessage());
+                $dataJson = [
+                    'title' => $title,
+                    'icon' => "error",
+                    'msg' => $msg
+                ];
+            }
+            echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
         }
-        $ide = FacturacionModel::borrar($id);
-        if ($ide) {
-            $dataJson = [
-                'status' => true,
-                'type' => 'success',
-                'msg' => sprintf('El registro %s, con la descripción %s se ha eliminado correctamente', $_POST['id'], $_POST['id'])
-            ];
-        } else {
-            $dataJson = [
-                'status' => true,
-                'type' => 'success',
-                'msg' => sprintf('El registro %s, con la descripción %s se ha eliminado correctamente', $_POST['cod_alm'], $_POST['noidm_alm'])
-            ];
-        }
-        echo json_encode($r, JSON_UNESCAPED_UNICODE);
     }
-    public function create_express(){
+    public function create_express()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_fab = $_POST['id_fab'];
             $objeto = FacturacionModel::create_express($id_fab);
             echo json_encode($objeto);
         }
     }
-    public function listar_factura(){
+    public function listar_factura()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_emp = $_POST['id_emp'];
             $r = FacturacionModel::listar_Factura($id_emp);
             echo json_encode($r);
         }
     }
-    public function tip_doc_fac(){
+    public function tip_doc_fac()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id_emp'];
             $r = FacturacionModel::tip_doc_fac($id);
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function aprobacion(){
+    public function aprobacion()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $data = [
                 'tipo_fgenmsgcol' => 1,
@@ -200,7 +223,8 @@ class Facturacion extends Controller
             echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function update_tasa(){
+    public function update_tasa()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $data = array();
             $id_cot = $_POST['id_cot'];
@@ -210,20 +234,23 @@ class Facturacion extends Controller
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function consultar_factura_nc(){
+    public function consultar_factura_nc()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id_cot'];
             $r = FacturacionModel::edit_deta($id);
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function readpdf(){
+    public function readpdf()
+    {
         $this->views->getView($this, 'readpdf', [
             'page_name' => 'Nueva '  . $_SESSION['page_name'],
             'function_js' => 'Facturacion.js',
         ]);
     }
-    public function equivale(){
+    public function equivale()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_emp = $_POST['id_emp'];
             $id_ent = $_POST['id_ent'];
@@ -236,7 +263,8 @@ class Facturacion extends Controller
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function ventas_unidades(){
+    public function ventas_unidades()
+    {
         Auth::noAuth();
         parent::__construct();
         Permisos::getPermisos(176);
@@ -247,7 +275,25 @@ class Facturacion extends Controller
             ]);
         }
     }
-    public function store(){
+
+    /**Nuevos Cambios */
+    public function cargar_screen_main()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $datos_tabla = [];
+            $ori = $_SESSION['tipo_fact'];
+            $r = FacturacionModel::all($ori);
+            //Crear tokens
+            foreach ($r as $p) {
+                $datos_tabla[] = array_merge($p, [
+                    "token_edit" => encriptar_url(json_encode(['accion' => 'edit', 'id' => $p['id']]))
+                ]);
+            }
+            echo json_encode($datos_tabla, JSON_UNESCAPED_UNICODE);
+        }
+    }
+    public function store()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $todosLosItems = [];
             $totalItems = count($_POST['id_prod']);
@@ -435,7 +481,7 @@ class Facturacion extends Controller
                             }
                         }
                         Alertas::new(sprintf('La factura número %s se ha creado exitosamente.', $data['num_tdo']));
-                    } else {                        
+                    } else {
                         $id = FacturacionModel::actualizar($_POST['id'], $data);
                         $id_notify = $_POST['id'];
                         $id_det = FacturacionModel::borrarDetfactura($_POST['id']);
@@ -453,7 +499,7 @@ class Facturacion extends Controller
                     //$itemTotal = count($_POST['id_prod']);
                     $data2 = array();
                     foreach ($itemsFactura as $item) {
-                        $id_prod = $item['id_prod'];                        
+                        $id_prod = $item['id_prod'];
                         $can_det = $item['cant'];
                         $uni_vta = $item['uni_ven_prod'];
                         $pre_unit =  str_replace('.', '', $item['ventas_prod']);
@@ -597,7 +643,7 @@ class Facturacion extends Controller
 
                         if ($id_ent['c_consig'] == 1) {
                             $id_alm = $id_ent['id_alm'];
-                            if(!isset($_POST['id_ubi'])){
+                            if (!isset($_POST['id_ubi'])) {
                                 $id_ubi = $id_ent['id_ubi'];
                             }
                         }

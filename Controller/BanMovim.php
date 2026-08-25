@@ -533,7 +533,7 @@ class BanMovim extends Controller
         if (Permisos::read()) {
             $id = intval(limpiar($id));
             if ($id > 0) {
-                $r = BanMovimModel::print_mov($id);
+                $r = BanMovimModel::print_mov($id);                
                 if (empty($r)) {
                     Alertas::new('El registro no existe', 'warning');
                     header('Location:' . base_url . '/BanMovim');

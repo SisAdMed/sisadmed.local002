@@ -199,7 +199,7 @@ function CargarDatosTabla_Producto_001() {
 		},
 	});
 	promise.then(function () {
-		const url = `${base_url}/Perfil/DatosTabla_001_det_cli`;
+		const url = `${base_url}/Perfil/DatosTabla_001_det_cli`; 
 		//Ajax para 
 		$.ajax({
 			url: url,
@@ -228,7 +228,7 @@ function CargarDatosTabla_Producto_001() {
 				//$('#tabla_grafica_prod_det').append('<caption style="caption-side: top-right">' + title + '</caption>');
 				// 3. Inyección del Footer en el DOm ante de inicializar
 				let footerHtml = '<tr><th>TOTALES</th>';
-				for (let i = 1; i < 12; i++) 	footerHtml += '<th></th>';
+				for (let i = 1; i < 13; i++) 	footerHtml += '<th></th>';
 				footerHtml += '</tr>';
 				$('#tabla_grafica_prod_det').find('tfoot').remove(); //Limpiar si existe
 				$('#tabla_grafica_prod_det').append('<tfoot>' + footerHtml + '</tfoot>');
@@ -241,6 +241,7 @@ function CargarDatosTabla_Producto_001() {
 					columns: [
 						{ title: "Empresa", data: "nombre_emp" },
 						{ title: "Cliente", data: "nom_ent" },
+						{ title: "Vendedor", data: "nom_vend" },
 						{ title: "Ventas", data: "sub_total", render: DataTable.render.number('.', ',', 2), className: 'text-right' },
 						{ title: "Costo", data: "costo", render: DataTable.render.number('.', ',', 2), className: 'text-right' },
 						{ title: "Utilidad", data: "utilidad", render: DataTable.render.number('.', ',', 2), className: 'text-right' },
@@ -290,7 +291,7 @@ function CargarDatosTabla_Producto_001() {
 						};
 						//Aplicar suma a todas las columnas númericas (desde la 1 en adelante)						
 						var total = 0;
-						for (let i = 2; i < 12; i++) {
+						for (let i = 3; i < 13; i++) {
 							total = sumarColumna(parseFloat(i));
 							if (i == 5) {
 								total = sumarColumna(parseFloat(2)) + sumarColumna(parseFloat(3))

@@ -66,23 +66,26 @@
     $pdf->SetFont('Arial','', $tman_letra);
     $rows = 0;
     $total = 0;
-    $pdf->Ln(2);
+    $pdf->Ln(2);    
     $total_rows = count($r);
     for ($i = 0; $i < count($r); $i++) {
         $pdf->Cell(5, 3, $r[$i]->item, 0, 0, 'C');
         $cadena = iconv("UTF-8", "ISO-8859-1", html_entity_decode($r[$i]->nom_bancon));
         $pdf->cell(15, 3, $r[$i]->cod_bancon, 0, 0,'L');
         $pdf->cell(10, 3, ($cadena), 0, 0,'L');
-        if($r[$i]->cod_aux){
+        $monto = $r[$i]->monto_for;
+        if($r[$i]->cod_aux){            
+            $pdf->Cell(35);
             $pdf->cell(80, 3, htmlentities($r[$i]->cod_aux . ' - ' . $r[$i]->nombre_aux), 0, 0,'L');
-        }else{
+            $pdf->Cell(51, 3, number_format($monto, 2, ",", ".") , 0, 1, 'R');
+        }else{                        
             $pdf->cell(80, 3, '', 0, 0,'L');
+            $pdf->Cell(86, 3, number_format($monto, 2, ",", ".") , 0, 1, 'R');
         }
         if($i == ($total_rows-1)){
              $pdf->SetFont('Arial', 'U', $tman_letra);
         }
-        $monto = $r[$i]->monto_for;
-        $pdf->Cell(86, 3, number_format($monto, 2, ",", ".") , 0, 1, 'R');
+                
         $total += $monto;
         
     }

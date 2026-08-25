@@ -21,6 +21,7 @@
                 <th>Id</th>
                 <th>Grupo</th>
                 <th>Descripción</th>
+                <th>Ver in Internet</th>
                 <th>Status</th>
                 <th>Acciones</th>
             </thead>
@@ -30,6 +31,14 @@
                         <td><?= $r->id_grupo; ?></td>
                         <td><?= $r->grupo_codigo; ?></td>
                         <td><?= $r->grupo_nombre; ?></td>
+                        <td>
+                            <?php if ($r->view_internet) : ?>
+                                <input type="checkbox" checked disabled>
+                            <?php else : ?>
+                                <input type="checkbox" disabled>
+                            <?php endif ?>
+                        </td>
+
                         <!--Status-->
                         <?php if ($r->status) : ?>
                             <td><span class="badge badge-success">Activo</span></td>
@@ -52,6 +61,7 @@
                 <th>Id</th>
                 <th>Grupo</th>
                 <th>Descripción</th>
+                <th>Ver in Internet</th>
                 <th>Status</th>
                 <th>Acciones</th>
                 </thead>

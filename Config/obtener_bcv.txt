@@ -1,0 +1,40 @@
+
+X-Powered-By: PHP/8.2.31
+Content-type: text/html; charset=UTF-8
+
+<br />
+<b>Warning</b>:  Undefined array key "HTTP_HOST" in <b>/home/cpuj4gbphmxn/sisadmed.corp-mmq.com/Config/Config.php</b> on line <b>11</b><br />
+SQL: [192] INSERT INTO f0012 (fecha_cambio, id_moneda, cambio_compra, cambio_venta, create_user, create_date) VALUES (:fecha_cambio, :id_moneda, :cambio_compra, :cambio_venta, :create_user, :create_date)
+Sent SQL: [186] INSERT INTO f0012 (fecha_cambio, id_moneda, cambio_compra, cambio_venta, create_user, create_date) VALUES ('2026-08-12 05:00:04', '2', '764.3486', '764.3486', '1', '2026-08-12 05:00:04')
+Params:  6
+Key: Name: [13] :fecha_cambio
+paramno=-1
+name=[13] ":fecha_cambio"
+is_param=1
+param_type=2
+Key: Name: [10] :id_moneda
+paramno=-1
+name=[10] ":id_moneda"
+is_param=1
+param_type=2
+Key: Name: [14] :cambio_compra
+paramno=-1
+name=[14] ":cambio_compra"
+is_param=1
+param_type=2
+Key: Name: [13] :cambio_venta
+paramno=-1
+name=[13] ":cambio_venta"
+is_param=1
+param_type=2
+Key: Name: [12] :create_user
+paramno=-1
+name=[12] ":create_user"
+is_param=1
+param_type=2
+Key: Name: [12] :create_date
+paramno=-1
+name=[12] ":create_date"
+is_param=1
+param_type=2
+<pre></pre>Tasa (764.3486 VES) guardada correctamente en la base de datos.

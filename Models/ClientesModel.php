@@ -27,7 +27,8 @@ class ClientesModel extends DB{
         return $r;
     }
     static function show_row($id){
-        $r = DB::query("SELECT e.id_ent id_ent, e.id_pais id_pais, e.id_edo id_edo, e.id_ciudad id_ciudad, e.id_vend id_vend, e.id_zona id_zona, e.id_motcam id_motcam, e.id_emp id_emp, e.id_moneda id_moneda, e.rif_ent rif_ent, e.nom_ent nom_ent, e.cor_ent cor_ent, e.postal_ent postal_ent, e.dir_ent dir_ent, e.status as status, con.nom_con nom_con, con.ape_con ape_con, con.email_con email_con, con.id_pre id_pre, con.num_tel_con num_tel_con, con.id_dep id_dep, pre.id_cod_pre id_cod_pre, dep.nom_dep nom_dep, e.id_diascre, dicr.cod_diascre, e.note_fac note_fac_custom, e.id_alm, e.c_consig, e.id_ubi, e.handling_conver, e.print_lote, e.req_exc_rat, e.print_special, e.id_tipocliente, e.contr_esp, e.id_por_ret_iva FROM f0014 e LEFT JOIN f0004 p ON p.id_pais = e.id_pais  LEFT JOIN f00041 d ON d.id_edo = e.id_edo LEFT JOIN f00042 c ON c.id_ciudad = e.id_ciudad LEFT JOIN f0003 z ON z.id_zona = e.id_zona LEFT JOIN f0016 v ON v.id_vend = e.id_vend LEFT JOIN f00141 con ON con.id_ent = e.id_ent LEFT JOIN f0018 pre ON pre.id_pre = con.id_pre LEFT JOIN f00142 dep ON dep.id_dep = con.id_dep LEFT JOIN f6005 dicr on dicr.id_diascre = e.id_diascre LEFT JOIN f4014 tipcli on tipcli.id = e.id_tipocliente WHERE e.id_ent = {$id}");
+        $sql = "SELECT e.id_ent id_ent, e.id_pais id_pais, e.id_edo id_edo, e.id_ciudad id_ciudad, e.id_vend id_vend, e.id_zona id_zona, e.id_motcam id_motcam, e.id_emp id_emp, e.id_moneda id_moneda, e.rif_ent rif_ent, e.nom_ent nom_ent, e.cor_ent cor_ent, e.postal_ent postal_ent, e.dir_ent dir_ent, e.status as status, con.nom_con nom_con, con.ape_con ape_con, con.email_con email_con, con.id_pre id_pre, con.num_tel_con num_tel_con, con.id_dep id_dep, pre.id_cod_pre id_cod_pre, dep.nom_dep nom_dep, e.id_diascre, dicr.cod_diascre, e.note_fac note_fac_custom, e.id_alm, e.c_consig, e.id_ubi, e.handling_conver, e.print_lote, e.req_exc_rat, e.print_special, e.id_tipocliente, e.contr_esp, e.id_por_ret_iva, e.cant_dec, e.view_internet, e.url, e.logo_ent FROM f0014 e LEFT JOIN f0004 p ON p.id_pais = e.id_pais  LEFT JOIN f00041 d ON d.id_edo = e.id_edo LEFT JOIN f00042 c ON c.id_ciudad = e.id_ciudad LEFT JOIN f0003 z ON z.id_zona = e.id_zona LEFT JOIN f0016 v ON v.id_vend = e.id_vend LEFT JOIN f00141 con ON con.id_ent = e.id_ent LEFT JOIN f0018 pre ON pre.id_pre = con.id_pre LEFT JOIN f00142 dep ON dep.id_dep = con.id_dep LEFT JOIN f6005 dicr on dicr.id_diascre = e.id_diascre LEFT JOIN f4014 tipcli on tipcli.id = e.id_tipocliente WHERE e.id_ent = {$id}";        
+        $r = DB::query($sql);
         return $r;
     }
     static function borrarimg($id){
@@ -50,7 +51,7 @@ class ClientesModel extends DB{
         }
         return $r;
     }
-    static function consulta_vend($id_ent){
+    static function consulta_vend(int $id_ent){
         $r = DB::query("SELECT DISTINCT a.id_vend, a.id_moneda, case when ISNULL(b.cod_diascre) THEN 0 ELSE b.cod_diascre END cod_diascre, a.nom_ent, a.handling_conver, a.id_alm, a.id_ubi, c.id_motcam, a.handling_conver, a.print_special, a.req_exc_rat, a.c_consig, a.contr_esp, a.id_por_ret_iva FROM f0014 a LEFT OUTER JOIN f6005 b on b.id_diascre = a.id_diascre left OUTER JOIN f0012a c ON c.id_motcam = a.id_motcam LEFT OUTER JOIN f0020 d on d.id = a.id_por_ret_iva WHERE a.id_ent = {$id_ent}");
         return $r[0];
     }
@@ -60,18 +61,18 @@ class ClientesModel extends DB{
     static function listar_dpto_ent(){
         return $r = DB::query("SELECT * FROM f00142 WHERE status = 1 ORDER BY nom_dep");
     }
-    static function borrar_contactos($id_ent){
+    static function borrar_contactos(int $id_ent){
         return $r = DB::query("DELETE FROM f00141 WHERE id_ent = {$id_ent}");
     }
     static function guardar_contactos($id_ent, $data){
         return $id = DB::insert('f00141', $data);
     }
-    static function destroy($id){        
+    static function destroy(int $id){        
         $id2 = DB::delete("f00141", ['id_ent' => $id]);
         $id = DB::delete('f0014', ['id_ent' => $id], 1);
         return $id;
     }
-    static function consulta_motivo($id){
+    static function consulta_motivo(int $id){
         return $r = DB::query("SELECT b.id_fab, b.adicional FROM f0014 a INNER JOIN f0012a1 b on b.id_motcam = a.id_motcam WHERE a.id_ent = {$id}");
     }
     public static function tot_cli(){
@@ -86,12 +87,17 @@ class ClientesModel extends DB{
     static function listar_dias_credito(){
         return $r = DB::query("SELECT * FROM f6005 WHERE status = 1");
     }
-    static function total_rows($id){
+    static function total_rows(int $id){
         return $r = DB::query("SELECT count(*) total FROM f0014 WHERE rif_ent = '". $id ."'");
     }
     //Llenar combo Tipos de Clientes agregado el 04-07-2025 a las 10:46:00 por jose Vargas
     static function listar_tipos_clientes(){
         $r = DB::query("SELECT * FROM f4014 WHERE status = 1 ORDER BY description");
         return $r;
+    }
+    static function getlogoEnt(int $id){
+        $sql = "SELECT logo_ent FROM f0014 WHERE id_ent = {$id}";
+        $r = DB::query($sql);
+        return $r[0];
     }
 }

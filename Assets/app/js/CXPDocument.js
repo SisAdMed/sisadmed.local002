@@ -5,7 +5,7 @@
 */
 //Variables
 let item = 0;
-let table;
+tabla = 'tblDetalle';
 //Al iniciar la aplicación
 $().ready(function(){
 	//Validaciones
@@ -79,7 +79,7 @@ function show_row(id){
 			id_emp = data[0]["id_emp"];
 			listar_empresas(id_emp,true);
 			id_tdo = data[0]["id_tdo"];
-			listar_tipos_documentos_cxp(id_emp, "", id_tdo, true, "id_tdo");
+			listar_tipos_documentos_cxp(id_emp, "", id_tdo, true, "id_tdo_cxp");
 			id_cli = data[0]["id_cli"];
 			$("#id_cli").val(id_cli);
 			$("#id_cli").trigger("change");
@@ -89,10 +89,10 @@ function show_row(id){
 			$("#fecha_venci").val(data[0]["fecha_venci"]);
 			id_moneda = data[0]["id_moneda"];
 			listar_monedas(id_moneda);
-			tasa_cambio = format_number_with_dec_new(data[0]["tasa_cambio"],2);
+			tasa_cambio = format_number_with_dec_new(data[0]["tasa_cambio"]);
 			$("#tasa_cambio").val(tasa_cambio);
 			$("#tasa_cambio").prop("readonly", true);
-			show_tasa();
+			show_tasa(id_emp, id_moneda, data[0]["tasa_cambio"], 0);
 			$("#descrip_cot").val(data[0]["descrip_cot"]);
 			$("#id_retiva").empty();
 			id_retiva = data[0]["id_retiva"];
@@ -139,13 +139,17 @@ function dat_form_new(){
 $("#id_emp").on("change", function(e){
 	e.preventDefault();
 	id_emp = $(this).val();
-	listar_tipos_documentos_CXP(id_emp, "", "", false, "id_tdo");
+	listar_tipos_documentos_CXP(id_emp, "", "", false, "id_tdo_cxp");
 })
 //Al selecionar el tipo de documento, para valdiar si usa consecutivo
-$("#id_tdo").on("change", function(e){
+$("#id_tdo_cxp").on("change", function(e){
 	e.preventDefault();
 	id_tdo = $(this).val();
-	const url = `${base_url}/CXPDocument/val_tdo`;
+	const url = `${base_url}/CXPDocument/val_tdo_CXP`;	
+	status = 1
+	readonly = false;		
+	listar_status(status);
+	$("#status").prop("disabled", false);
 	//Ajax para Validar el Tipo de Documento
 	$.ajax({
 		url: url,
@@ -164,15 +168,21 @@ $("#id_tdo").on("change", function(e){
 			console.log('Ha ocurrido el siguiente error:', PDOException.responseText)
 		},
 		success: function(data) {
-			if(data){
+			if(data){						
 				if(data.con_tdoc == 0){
-					$("#num_tdo").prop("readonly", false);
+					$("#num_tdo").prop("disabled", false);
 				}else{
-					$("#num_tdo").prop("readonly", true);
+					$("#num_tdo").prop("disabled", true);
 				}
+				if(data.sol_aprob == 1){
+					status = 9;
+					readonly = true;
+				}				
 			}
 		},
 	});
+	$("#status").val(status);
+	$("#status").prop("disabled", readonly);
 })
 //Al seleccionar proveedor
 $("#id_cli").on('change', async function(e){
@@ -278,10 +288,6 @@ $(document).on("change", ".caliva", async function (e) {
 	tasa_cambio = formatoMoneda($("#tasa_cambio").val());
 	recorreTable_fac(1, tasa_cambio);
 });
-//Refrescar DataTable del Index
-$(".refresh-button").on("click", function () {
-	tableIndex.ajax.reload(null, false);
-});
 //Eliminar un registro
 $("#tblIndexMain").on("click", ".btn-delete-index", function () {
 	var recordId = $(this).data("id"); // Obtiene el ID del registro
@@ -382,3 +388,85 @@ $("#my_form").on("submit", function (e) {
 		return false;
 	}
 });
+//funcion para elimnar una fila de detalle Nota de Entrega
+$(document).on("click", ".borrar", function (event) {
+	event.preventDefault();
+	$(this).closest("tr").remove();
+	xtasa = formatoMoneda($("#tasa_cambio").val());
+	recorreTable_fac(1, xtasa, '', tabla);
+});
+async function recorreTable_fac(verstock = 0, tasa_cambio = 1, tipo, tabla = 'tblDetalle') {
+	if (!xtasavatTax_val) {
+		fecha = $("#fecha_comp").val();
+		xtasavatTax = await xvatTax(fecha, "IVA");
+		xtasaIVA = parseFloat(xtasavatTax[0]["txr1_iva"]);
+		xtasavatTax_val = true;
+	}
+	subTotal = 0.0;
+	iva = 0.0;
+	xbase = 0.0;
+	xtotal_form = 0.0;
+	if (tipo == "C") {
+		verstock = 1;
+	} else if (tipo == "F" || tipo == "N" || tipo == "NF") {
+		verstock = 1;
+	}
+	// 1. Definimos el selector de tu tabla	
+	// Pasamos la INSTANCIA de DataTables a tu función (ej: miDataTable)
+
+	//Recorrer Filas
+	$(`#${tabla} tbody tr`).each(function () {
+		var xIVA = $(this).find(".input-iva").val();
+		var xmonto = 0;
+		var xmonto_str = $(this).find(".input-fila").val();
+
+		if (xmonto_str) {
+			// Tu función de conversión (asumo que limpia puntos/comas y devuelve un float o número)
+			xmonto = formatoMoneda(xmonto_str);
+
+			if (!isNaN(xmonto)) {
+				subTotal += parseFloat(xmonto);
+
+				// Si aplica IVA, acumulamos en la base imponible
+				if (xIVA === "S" || xIVA === "s") {
+					xbase += parseFloat(xmonto);
+				}
+			}
+		}
+	});
+
+	//Si es en dolares mostrar el contravalor en Bs
+	xtasa = tasa_cambio;
+	//Calcular el IVA
+
+	if (xbase != 0) {
+		iva = parseFloat(xbase * (xtasaIVA / 100));
+	}
+	xtotal_form = subTotal + iva;
+	//Poner en cero todo
+	$("#sub_totall").val(format_number_with_dec_new(0, 2));
+	$("#ival").val(format_number_with_dec_new(0, 2));
+	$("#total_frml").val(format_number_with_dec_new(0, 2));
+	//
+	$("#sub_totalBs").val(format_number_with_dec_new(0 , 2));
+	$("#ivaBs").val(format_number_with_dec_new( 0, 2));
+	$("#total_frmBs").val(format_number_with_dec_new(0 , 2));
+	//
+	$("#sub_totalDom").val(format_number_with_dec_new(0, 2));
+	$("#ivaDom").val(format_number_with_dec_new(0, 2));
+	$("#total_frmDom").val(format_number_with_dec_new(0, 2));
+
+	if (xtasa > 1) {
+		$("#sub_totall").val(format_number_with_dec_new(subTotal, 2));
+		$("#ival").val(format_number_with_dec_new(iva, 2));
+		$("#total_frml").val(format_number_with_dec_new(xtotal_form, 2));
+		//
+		$("#sub_totalBs").val(format_number_with_dec_new(subTotal * xtasa, 2));
+		$("#ivaBs").val(format_number_with_dec_new(iva * xtasa, 2));
+		$("#total_frmBs").val(format_number_with_dec_new(xtotal_form * xtasa, 2));
+	} else {
+		$("#sub_totalDom").val(format_number_with_dec_new(subTotal, 2));
+		$("#ivaDom").val(format_number_with_dec_new(iva, 2));
+		$("#total_frmDom").val(format_number_with_dec_new(xtotal_form, 2));
+	}
+}

@@ -193,3 +193,30 @@ table.dataTable tbody td {
     visibility: visible !important;
     height: 150px !important;
 }
+/* Ajustar la altura del contenedor principal de Select2 */
+.select2-container .select2-selection--single {
+    height: calc(2.25rem + 2px) !important; /* Altura estándar de form-control en Bootstrap 4 */
+    padding: 0.375rem 0.75rem;
+}
+
+/* Ajustar el alineado del texto interno */
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+    line-height: 1.5 !important;
+    padding-left: 0 !important;
+}
+
+/* Ajustar la flecha del select para que quede centrada */
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+    height: calc(2.25rem + 2px) !important;
+}
+
+/* Forzamos a que todas las celdas del cuerpo de la tabla del detalle se alineen al medio */
+#tblDetalle tbody td {
+    vertical-align: middle !important;
+}
+#tblModalUbicaciones tbody tr {
+    cursor: pointer;
+}
+#tblModalUbicaciones tbody tr:hover {
+    background-color: #f1f5f9;
+}

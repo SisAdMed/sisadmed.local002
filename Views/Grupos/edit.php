@@ -1,10 +1,10 @@
-<?php headerAdmin($data);?>
+<?php headerAdmin($data ?? []);?>
 <div class='content-wrapper'>
     <section class='content-header'>
         <div class='container-fluid'>
             <div class='row mb-2'>
                 <div class='col-sm-12'>
-                    <h1><?php echo $data['page_name']; ?>
+                    <h1><?php echo $data['page_name'] ?? ''; ?>
                         <ol class='breadcrumb float-sm-right'>
                         <li class='breadcrumb-item'><a href='<?= base_url ?>/Grupos' title='Lista de menú'><i class='fa fa-reply'></i></a></li>
                     </h1>
@@ -14,7 +14,7 @@
     </section>
     <section class='content'>
          <?php echo Alertas::mostrarAlerta() ?>
-        <form name='my_form' id="my_form" action='<?php echo base_url ?>/Grupos/store' method='POST' class='form-horizontal form-label-left'>
+        <form name='my_form' id="my_form" action='<?php echo base_url ?>/Grupos/store' method='POST' class='form-horizontal form-label-left' enctype='multipart/form-data'>
             <div lass='row d-flex justify-content-ceter'>
                 <?php include_once __DIR__ . '/form.php' ?>
                 <div class='card-footer'>
@@ -24,4 +24,4 @@
         </form>
     </section>
 </div>
-<?php footerAdmin($data);?>
+<?php footerAdmin($data ?? []);?>

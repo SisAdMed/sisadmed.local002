@@ -19,7 +19,7 @@
     }
     static function edit($id){
         $logo = IMG ;
-        $r = DB::query("SELECT a.id_emp, a.cod_emp, a.nombre_emp, a.rif_empresa, a.dir_emp, a.id_pais, a.tel_emp, a.email_emp, a.id_moneda, CASE WHEN a.logo THEN CONCAT('$logo', 'companies/', a.logo) ELSE '' END logo, a.status, a.create_user, a.create_date, a.modify_user, a.modify_date, a.host, a.usuario, a.pass_email, a.puerto_send, a.fec_ini_fis, a.fec_fin_fis, a.fec_ctb, a.fec_ban, a.fec_cxc, a.fec_cxp, a.fec_nom, a.id_iva, a.especial_contrib, a.iva_deb_fis, IFNULL(CONCAT( b.cod_cta, ' - ',  b.nombre_cta), ' ') nom_ctb_iva_deb_fis, a.iva_cre_fis, IFNULL(CONCAT( c.cod_cta, ' - ', c.nombre_cta), ' ') nom_ctb_iva_cre_fis FROM f0011 a LEFT OUTER JOIN f0010 b ON b.id_cta = a.iva_deb_fis LEFT OUTER JOIN f0010 c ON c.id_cta = a.iva_cre_fis WHERE a.id_emp = {$id}");
+        $r = DB::query("SELECT a.id_emp, a.cod_emp, a.nombre_emp, a.rif_empresa, a.dir_emp, a.id_pais, a.tel_emp, a.email_emp, a.id_moneda, CASE WHEN a.logo THEN CONCAT('$logo', 'companies/', a.logo) ELSE '' END logo, a.status, a.create_user, a.create_date, a.modify_user, a.modify_date, a.host, a.usuario, a.pass_email, a.puerto_send, a.fec_ini_fis, a.fec_fin_fis, a.fec_ctb, a.fec_ban, a.fec_cxc, a.fec_cxp, a.fec_nom, a.id_iva, a.especial_contrib, a.iva_deb_fis, IFNULL(CONCAT( b.cod_cta, ' - ',  b.nombre_cta), ' ') nom_ctb_iva_deb_fis, a.iva_cre_fis, IFNULL(CONCAT( c.cod_cta, ' - ', c.nombre_cta), ' ') nom_ctb_iva_cre_fis, a.historia, a.mision, a.vision, a.valores, a.cifras, a.redes, a.footer FROM f0011 a LEFT OUTER JOIN f0010 b ON b.id_cta = a.iva_deb_fis LEFT OUTER JOIN f0010 c ON c.id_cta = a.iva_cre_fis WHERE a.id_emp = {$id}");
         return $r[0];
     }
     static function listar_empresas(){
@@ -35,5 +35,15 @@
     static function get_empresa_config($id_emp){
         $r = DB::query("SELECT fec_ini_fis, fec_fin_fis, fec_ctb, fec_ban, fec_cxc, fec_cxp, fec_nom FROM f0011 WHERE id_emp = {$id_emp}");
         return $r[0];
-    }   
+    }  
+    static function save_contenidos($data){
+        return $id = DB::insert('f00111', $data);
+    }    
+    static function getContenidos(){
+        $sql = "SELECT * FROM f00111";
+        return $r = DB::query($sql);
+    }
+    static function update_contenidos($id, $data){
+        return $r    = DB::update('f00111', $data, ['id' => $id]);
+    }
 }

@@ -13,13 +13,12 @@
             </div>
         </div>
     </section>
-    <section class="content">
-        <?php echo Alertas::mostrarAlerta() ?>
-        <form  name="my_form" id="my_form" action="<?php echo base_url ?>/ConfigCXC/store" method="POST" class="form-horizontal form-label-left" >
+    <section class="content">        
+        <form id="my_form" name="my_form" method="POST" class="form-horizontal form-label-left" >
             <div lass="row d-flex justify-content-ceter">
                 <?php include_once __DIR__ . "/form.php" ?>
                 <div class="card-footer">
-                    <input type="submit" id="btnok" name="btnok" class="btn btn-success" value="Guardar" />
+                    <input type="submit" id="btnok" name="btnok" class="btn btn-success btn-xs" value="Guardar" />
                 </div>
             </div>
         </form>

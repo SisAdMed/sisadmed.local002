@@ -16,7 +16,7 @@
             case 'I':
                 $title = 'INVENTARIOS';
                 break;
-            case 'I':
+            case 'M':
                 $title = 'COMPRAS';
                 break;
             case 'F':
@@ -57,8 +57,14 @@
                 if(isset($_POST['id_aux'])){
                     $id_aux = $_POST['id_aux'];
                 }
+                $nomModule = '';
+                if($_SESSION['mayanamod'] == 'B'){
+                    $nomModule = 'AnaliticoBan';
+                }elseif($_SESSION['mayanamod'] == 'P'){
+                    $nomModule = 'AnaliticoCxp';
+                }                
+                $r = MayAnaModModel::$nomModule($id_emp, $fec_ini, $fec_fin, $id_ctb, $id_aux);                
                 
-                $r = MayAnaModModel::AnaliticoBan($id_emp, $fec_ini, $fec_fin, $id_ctb, $id_aux);
                 echo json_encode($r, JSON_UNESCAPED_UNICODE);
             }
         }

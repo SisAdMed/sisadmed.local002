@@ -1,4 +1,7 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\Calculation\TextData\Search;
+
 class ProductosModel extends DB {
     public function __construct() {
         parent::__construct();
@@ -7,8 +10,7 @@ class ProductosModel extends DB {
         $x = DB::query("SELECT GROUP_CONCAT(id_alm) id_alm FROM f4999;");
         $id_alm = $x[0]['id_alm'];
         $fecha = Date('Y-m-d');        
-        $sql = "SELECT p.id_prod, p.cod_prod, p.cod2_prod, p.nom_prod, p.ref_prod, ma.nom_fab, p.costo_prod,p.flete_prod, p.otros_prod, p.door_costo, p.recar_prod, p.ventas_prod, p.recar2_prod, p.venta2_prod, p.status, g.grupo_nombre, p.uni_ven_prod, p.origen, p.alto, p.ancho, p.largo, pre1.nom_pre empaque, pre2.nom_pre bultos, pre.nom_pre, p.gen_prod, p.des_prod, p.uni_com_prod, p.con_cons_prod, p.conv_prod_cons, p.iva_prod, p.lote_prod, p.interno_prod, p.door_prod, fn_saldo_act_inv(0, p.id_prod, '$id_alm', CURDATE()) stock, (SELECT COUNT(*) FROM f40051 WHERE id_prod = p.id_prod) fotos, CASE WHEN ma.adicional01 = 0 THEN  'Si' ELSE 'No' END adicional, us.administrator admin, CONCAT(b.name_user, ' ', b.last_user) creado_por, DATE_FORMAT(p.create_date, '%d-%m-%Y %H:%i:%s') create_date, CONCAT(v.name_user, ' ', v.last_user) modificado_por, DATE_FORMAT(p.modify_date, '%d-%m-%Y %H:%i:%s') modify_date FROM f4005 p INNER JOIN f0002 b ON b.id_user = p.create_user LEFT OUTER JOIN f0002 v ON v.id_user = p.modify_user LEFT OUTER JOIN f4004 pre on pre.id_pre = p.id_pre LEFT OUTER JOIN f4007 g on g.id_grupo = p.id_grupo LEFT OUTER JOIN f4003 ma on ma.id_fab = p.id_fab LEFT OUTER JOIN f4004 pre1 on pre1.id_pre = p.id_presen1 LEFT OUTER JOIN f4004 pre2 ON pre2.id_pre = p.id_presen2 LEFT OUTER JOIN f0002 us ON us.id_user = " . $_SESSION['id_user'] . " ORDER BY p.nom_prod";
-        //debug($sql);
+        $sql = "SELECT p.id_prod, p.cod_prod, p.cod2_prod, p.nom_prod, p.ref_prod, ma.nom_fab, p.costo_prod,p.flete_prod, p.otros_prod, p.door_costo, p.recar_prod, p.ventas_prod, p.recar2_prod, p.venta2_prod, p.status, g.grupo_nombre, p.uni_ven_prod, p.origen, p.alto, p.ancho, p.largo, pre1.nom_pre empaque, pre2.nom_pre bultos, pre.nom_pre, p.gen_prod, p.des_prod, p.uni_com_prod, p.con_cons_prod, p.conv_prod_cons, p.iva_prod, p.lote_prod, p.interno_prod, p.door_prod, fn_saldo_act_inv(0, p.id_prod, '$id_alm', CURDATE()) stock, (SELECT COUNT(*) FROM f40051 WHERE id_prod = p.id_prod) fotos, CASE WHEN ma.adicional01 = 0 THEN  'Si' ELSE 'No' END adicional, us.administrator admin, CONCAT(b.name_user, ' ', b.last_user) creado_por, DATE_FORMAT(p.create_date, '%d-%m-%Y %H:%i:%s') create_date, CONCAT(v.name_user, ' ', v.last_user) modificado_por, DATE_FORMAT(p.modify_date, '%d-%m-%Y %H:%i:%s') modify_date FROM f4005 p LEFT OUTER JOIN f0002 b ON b.id_user = p.create_user LEFT OUTER JOIN f0002 v ON v.id_user = p.modify_user LEFT OUTER JOIN f4004 pre on pre.id_pre = p.id_pre LEFT OUTER JOIN f4007 g on g.id_grupo = p.id_grupo LEFT OUTER JOIN f4003 ma on ma.id_fab = p.id_fab LEFT OUTER JOIN f4004 pre1 on pre1.id_pre = p.id_presen1 LEFT OUTER JOIN f4004 pre2 ON pre2.id_pre = p.id_presen2 LEFT OUTER JOIN f0002 us ON us.id_user = " . $_SESSION['id_user'] . " ORDER BY p.nom_prod";        
         return $r = DB::query($sql);
     }
     static function guardar($data){
@@ -87,8 +89,7 @@ class ProductosModel extends DB {
         $r = DB::query($sql);
         return $r[0];
     }
-    static function consulta_presu($id)
-    {
+    static function consulta_presu($id){
         $fecha = Date('Y-m-d');
         $filter = '';
         $x = DB::query("SELECT GROUP_CONCAT(id_alm) id_alm FROM f4999;");
@@ -139,7 +140,7 @@ class ProductosModel extends DB {
             $filter .= " AND fn_saldo_act_inv(0, a.id_prod, '$id_alm', '$fecha') > 0";
         }
         //$sql = "SELECT a.id_prod, a.cod_prod, a.cod2_prod, a.nom_prod, a.ref_prod, b.nom_fab, 0 stock FROM f4005 a INNER JOIN f4003 b ON b.id_fab = a.id_fab WHERE a.status = 1 ". $filter ." ORDER BY a.nom_prod";
-        $sql = "SELECT a.id_prod, a.cod_prod, a.cod2_prod, a.nom_prod, a.ref_prod, b.nom_fab, fn_saldo_act_inv(0, a.id_prod, '$id_alm', '$fecha') stock FROM f4005 a INNER JOIN f4003 b ON b.id_fab = a.id_fab WHERE a.status = 1 AND a.uni_ven_prod > 0 AND a.costo_prod > 0 ". $filter ." ORDER BY a.nom_prod";
+        $sql = "SELECT a.id_prod, a.cod_prod, a.cod2_prod, a.nom_prod, a.ref_prod, b.nom_fab, fn_saldo_act_inv(0, a.id_prod, '$id_alm', '$fecha') stock, a.lote_prod lote FROM f4005 a INNER JOIN f4003 b ON b.id_fab = a.id_fab WHERE a.status = 1 AND a.uni_ven_prod > 0 AND a.costo_prod > 0 ". $filter ." ORDER BY a.nom_prod";
         $r = DB::query($sql);
         return $r;
     }
@@ -168,9 +169,9 @@ class ProductosModel extends DB {
         $r = DB::query("SELECT a.id_prod, b.cod_prod, b.cod2_prod, b.nom_prod, b.ref_prod, c.nom_fab, sum(stock) stock FROM f4010 a INNER JOIN f4005 b ON b.id_prod = a.id_prod INNER JOIN f4003 c ON c.id_fab = b.id_fab WHERE a.id_ent = {$id_ent} AND a.id_alm = {$id_alm} GROUP BY a.id_prod, b.cod_prod, b.cod2_prod, b.nom_prod, b.ref_prod, c.nom_fab HAVING SUM(stock) > 0");
         return $r;
     }
-    static function val_cod_prod($id, $cod){
-        if($cod){
-            $r = DB::query("SELECT count(*) totrows FROM f4005 WHERE id_prod <> {$cod} AND cod_prod = '".$id."'");
+    static function val_cod_prod($id, $linkod){
+        if($linkod){
+            $r = DB::query("SELECT count(*) totrows FROM f4005 WHERE id_prod <> {$linkod} AND cod_prod = '".$id."'");
         }else{
             $r = DB::query("SELECT count(*) totrows FROM f4005 WHERE cod_prod = '".$id."'");
         }
@@ -181,11 +182,10 @@ class ProductosModel extends DB {
         return $r = DB::query($sql);
     }
     static function cargar_screen_main() {
-           $x = DB::query("SELECT GROUP_CONCAT(id_alm) id_alm FROM f4999;");
+        $x = DB::query("SELECT GROUP_CONCAT(id_alm) id_alm FROM f4999;");
         $id_alm = $x[0]['id_alm'];
         $fecha = Date('Y-m-d');        
-        $sql = "SELECT p.id_prod, p.cod_prod, p.cod2_prod, p.nom_prod, p.ref_prod, ma.nom_fab, p.costo_prod,p.flete_prod, p.otros_prod, p.door_costo, p.recar_prod, p.ventas_prod, p.recar2_prod, p.venta2_prod, p.status, g.grupo_nombre, p.uni_ven_prod, p.origen, p.alto, p.ancho, p.largo, pre1.nom_pre empaque, pre2.nom_pre bultos, pre.nom_pre, p.gen_prod, p.des_prod, p.uni_com_prod, p.con_cons_prod, p.conv_prod_cons, p.iva_prod, p.lote_prod, p.interno_prod, p.door_prod, fn_saldo_act_inv(0, p.id_prod, '$id_alm', CURDATE()) stock, (SELECT COUNT(*) FROM f40051 WHERE id_prod = p.id_prod) fotos, CASE WHEN ma.adicional01 = 0 THEN  'Si' ELSE 'No' END adicional, us.administrator admin, CONCAT(b.name_user, ' ', b.last_user) creado_por, DATE_FORMAT(p.create_date, '%d-%m-%Y %H:%i:%s') create_date, CONCAT(v.name_user, ' ', v.last_user) modificado_por, DATE_FORMAT(p.modify_date, '%d-%m-%Y %H:%i:%s') modify_date FROM f4005 p INNER JOIN f0002 b ON b.id_user = p.create_user LEFT OUTER JOIN f0002 v ON v.id_user = p.modify_user LEFT OUTER JOIN f4004 pre on pre.id_pre = p.id_pre LEFT OUTER JOIN f4007 g on g.id_grupo = p.id_grupo LEFT OUTER JOIN f4003 ma on ma.id_fab = p.id_fab LEFT OUTER JOIN f4004 pre1 on pre1.id_pre = p.id_presen1 LEFT OUTER JOIN f4004 pre2 ON pre2.id_pre = p.id_presen2 LEFT OUTER JOIN f0002 us ON us.id_user = " . $_SESSION['id_user'] . " ORDER BY p.nom_prod";
-        //debug($sql);
+        $sql = "SELECT p.id_prod, p.cod_prod, p.cod2_prod, p.nom_prod, p.ref_prod, ma.nom_fab, p.costo_prod,p.flete_prod, p.otros_prod, p.door_costo, p.recar_prod, p.ventas_prod, p.recar2_prod, p.venta2_prod, p.status, g.grupo_nombre, p.uni_ven_prod, p.origen, p.alto, p.ancho, p.largo, pre1.nom_pre empaque, pre2.nom_pre bultos, pre.nom_pre, p.gen_prod, p.des_prod, p.uni_com_prod, p.con_cons_prod, p.conv_prod_cons, p.iva_prod, p.lote_prod, p.interno_prod, p.door_prod, fn_saldo_act_inv(0, p.id_prod, '$id_alm', CURDATE()) stock, (SELECT COUNT(*) FROM f40051 WHERE id_prod = p.id_prod) fotos, CASE WHEN ma.adicional01 = 0 THEN  'Si' ELSE 'No' END adicional, us.administrator admin, CONCAT(b.name_user, ' ', b.last_user) creado_por, DATE_FORMAT(p.create_date, '%d-%m-%Y %H:%i:%s') create_date, CONCAT(v.name_user, ' ', v.last_user) modificado_por, DATE_FORMAT(p.modify_date, '%d-%m-%Y %H:%i:%s') modify_date FROM f4005 p LEFT OUTER JOIN f0002 b ON b.id_user = p.create_user LEFT OUTER JOIN f0002 v ON v.id_user = p.modify_user LEFT OUTER JOIN f4004 pre on pre.id_pre = p.id_pre LEFT OUTER JOIN f4007 g on g.id_grupo = p.id_grupo LEFT OUTER JOIN f4003 ma on ma.id_fab = p.id_fab LEFT OUTER JOIN f4004 pre1 on pre1.id_pre = p.id_presen1 LEFT OUTER JOIN f4004 pre2 ON pre2.id_pre = p.id_presen2 LEFT OUTER JOIN f0002 us ON us.id_user = " . $_SESSION['id_user'] . " ORDER BY p.nom_prod";         
         return $r = DB::query($sql);
     }
     static function stock_consig($id_emp, $id_alm, $id_ubi, $fec_fin, $id_fab, $id_prod){
@@ -246,7 +246,91 @@ class ProductosModel extends DB {
         $fecha = Date('Y-m-d');
         $x = DB::query("SELECT GROUP_CONCAT(id_alm) id_alm FROM f4999;");
         $id_alm = $x[0]['id_alm'];
-        $sql = "SELECT a.cod_prod, a.cod2_prod, a.nom_prod, a.gen_prod, a.ref_prod, a.id_presen1, a.id_presen2, a.id_pre, a.id_fab, a.id_grupo, a.id_sub_grupo, a.origen, a.ancho, a.largo, a.alto, a.iva_prod, a.lote_prod, a.interno_prod, a.uni_com_prod, a.uni_ven_prod, a.con_cons_prod, a.conv_prod_cons, a.costo_prod, a.flete_prod, a.otros_prod, a.door_costo,  a.costo1, a.recar_prod, a.ventas_prod, a.recar2_prod, a.venta2_prod, a.status, a.stock_minimo, fn_saldo_act_inv(0, a.id_prod, '$id_alm', '$fecha') stock, a.id_fab_fac, a.des_prod, a.commet_prod, y.regsan_prod, y.cpe_prod, y.nomcor_prod, y.marcom_prod, y.fabpor_prod, y.connetpro_prod, y.connetcaj_prod, y.uso_prod, CONCAT(b.name_user, ' ', b.last_user) creado_por, DATE_FORMAT(a.create_date, '%d-%m-%Y %H:%i:%s') create_date, CONCAT(v.name_user, ' ', v.last_user) modificado_por, DATE_FORMAT(a.modify_date, '%d-%m-%Y %H:%i:%s') modify_date FROM f4005 a INNER JOIN f0002 b ON b.id_user = a.create_user LEFT OUTER JOIN f40051 z ON z.id_prod = a.id_prod LEFT OUTER JOIN f40052 y ON y.id_prod = a.id_prod LEFT OUTER JOIN f40054 x ON x.id_prod = a.id_prod LEFT OUTER JOIN f0002 v ON v.id_user = a.modify_user WHERE a.id_prod = {$id}";            
+        $sql = "SELECT a.cod_prod, a.cod2_prod, a.nom_prod, a.gen_prod, a.ref_prod, a.id_presen1, a.id_presen2, a.id_pre, a.id_fab, a.id_grupo, a.id_sub_grupo, a.origen, a.ancho, a.largo, a.alto, a.iva_prod, a.lote_prod, a.interno_prod, a.uni_com_prod, a.uni_ven_prod, a.con_cons_prod, a.conv_prod_cons, a.costo_prod, a.flete_prod, a.otros_prod, a.door_costo,  a.costo1, a.recar_prod, a.ventas_prod, a.recar2_prod, a.venta2_prod, a.status, a.stock_minimo, fn_saldo_act_inv(0, a.id_prod, '$id_alm', '$fecha') stock, a.id_fab_fac, a.des_prod, a.commet_prod, y.regsan_prod, y.cpe_prod, y.nomcor_prod, y.marcom_prod, y.fabpor_prod, y.connetpro_prod, y.connetcaj_prod, y.uso_prod, CONCAT(b.name_user, ' ', b.last_user) creado_por, DATE_FORMAT(a.create_date, '%d-%m-%Y %H:%i:%s') create_date, CONCAT(v.name_user, ' ', v.last_user) modificado_por, DATE_FORMAT(a.modify_date, '%d-%m-%Y %H:%i:%s') modify_date, a.estado_id FROM f4005 a LEFT OUTER JOIN f0002 b ON b.id_user = a.create_user LEFT OUTER JOIN f40051 z ON z.id_prod = a.id_prod LEFT OUTER JOIN f40052 y ON y.id_prod = a.id_prod LEFT OUTER JOIN f40054 x ON x.id_prod = a.id_prod LEFT OUTER JOIN f0002 v ON v.id_user = a.modify_user WHERE a.id_prod = {$id}";            
         return $r = DB::query($sql);
     }
+    static function cargar_screen_main_serverSide($start, $length, $search, $order, $order_dir){         
+        $x = DB::query("SELECT GROUP_CONCAT(id_alm) id_alm FROM f4999;");
+        $id_alm = $x[0]['id_alm'];
+        $fecha = Date('Y-m-d');                
+        $limit = "" ;
+        $where = '';
+        //Si hay un busqueda efectiva
+        if($search !=""){
+            $where = " 
+                WHERE 
+                p.id_prod LIKE :id_prod
+                OR p.cod_prod LIKE  :cod_prod
+                OR p.cod2_prod LIKE :cod2_prod
+                OR p.ref_prod LIKE ':ref_prod 
+                OR p.nom_prod LIKE :nom_prod              
+                OR ma.nom_fab LIKE :nom_fab
+            ";
+        }                 
+        $db = new Conexion();
+        $link = $db->conect();        
+        //Total de Registros
+        $sql_total = "SELECT COUNT(*) FROM f4005";
+        $query_total = $link->prepare($sql_total);
+        $query_total->execute();
+        //Obtener el Total
+        $recordsTotal = $query_total->fetchColumn();        
+        //Total de registros filtrados
+        $sql_filtrado = "SELECT COUNT(*) FROM f4005 $where";
+        $query_filtrado = $link->prepare($sql_filtrado);        
+        //Si tenemos busqueda
+        if($search != ""){            
+            $query_filtrado->bindValue(':cod_prod', '%'.$search.'%', PDO::PARAM_STR);
+            $query_filtrado->bindValue(':cod2_prod', '%'.$search.'%', PDO::PARAM_STR);
+            $query_filtrado->bindValue(':ref_prod', '%'.$search.'%', PDO::PARAM_STR);
+            $query_filtrado->bindValue(':nom_prod', '%'.$search.'%', PDO::PARAM_STR);
+            $query_filtrado->bindValue(':nom_fab', '%'.$search.'%', PDO::PARAM_STR);
+        }
+        $query_filtrado->execute();
+        $recordsFiltered = $query_filtrado->fetchColumn();        
+        $sql = "SELECT p.id_prod, p.cod_prod, p.cod2_prod, p.nom_prod, p.ref_prod, ma.nom_fab, p.costo_prod,p.flete_prod, p.otros_prod, p.door_costo, p.recar_prod, p.ventas_prod, p.recar2_prod, p.venta2_prod, p.status, g.grupo_nombre, p.uni_ven_prod, p.origen, p.alto, p.ancho, p.largo, pre1.nom_pre empaque, pre2.nom_pre bultos, pre.nom_pre, p.gen_prod, p.des_prod, p.uni_com_prod, p.con_cons_prod, p.conv_prod_cons, p.iva_prod, p.lote_prod, p.interno_prod, p.door_prod, fn_saldo_act_inv(0, p.id_prod, '$id_alm', CURDATE()) stock, (SELECT COUNT(*) FROM f40051 WHERE id_prod = p.id_prod) fotos, CASE WHEN ma.adicional01 = 0 THEN  'Si' ELSE 'No' END adicional, us.administrator admin, CONCAT(b.name_user, ' ', b.last_user) creado_por, DATE_FORMAT(p.create_date, '%d-%m-%Y %H:%i:%s') create_date, CONCAT(v.name_user, ' ', v.last_user) modificado_por, DATE_FORMAT(p.modify_date, '%d-%m-%Y %H:%i:%s') modify_date FROM f4005 p LEFT OUTER JOIN f0002 b ON b.id_user = p.create_user LEFT OUTER JOIN f0002 v ON v.id_user = p.modify_user LEFT OUTER JOIN f4004 pre on pre.id_pre = p.id_pre LEFT OUTER JOIN f4007 g on g.id_grupo = p.id_grupo LEFT OUTER JOIN f4003 ma on ma.id_fab = p.id_fab LEFT OUTER JOIN f4004 pre1 on pre1.id_pre = p.id_presen1 LEFT OUTER JOIN f4004 pre2 ON pre2.id_pre = p.id_presen2 LEFT OUTER JOIN f0002 us ON us.id_user = " . $_SESSION['id_user'] . " $where ORDER BY $order $order_dir";                
+        if($length != -1){
+            $sql .= " LIMIT :start, :length";
+        }        
+        $query = $link->prepare($sql);
+
+        if($search != ""){            
+            $query->bindValue(':cod_prod', '%'.$search.'%', PDO::PARAM_STR);
+            $query->bindValue(':cod2_prod', '%'.$search.'%', PDO::PARAM_STR);
+            $query->bindValue(':ref_prod', '%'.$search.'%', PDO::PARAM_STR);
+            $query->bindValue(':nom_prod', '%'.$search.'%', PDO::PARAM_STR);
+            $query->bindValue(':nom_fab', '%'.$search.'%', PDO::PARAM_STR);
+        }
+        //Parametros e paginacion
+        if($length != -1){
+            $query->bindValue(':start', (int)$start, PDO::PARAM_INT);
+            $query->bindValue(':length', (int)$length, PDO::PARAM_INT);
+        }
+        $query->execute();
+        $data = $query->fetchAll(PDO::FETCH_ASSOC);      
+        $datos_tabla = [];	
+        foreach ($data as $p) {
+            $datos_tabla[] = array_merge($p, [
+                "token_edit" => encriptar_url(json_encode(['accion' => 'edit', 'id' => $p['id_prod']]))
+            ]);
+        }
+        return  [
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $datos_tabla
+        ];
+    }
+    static function change_utility_data($id_prod = "", $id_fab = ""){
+        $filter = "";
+        if($id_fab != ""){
+            $filter = " AND a.id_fab IN ($id_fab)";
+        }
+        if($id_prod != ""){
+            $filter = " AND a.id_prod = $id_prod";
+        }
+        $sql_query = "SELECT a.id_prod, a.cod_prod, a.ref_prod, a.nom_prod, a.costo1, a.recar_prod, a.ventas_prod, IFNULL(a.recar2_prod, 0) recar2_prod, IFNULL(a.venta2_prod, 0) venta2_prod FROM `f4005` a INNER JOIN f4003 b ON b.id_fab = a.id_fab WHERE a.status = 1 AND IFNULL(b.adicional01, 0) = 0 $filter";
+        $r = DB::query($sql_query);
+        return $r;
+    }
+    
 }

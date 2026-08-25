@@ -61,17 +61,28 @@ class CotizacionesModel extends DB{
         $x = DB::query("SELECT GROUP_CONCAT(id_alm) id_alm FROM f4999;");
         $id_alm = $x[0]['id_alm'];
         //$sql = "SELECT a.*, ventas_prod / (SELECT IFNULL(y.adic_01,1) adic_01 FROM f0014 x INNER JOIN f0012a y ON y.id_motcam = x.id_motcam WHERE x.id_ent = {$id_ent}) pv1 FROM f4005 a WHERE a.id_fab IN ($id_fab) AND EXISTS (SELECT id_prod FROM f4010 WHERE id_prod = a.id_prod)";
-        $sql = "SELECT a.id_prod, a.nom_prod, a.uni_ven_prod, a.iva_prod, a.ventas_prod / (SELECT IFNULL(y.adic_01,1) adic_01 FROM f0014 x INNER JOIN f0012a y ON y.id_motcam = x.id_motcam WHERE x.id_ent = {$id_ent}) pv1, fn_saldo_ant_inv(0, a.id_prod, '$id_alm',  '$fecha', 0) stock FROM f4005 a WHERE a.id_fab IN ($id_fab) AND a.status = 1 AND fn_saldo_ant_inv(0, a.id_prod, '$id_alm', '$fecha', 0) > 0 ORDER BY a.nom_prod;"; 
+        //$sql = "SELECT a.id_prod, a.nom_prod, a.uni_ven_prod, a.iva_prod, a.ventas_prod / (SELECT IFNULL(y.adic_01,1) adic_01 FROM f0014 x INNER JOIN f0012a y ON y.id_motcam = x.id_motcam WHERE x.id_ent = {$id_ent}) pv1, fn_saldo_ant_inv(0, a.id_prod, '$id_alm',  '$fecha', 0) stock FROM f4005 a WHERE a.id_fab IN ($id_fab) AND a.status = 1 AND fn_saldo_ant_inv(0, a.id_prod, '$id_alm', '$fecha', 0) > 0 ORDER BY a.nom_prod;"; 
+        $sql = "SELECT id_prod, nom_prod, fn_saldo_ant_inv(0, id_prod, '$id_alm',  '$fecha', 0) stock FROM f4005 WHERE status = 1 AND id_fab IN ($id_fab) AND fn_saldo_ant_inv(0, id_prod, '$id_alm', '$fecha', 0) > 0 ORDER BY nom_prod";        
         $r = DB::query($sql);
         return $r;
     }
-    static function listar_cotizacones($id_emp){
-        $r = DB::query("SELECT id_cot, concat('Cotización: ', num_tdo, ' - Cliente: ', id_cli, ' - ', nom_ent) cliente FROM f4008 INNER JOIN f0014 on f0014.id_ent = f4008.id_cli WHERE f4008.id_emp = {$id_emp} AND f4008.id_cont is NULL AND f4008.status = 1");
+    static function listar_cotizacones(int $id_emp, int $id_cli){
+        $filter = "";
+        if($id_cli != 0){
+            $filter = " AND f0014.id_ent = {$id_cli} ";
+        }
+        $sql = "SELECT id_cot, concat('Cotización: ', num_tdo, ' - Cliente: ', id_cli, ' - ', nom_ent) cliente FROM f4008 INNER JOIN f0014 on f0014.id_ent = f4008.id_cli WHERE f4008.id_emp = {$id_emp} AND f4008.id_cont is NULL AND f4008.status = 1 $filter";
+        $r = DB::query($sql);
         return $r;
     }
     //Llenar listado entidad modal
     static function listar_entidad_modal($id, $tipo){
         $r = DB::query("SELECT a.id_ent id_ent, a.rif_ent rif_ent, a.nom_ent nom_ent, b.nom_vend nom_vend, c.nombre_zona, a.handling_conver FROM f0014 a INNER JOIN f0016 b ON b.id_vend = a.id_vend INNER JOIN f0003 c ON c.id_zona = a.id_zona WHERE a.status = 1 AND id_emp = {$id} AND tip_ent = '".$tipo."'");
         return $r;
+    }
+    static function obtener_precio_producto($id_prod, $id_cli, $id_moneda, $tasa_cambio){
+        $sql = "SELECT 1 cant, p.uni_ven_prod, CASE WHEN p.iva_prod = 1 THEN 'S' ELSE 'N' END iva_prod, p.ventas_prod, cli.nom_ent, IFNULL(fab.adicional, 0) ad_mar, IFNULL(adi1.tasa, 0) tasa, IFNULL(adil2.adic_01, 0) adic_01, IFNULL(adil2.adic_02, 0) adic_02, p.uni_ven_prod FROM f4005 p INNER JOIN f4004 pre on pre.id_pre = p.id_pre INNER JOIN f4007 g on g.id_grupo = p.id_grupo INNER JOIN f4003 ma on ma.id_fab = p.id_fab LEFT OUTER JOIN f4004 pre1 on pre1.id_pre = p.id_presen1 LEFT OUTER JOIN f4004 pre2 ON pre2.id_pre = p.id_presen2 LEFT OUTER JOIN f0014 cli ON cli.id_ent = {$id_cli} LEFT OUTER JOIN f0012a1 fab ON fab.id_motcam = cli.id_motcam LEFT OUTER JOIN f0011 emp ON emp.id_emp = cli.id_emp LEFT OUTER JOIN f0006 adi1 ON adi1.id_emp = emp.id_emp AND adi1.status = 1 LEFT OUTER JOIN f0012a adil2 on adil2.nom_motcam = cli.id_motcam WHERE p.id_prod = {$id_prod} LIMIT 1";
+        $r = DB::query($sql);
+        return $r[0];
     }
 }

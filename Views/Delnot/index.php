@@ -1,4 +1,13 @@
-<?php headerAdmin($data); ?>
+<?php
+if (!isset($data) || !is_array($data)) {
+    $data = [];
+}
+$data['page_name'] = $data['page_name'] ?? '';
+if (!isset($objeto) || !is_iterable($objeto)) {
+    $objeto = [];
+}
+headerAdmin($data);
+?>
 <div class="content-wrapper">
    <section class="content-header">
       <div class="container-fluid">

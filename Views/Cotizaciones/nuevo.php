@@ -1,10 +1,10 @@
-<?php headerAdmin($data); ?>
+<?php headerAdmin($data ?? []); ?>
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1><?php echo $data['page_name']; ?>
+                    <h1><?php echo $data['page_name'] ?? ''; ?>
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="<?= base_url ?>/Cotizaciones" title="Lista de menú"><i class="fa fa-reply"></i></a></li>
                         </ol>
@@ -14,14 +14,14 @@
         </div>
     </section>
     <section class="content">
-        <form id="my_form" name="my_form" action="<?php echo base_url ?>/Cotizaciones/store" method="POST" class="form-horizontal form-label-left text-xs"  enctype="multipart/form-data">
+        <form id="my_form" name="my_form" method="POST" class="form-horizontal form-label-left text-xs"  enctype="multipart/form-data">
             <div lass="row d-flex justify-content-ceter">
                 <?php include_once __DIR__ . "/form.php" ?>
                 <div class="card-footer">
-                    <input type="submit" id="btnok" name="btnok" class="btn btn-success btn-sm" value="Guardar" />
+                    <input type="submit" id="btnok" name="btnok" class="btn btn-success btn-xs" value="Guardar" />
                 </div>
             </div>
         </form>
     </section>
 </div>
-<?php footerAdmin($data); ?>
+<?php footerAdmin($data ?? []); ?>

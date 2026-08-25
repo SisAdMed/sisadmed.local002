@@ -1,7 +1,8 @@
 <?php
+    $r = [];
     require(FPDF1 . 'fpdf.php');
     include_once VARTAX;
-
+    
     //Variables
     $sub_total = 0;
     $mon_base = 0;
@@ -10,6 +11,7 @@
     $total = 0;
     $filemame = $r[0]->num_tdo . '-' . $r[0]->nom_ent . '.pdf';
     $tman_letra = 7;
+    $GLOBALS['nom_cli'] = $r[0]->nom_ent;
     $GLOBALS['moneda_cot'] = $r[0]->codigo_moneda;
     $GLOBALS['moneda_emp'] = $r[0]->moneda_emp;
     $GLOBALS['tasa_cambio'] = $r[0]->tasa_cambio;
@@ -218,12 +220,32 @@
             $this->cell(30);
             $this->Cell(20, 4, '$ ' . number_format($GLOBALS['mon_base'] * ($GLOBALS['tasa_iva']/100), 2, ",", "."), 0, 0, 'R');
             $this->Cell(20, 4, 'Bs ' . number_format(($GLOBALS['mon_base'] * ($GLOBALS['tasa_iva']/100)) * $GLOBALS['tasa_cambio'], 2, ",", "."), 0, 1, 'R');
-            //Total
+            //Total            
+            $total = "Total";            
+            $IGTF = '';
+            if($GLOBALS['nom_cli'] === 'CLINICA SANATRIX, C.A.'){
+                $total = 'Total antes del I.G.T.F.';
+                $IGTF = '3,00 %';
+            }
             $this->cell(100);
-            $this->cell(20, 4, html_entity_decode('Total'), 0, 0, 'L');
+            $this->cell(20, 4, html_entity_decode($total), 0, 0, 'L');
             $this->cell(30);
             $this->Cell(20, 4, '$ ' . number_format(($GLOBALS['mon_base'] + $GLOBALS['mon_exe']) + ($GLOBALS['mon_base'] * ($GLOBALS['tasa_iva']/100)), 2, ",", "."), 0, 0, 'R');
             $this->Cell(20, 4,'Bs ' .  number_format((($GLOBALS['mon_base'] + $GLOBALS['mon_exe']) + ($GLOBALS['mon_base'] * ($GLOBALS['tasa_iva']/100))) * $GLOBALS['tasa_cambio'],2, ",", "."), 0, 1 , 'R');
+            if($GLOBALS['nom_cli'] === 'CLINICA SANATRIX, C.A.'){                
+                $this->cell(100);
+                $this->cell(20, 4, html_entity_decode('I.G.T.F 3,00 %'), 0, 0, 'L');
+                $this->cell(30);
+                $tot_fac = ($GLOBALS['mon_base'] + $GLOBALS['mon_exe']) + ($GLOBALS['mon_base'] * ($GLOBALS['tasa_iva']/100));
+                $tot_igtf = $tot_fac * (3 / 100);                
+                $this->Cell(20, 4, '$ ' . number_format($tot_igtf, 2, ",", "."), 0, 0, 'R');
+                $this->Cell(20, 4,'Bs ' .  number_format($tot_igtf * $GLOBALS['tasa_cambio'],2, ",", "."), 0, 1 , 'R');
+                $this->cell(100);
+                $this->cell(20, 4, html_entity_decode('Total referencial a pagar'), 0, 0, 'L');
+                $this->cell(30);
+                $this->Cell(20, 4, '$ ' . number_format($tot_fac + $tot_igtf, 2, ",", "."), 0, 0, 'R');
+                $this->Cell(20, 4,'Bs ' .  number_format(($tot_fac + $tot_igtf) * $GLOBALS['tasa_cambio'],2, ",", "."), 0, 1 , 'R');
+            }
         }else{
             //Sub-total
             $this->cell(50);

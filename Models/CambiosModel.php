@@ -35,11 +35,12 @@
             }else{
                 $cambio = 1;
             }
-        }
+        }        
         return formatNumber($cambio, 4);
     }
     static function exist_rate_change($id_moneda, $fecha_cambio){
-        return $r = DB::query("SELECT * FROM f0012 WHERE id_moneda = {$id_moneda} AND fecha_cambio = '".$fecha_cambio."' ORDER BY fecha_cambio DESC LIMIT 1");
+         $r = DB::query("SELECT * FROM f0012 WHERE id_moneda = {$id_moneda} AND fecha_cambio = '".$fecha_cambio."' ORDER BY fecha_cambio DESC LIMIT 1");
+         return $r;
     }
     static function getIdMoneda($id){
         $r = DB::query("SELECT id_moneda FROM f0005 WHERE codigo_moneda = '$id'");

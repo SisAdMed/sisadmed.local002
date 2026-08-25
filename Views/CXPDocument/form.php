@@ -10,8 +10,8 @@
         </div>
         <div class="row">
             <div class="form-group col-md-2 col-sm-2 col-xs-12">
-                <label for="id_tdo">Tipo de Documento</label>
-                <select autofocus name="id_tdo" id="id_tdo" class="form-control  text-xs"></select>
+                <label for="id_tdo_cxp">Tipo de Documento</label>
+                <select autofocus name="id_tdo_cxp" id="id_tdo_cxp" class="form-control  text-xs"></select>
             </div>
             <div class="form-group col-md-4 col-sm-4 col-xs-12">
                 <label for="nom_cli">Proveedor</label>
@@ -63,44 +63,44 @@
             </div>
         </div>
         <div class="row">
-            <!--Moneda Foaranea-->
-            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-center foranea text-xs text-xs">
-                <label for="sub_total" class="text-xs">Sub-Total</label>
-                <input type="text" name="sub_total" id="sub_total" class="form-control text-right text-xs" readonly>
+            <!--Moneda Foaranea mostrando Moneda foranea-->
+            <div class="form-group col-md-1 col-sm-1 col-xs-12 text-center foranea text-xs text-xs">
+                <label for="sub_totall" class="text-xs">Sub-Total</label>
+                <input type="text" name="sub_totall" id="sub_totall" class="form-control text-right text-xs" readonly>
             </div>
-            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-right foranea text-xs">
-                <label for="iva" class="text-xs">IVA</label>
-                <input type="text" name="iva" id="iva" class="form-control text-right text-xs" readonly>
+            <div class="form-group col-md-1 col-sm-1 col-xs-12 text-right foranea text-xs">
+                <label for="ival" class="text-xs">IVA</label>
+                <input type="text" name="ival" id="ival" class="form-control text-right text-xs" readonly>
             </div>
-            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-right foranea text-xs">
-                <label for="total_frm" class="text-xs">Total</label>
-                <input type="text" name="total_frm" id="total_frm" class="form-control text-right text-xs" readonly>
+            <div class="form-group col-md-1 col-sm-1 col-xs-12 text-right foranea text-xs">
+                <label for="total_frml" class="text-xs">Total</label>
+                <input type="text" name="total_frml" id="total_frml" class="form-control text-right text-xs" readonly>
             </div>
             <!--Moneda Foaranea mostrando Moneda local-->
-            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-right foranea text-xs">
+            <div class="form-group col-md-1 col-sm-1 col-xs-12 text-right foranea text-xs">
                 <label for="sub_totalBs" class=" text-xs">Sub-Total Bs.</label>
                 <input type="text" name="sub_totalBs" id="sub_totalBs" class="form-control text-right text-xs" readonly>
             </div>
-            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-right foranea text-xs">
+            <div class="form-group col-md-1 col-sm-1 col-xs-12 text-right foranea text-xs">
                 <label for="ivaBs" class=" text-xs">IVA Bs.</label>
                 <input type="text" name="ivaBs" id="ivaBs" class="form-control text-right text-xs" readonly>
             </div>
-            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-right foranea text-xs">
+            <div class="form-group col-md-1 col-sm-1 col-xs-12 text-right foranea text-xs">
                 <label for="total_frmBs" class=" text-xs">Total Bs.</label>
                 <input type="text" name="total_frmBs" id="total_frmBs" class="form-control text-right text-xs" readonly>
             </div>
             <!--Moneda Local-->
-            <div class="form-group col-md-4 col-sm-4 col-xs-12 text-right local text-xs">
-                <label for="sub_totall" class=" text-xs">Sub-Total</label>
-                <input type="text" name="sub_totall" id="sub_totall" class="form-control text-right text-xs" readonly>
+            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-right local text-xs">
+                <label for="sub_totalDom" class=" text-xs">Sub-Total</label>
+                <input type="text" name="sub_totalDom" id="sub_totalDom" class="form-control text-right text-xs" readonly>
             </div>
-            <div class="form-group col-md-4 col-sm-4 col-xs-12 text-right local text-xs">
-                <label for="ival" class=" text-xs">IVA</label>
-                <input type="text" name="ival" id="ival" class="form-control text-right text-xs" readonly>
+            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-right local text-xs">
+                <label for="ivaDom" class=" text-xs">IVA</label>
+                <input type="text" name="ivaDom" id="ivaDom" class="form-control text-right text-xs" readonly>
             </div>
-            <div class="form-group col-md-4 col-sm-4 col-xs-12 text-right local text-xs">
-                <label for="total_frml" class=" text-xs">Total</label>
-                <input type="text" name="total_frml" id="total_frml" class="form-control text-right text-xs" readonly>
+            <div class="form-group col-md-2 col-sm-2 col-xs-12 text-right local text-xs">
+                <label for="total_frmDom" class=" text-xs">Total</label>
+                <input type="text" name="total_frmDom" id="total_frmDom" class="form-control text-right text-xs" readonly>
             </div>
         </div>
     </div>
@@ -119,7 +119,7 @@
                     <th>Auxiliar</th>
                     <th class="text-right">Monto</th>
                     <th>IVA</th>
-                    <th class="text-right">Monto IVA</th> 
+                    <th class="text-right">Monto IVA</th>
                     <th>Total</th>
                     <th class="text-center">Acción</th>
                 </thead>

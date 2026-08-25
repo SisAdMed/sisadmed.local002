@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <div class="form-group col-md-12 col-sm-12 col-xs-12" id="listar_ubicaciones_modal" name="listar_ubicaciones_modal">
                     <table id="tblModalUbicaciones" name="tblModalUbicaciones" class="display responsive nowrap table table-hover" style="width:100%">
-                         <thead>
+                        <thead>
                             <tr>
                                 <th>Id</th>
                                 <th>Código</th>

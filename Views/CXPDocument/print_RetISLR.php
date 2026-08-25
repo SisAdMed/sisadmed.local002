@@ -34,7 +34,7 @@ class PDF extends FPDF{
     //Cabecera de página
     function Header(){
         //Logo
-        $this->Image($this->ruta_logo, 10, 8, 50, 0, 'PNG');
+        //$this->Image($this->ruta_logo, 10, 8, 50, 0, 'PNG');
         //Rif
         $this->SetFont('Arial','B', 7);
         // Movernos a la derecha

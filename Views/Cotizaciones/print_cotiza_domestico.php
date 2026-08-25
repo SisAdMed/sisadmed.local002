@@ -7,7 +7,7 @@ $sub_total = 0;
 $mon_base = 0;
 $mon_exe = 0;
 $iva = 0;
-$tasa_iva;
+$tasa_iva = 0;
 $total = 0;
 $filemame = $r[0]->num_tdo . '-' . $r[0]->nom_ent . '.pdf';
 $tman_letra = 7;

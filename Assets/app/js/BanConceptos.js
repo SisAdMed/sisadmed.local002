@@ -56,7 +56,7 @@ $(document).ready(function(){
         //Afecta documento
         listar_agrupador('', 'id_bantdo');
         listar_retislr('', 'id_retislr')
-        listar_status();
+        listar_status(1);
     }
 })
 //Validar si usa o no Auxiliars la cuenta contable

@@ -1,6 +1,13 @@
 {
     "require": {
         "phpmailer/phpmailer": "^6.9",
-        "smalot/pdfparser": "^2.11"
+        "smalot/pdfparser": "^2.11",
+        "minishlink/web-push": "^11.0",
+        "guzzlehttp/guzzle": "^8.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }

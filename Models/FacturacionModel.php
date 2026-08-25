@@ -3,8 +3,13 @@ class FacturacionModel extends DB{
     public function __construct() {
         parent::__construct();
     }
-    static function all($tipo){
-        return $r = DB::query("SELECT c.id_cot, e.nombre_emp, t.nom_tdoc, c.num_tdo, a.nom_ent, c.fecha_comp, m.codigo_moneda, CASE WHEN c.imp_crcd = 0 THEN c.tasa_cambio ELSE c.imp_tasa_cambio END tasa_cambio, v.nom_vend, c.status, c.id_cont fuente, ap.status penapro, c.nro_control, a.print_special, c.id_moneda, CONCAT(uc.name_user, ' ', uc.last_user) creado_por, IFNULL(CONCAT(um.name_user, ' ', um.last_user), ' ') modificado_por FROM f6003 c INNER JOIN f0011 e ON e.id_emp = c.id_emp INNER JOIN f6001 t ON t.id_tdoc = c.id_tdo INNER JOIN f0014 a ON a.id_ent = c.id_cli INNER JOIN f0005 m ON m.id_moneda = c.id_moneda INNER JOIN f0016 v ON v.id_vend = c.id_vend LEFT OUTER JOIN f4008 co ON co.id_cot = SUBSTRING(c.id_cont,1,LOCATE('-', c.id_cont) - 1) LEFT OUTER JOIN f6001 td ON td.id_tdoc = co.id_tdo LEFT OUTER JOIN fgenmsg ap ON ap.id_cot = c.id_cot AND ap.status = 1 AND ap.tipo_fgenmsgcol = 1 INNER JOIN f4999 cfg ON cfg.id_emp = c.id_emp INNER JOIN f0002 uc ON uc.id_user = c.create_user LEFT OUTER JOIN f0002 um ON um.id_user = c.modify_user WHERE t.tipo_tdoc = '".$tipo."' ");
+    static function all(string $tipo){
+        $filter = "";
+        if($tipo == "F"){
+            $filter = " INNER JOIN f60032 dd ON dd.id_cot = c.id_cot ";
+        }
+        $sql = "SELECT c.id_cot, e.nombre_emp, t.nom_tdoc, c.num_tdo, a.nom_ent, c.fecha_comp, m.codigo_moneda, CASE WHEN c.imp_crcd = 0 THEN c.tasa_cambio ELSE c.imp_tasa_cambio END tasa_cambio, v.nom_vend, c.status, c.id_cont fuente, ap.status penapro, c.nro_control, a.print_special, c.id_moneda, CONCAT(uc.name_user, ' ', uc.last_user) creado_por, IFNULL(CONCAT(um.name_user, ' ', um.last_user), ' ') modificado_por FROM f6003 c INNER JOIN f0011 e ON e.id_emp = c.id_emp INNER JOIN f6001 t ON t.id_tdoc = c.id_tdo INNER JOIN f0014 a ON a.id_ent = c.id_cli INNER JOIN f0005 m ON m.id_moneda = c.id_moneda INNER JOIN f0016 v ON v.id_vend = c.id_vend LEFT OUTER JOIN f4008 co ON co.id_cot = SUBSTRING(c.id_cont,1,LOCATE('-', c.id_cont) - 1) LEFT OUTER JOIN f6001 td ON td.id_tdoc = co.id_tdo LEFT OUTER JOIN fgenmsg ap ON ap.id_cot = c.id_cot AND ap.status = 1 AND ap.tipo_fgenmsgcol = 1 INNER JOIN f4999 cfg ON cfg.id_emp = c.id_emp INNER JOIN f0002 uc ON uc.id_user = c.create_user LEFT OUTER JOIN f0002 um ON um.id_user = c.modify_user $filter WHERE t.tipo_tdoc = '".$tipo."' ";        
+        return $r = DB::query($sql);
     }
     static function guardar($data){
         return $r = DB::insert('f6003', $data);
@@ -26,9 +31,45 @@ class FacturacionModel extends DB{
     static function selectEncyDetmovinv($id){
         return $r = DB::query("SELECT c.id_movinv FROM f6003 a INNER JOIN f6001 b ON b.id_tdoc = a.id_tdo INNER JOIN f4009 c ON c.origen = CONCAT(a.id_cont, '-', b.tipo_codigo, '-', a.id_emp, '-', a.num_tdo ) WHERE a.id_cot = {$id}");
     }
-    static function borrarEncyDetmovinv($id){
-        $r = DB::delete('f40091', ['id_movinv' => $id], 1000);
-        return $r = DB::delete('f4009', ['id_movinv' => $id], 1000);
+    static function borrarEncyDetmovinv($id, $row){
+        $db = new Conexion(); //Obtener la instancia del PDO
+        $link = (object)$db->conect();
+        try {
+            // INICIAR LA TRANSACCIÓN           
+            $link->beginTransaction();
+            // ==========================================
+            // ELIMINAR ENCABEZADO Y DETALLES DE MOVIMIENTOS 
+            // ==========================================              
+            if($id){                                
+                $sqlDeleteDeta = "DELETE FROM f40091 WHERE id_movinv = :id_movinv";
+                $stmtDeleteDeta   = $link->prepare($sqlDeleteDeta);
+                $sqlDeleteEnca = "DELETE FROM f4009  WHERE id_movinv = :id_movinv";
+                $stmtDeleteEnca   = $link->prepare($sqlDeleteEnca);
+                foreach ($id as $id_mov) {                       
+                    $stmtDeleteDeta->execute([':id_movinv' => $id_mov['id_movinv']]);
+                    // Ejecutamos luego el encabezado
+                    $stmtDeleteEnca->execute([':id_movinv' => ['id_movinv']]);
+                    // Limpiamos los cursores para la siguiente vuelta del ciclo
+                    $stmtDeleteDeta->closeCursor();
+                    $stmtDeleteEnca->closeCursor();
+                }
+            }
+            
+            // ==========================================
+            // CAMBIAR STATUS DEL DOCUMENTO A INACTIVO
+            // ==========================================               
+            $sql = "UPDATE f6003 SET status = 0 WHERE id_cot = :id_cot";
+            $stmt = $link->prepare($sql);
+            $stmt->execute([':id_cot' => $row ]);
+            // ==========================================
+            // ULTIMO PASO: SI TODO SALIÓ BIEN, CONFIRMAR DATOS
+            // ==========================================               
+            $link->commit();
+            return true;
+        } catch (\PDOException $e) {            
+            $link->rollback();
+            throw new Exception($e->getMessage(), $e->getCode());
+        }        
     }
     static function guardarDetfactura($data){
         return $id = DB::insert('f60031', $data);
@@ -72,13 +113,14 @@ class FacturacionModel extends DB{
         return $r[0];
     }
     static function detalle_venta($id){
-        return $r = DB::query("SELECT a.id_cot, a.iva_prod, SUM(a.sub_total) monto, SUM(a.mon_iva) mon_iva FROM f60031 a WHERE a.id_cot = {$id} GROUP BY a.id_cot, a.iva_prod");
+        $sql = "SELECT a.id_cot, a.iva_prod, SUM(a.sub_total) monto, SUM(a.mon_iva) mon_iva FROM f60031 a WHERE a.id_cot = {$id} GROUP BY a.id_cot, a.iva_prod";        
+        return $r = DB::query($sql);
     }
     static function borrarDetCXCDocument($id){
         return $r = DB::delete('f60032', ['id_cot' => $id], 100);
     }
     static function tip_doc_fac($id){
-        $r = DB::query("SELECT * FROM f4999 a INNER JOIN f6002 b ON b.id_emp = a.id_emp and a.id_con_sales = b.id WHERE a.id_emp = {$id} AND a.status = 1");
+        $r = DB::query("SELECT * FROM f4999 a INNER JOIN f6002 b ON b.id_emp = a.id_emp and a.id_con_sales = b.id INNER JOIN f4001 c ON c.id_emp = a.id_emp AND c.id_ubi = a.id_ubi  WHERE a.id_emp = {$id} AND a.status = 1");
         return $r[0];
     }
     static function set_cotiza($id, $data, $origen){

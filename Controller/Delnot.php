@@ -11,7 +11,7 @@ class Delnot extends Controller {
         if(empty($_SESSION['permisosMod']['r'])){
             header('Location:' . base_url . '/Perfil');
         }
-        $objeto = DelnotModel::all("N");
+        $objeto = DelnotModel::all("N");        
         $this->views->getView($this, 'index', [
             'page_name' => 'Consulta de Notas de Entrega',
             'function_js' => 'Delnot.js',
@@ -497,7 +497,7 @@ class Delnot extends Controller {
         header('Location:' . base_url . '/Delnot');
     }
     public function consultar_factura(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){            
             $id = $_POST['id_cot'];
             $tipo = $_POST['tipo'];
             $r = DelnotModel::edit_deta($id, $tipo);

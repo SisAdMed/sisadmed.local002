@@ -12,7 +12,7 @@ $(function () {
             status_user: "required",
             password_user: {
                 required: {
-                    depends: function(element){
+                    depends: function (element) {
                         return $("#id").val() == "";
                     }
                 }
@@ -21,7 +21,7 @@ $(function () {
         messages: {}
     });
     //Cargar el index
-    form = $("form").attr("id");    
+    form = $("form").attr("id");
     if (form === undefined) {
         initUsuarios();
     } else {
@@ -32,7 +32,8 @@ $(function () {
         } else {
             dat_form_new();
         }
-    }   
+    }
+    view_notification()
 });
 //Nuevo Registro
 function dat_form_new() {
@@ -47,19 +48,19 @@ function show_row(id) {
         url: url,
         method: 'POST',
         dataSrc: '',
-        data: {id: id},
+        data: { id: id },
         dataType: 'json',
-        beforeSend: function() {
+        beforeSend: function () {
             loader.show();
         },
-        complete: function() {
+        complete: function () {
             loader.hide();
         },
-        error: function(PDOException) {
+        error: function (PDOException) {
             loader.hide();
             console.log('Ha ocurrido el siguiente error:', PDOException.responseText)
         },
-        success: function(data) {
+        success: function (data) {
             if (data) {
                 $("#name_user").val(decodeEntities(data.name_user));
                 $("#last_user").val(decodeEntities(data.last_user));
@@ -69,14 +70,14 @@ function show_row(id) {
                 $("#last_login").val(data.last_login ? moment(data.last_login).format('DD-MM-YYYY HH:mm:ss') : '');
                 listar_roles(data.id_rol, "id_rol");
                 listar_status(data.status_user, "status_user");
-                if(data.appdis == 1){
+                if (data.appdis == 1) {
                     $("#appdis").prop('checked', true);
                 }
                 if (data.administrator == 1) {
                     $("#administrator").prop('checked', true);
                 }
                 $("#imgPreview").remove();
-                if (data.photo_user) { 
+                if (data.photo_user) {
                     $("#cardimg1").append(`<img id="imgPreview" name="imgPreview" src="${base_url}/Assets/img/users/${data.photo_user}" width="200" height="200" id="imgPreview">`);
                 }
             }
@@ -91,13 +92,9 @@ $("#name_user, #last_user").on("keyup", function () {
     if (name && last) {
         var code = (name + '.' + last).toLowerCase().replace(/\s+/g, '');
         $("#code_user").val(code);
-    }else{
+    } else {
         $("#code_user").val("");
     }
-});
-//Función para recargar el datatable
-$(".refresh-button").on("click", function () {
-    tableIndex.ajax.reload(null, false);
 });
 //Eliminar un registro
 $("#tblIndexMain").on("click", ".btn-delete-index", function () {
@@ -130,8 +127,6 @@ $("#tblIndexMain").on("click", ".btn-delete-index", function () {
                 },
                 success: function (resulta) {
                     // La respuesta del servidor debe indicar si fue exitoso
-                    console.log(resulta);
-                    
                     Swal.fire({
                         icon: `${resulta.icon}`,
                         title: `${resulta.title}`,
@@ -158,7 +153,7 @@ $("#my_form").on("submit", function (e) {
     e.preventDefault();
     if ($(this).valid()) {
         $("#btnok").prop('disabled', true);
-        var formData = new FormData(this);        
+        var formData = new FormData(this);
         const url = `${base_url}/Usuarios/store`;
         $.ajax({
             type: "POST",
@@ -176,7 +171,7 @@ $("#my_form").on("submit", function (e) {
                     text: data.msg,
                     icon: data.icon,
                 }).then((result) => {
-                    if (data.success != 0) {                       
+                    if (data.success != 0) {
                         window.location.href = `${base_url}/Usuarios`;
                     }
                 });
@@ -195,4 +190,65 @@ $("#my_form").on("submit", function (e) {
         return false;
     }
 });
+/**Cargar Aprobaciones pendientes */
+function view_notification() {
+    const url = `${base_url}/Usuarios/get_notification`;
+    $.ajax({
+        url: url,
+        method: 'POST',
+        dataSrc: '',
+        dataType: 'json',
+        beforeSend: function(){
+            loader.show()
+        },
+        success: function (data) {    
+            $("#tblAprobaciones").DataTable({
+                method: 'POST',
+                data: data,
+                dataSrc: data,
+                responsive: true,
+                dataType: 'json',
+                columns: [
+                    { data: "id", title: "Id" },
+                    { data: "create_date", title: "Creado el" },                    
+                    { data: "tipo", title: "Tipo" },
+                    { data: "mensaje", title: "Mensaje" },
+                    { data: "motivo", title: "Motivo"},
+                    {
+                        data: "leido", title: "Status", className: "text-center",
+                        render: function (data, type, row) {
+                            if (row.approved == 1) {
+                                return '<span class="badge badge-success">Aprobado</span>';
+                            } else {
+                                return '<span class="badge badge-warning">Pendiente</span>';
+                            }
+                        }
+                    },
+                    {
+                        data: null,
+                        title: "Ver Doc.",
+                        className: "all",
+                        orderable: false,
+                        render: function (data, type, row) {
+                            // Usamos el token enmascarado para el botón de ir al documento
+                            if(row.approved == 0){
+                                return `
+                                <a href="${base_url}/${row.url_destino}" class="btn btn-primary btn-xs view-doc">
+                                <i class="fas fa-folder-open"></i> Ver Doc
+                                </a>`;
+                            }
+                            return '';
+                        }
+                    }
+                ],
+                language: {
+                    url: `${base_url}/Assets/json/es-ES.json`,
+                },
+            });
+        },
+        complete: function () {
+            loader.hide();
+        },
 
+    });
+}

@@ -1,3 +1,4 @@
+<?php /** @var array $data */ ?>
 <?php headerAdmin($data); ?>
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->

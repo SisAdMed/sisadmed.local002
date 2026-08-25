@@ -62,20 +62,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <!-- <div class="container"> -->
-                        <div class="row">
-                            <div class="col">
-                                <table id="tbl_analitico" class="table table-striped table-bordered display responsive nowrap table-hover text-xs" style="width: 100%;">
-                                    <thead></thead>
-                                    <tfoot></tfoot>
-                                </table>
-                            </div>
-                        </div>
-                   <!--  </div> -->
-
+                <div id="contenedorTabla">                  
                 </div>
-                <div class="card-footer"></div>
             </div>
         </form>
     </section>

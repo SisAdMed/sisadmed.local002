@@ -46,7 +46,7 @@ class ConcepCXPModel extends DB {
             return false;
         }        
     }
-    static function val_con($id){
+    static function val_con($id){        
         $id = substr($id, 0, -1);
         $sql = "SELECT * FROM f3003 WHERE codigo_con = '$id' AND agrupa_con = 'S' LIMIT 1";
         $r = DB::query($sql);

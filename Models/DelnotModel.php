@@ -4,7 +4,7 @@ class DelnotModel extends DB{
         parent::__construct();
     }
     static function all($tipo){
-        return $r = DB::query("SELECT c.id_cot, e.nombre_emp, t.nom_tdoc, c.num_tdo, a.nom_ent, c.fecha_comp, m.codigo_moneda, c.tasa_cambio, v.nom_vend, c.status, CONCAT('FAC-', td.tipo_codigo, '-', SUBSTRING(c.id_cont,1,LOCATE('-',c.id_cont) - 1)) fuente, ap.status penapro, c.nro_control FROM f6003 c INNER JOIN f0011 e ON e.id_emp = c.id_emp INNER JOIN f6001 t ON t.id_tdoc = c.id_tdo INNER JOIN f0014 a ON a.id_ent = c.id_cli INNER JOIN f0005 m ON m.id_moneda = c.id_moneda INNER JOIN f0016 v ON v.id_vend = c.id_vend LEFT OUTER JOIN f4008 co ON co.id_cot = SUBSTRING(c.id_cont,1,LOCATE('-', c.id_cont) - 1) LEFT OUTER JOIN f6001 td ON td.id_tdoc = co.id_tdo AND td.tipo_tdoc = '.$tipo.' LEFT OUTER JOIN fgenmsg ap ON ap.id_cot = c.id_cot AND ap.status = 1 AND ap.tipo_fgenmsgcol = 1 INNER JOIN f4999 cfg ON cfg.id_emp = c.id_emp AND cfg.id_tdoc_not = c.id_tdo");
+        return $r = DB::query("SELECT c.id_cot, e.nombre_emp, t.nom_tdoc, c.num_tdo, a.nom_ent, c.fecha_comp, m.codigo_moneda, c.tasa_cambio, v.nom_vend, c.status, CONCAT('FAC-', td.tipo_codigo, '-', SUBSTRING(c.id_cont,1,LOCATE('-',c.id_cont) - 1)) fuente, '0' penapro, c.nro_control FROM f6003 c INNER JOIN f0011 e ON e.id_emp = c.id_emp INNER JOIN f6001 t ON t.id_tdoc = c.id_tdo INNER JOIN f0014 a ON a.id_ent = c.id_cli INNER JOIN f0005 m ON m.id_moneda = c.id_moneda INNER JOIN f0016 v ON v.id_vend = c.id_vend LEFT OUTER JOIN f4008 co ON co.id_cot = SUBSTRING(c.id_cont,1,LOCATE('-', c.id_cont) - 1) LEFT OUTER JOIN f6001 td ON td.id_tdoc = co.id_tdo AND td.tipo_tdoc = '.$tipo.' INNER JOIN f4999 cfg ON cfg.id_emp = c.id_emp AND cfg.id_tdoc_not = c.id_tdo");
     }
     static function guardar($data){
         return $r = DB::insert('f6003', $data);
@@ -34,7 +34,9 @@ class DelnotModel extends DB{
         $r = DB::query($sql);
         return $r[0];
     }
-    static function edit_deta($id, $tipo){
+    static function edit_deta(int $id, string $tipo){
+        $x = DB::query("SELECT GROUP_CONCAT(id_alm) id_alm FROM f4999;");
+        $id_alm = $x[0]['id_alm'];
         if($tipo === 'NOF'){
             $xtipo = 'NOF';
         }else if($tipo == 'NOL'){
@@ -42,7 +44,7 @@ class DelnotModel extends DB{
         }else{
             $xtipo = 'NOF';
         }
-        $sql = "SELECT a.id_emp, a.id_tdo, a.num_tdo, a.fecha_comp, a.fecha_venci, a.id_cli, d.nom_ent, a.id_moneda, a.tasa_cambio, a.id_vend, e.id_prod, f.nom_prod, e.can_det, e.uni_vta, e.pre_unit, e.pre_vta,  e.iva_prod, e.sub_total, a.nro_control, a.oc_cliente, fn_alm_in_out(a.id_emp, 'S', c.tipo_codigo, '$xtipo', a.num_tdo) alm_out, fn_alm_in_out(a.id_emp, 'E', c.tipo_codigo, '$xtipo', a.num_tdo) alm_in FROM f6003 a INNER JOIN f0011 b ON b.id_emp = a.id_emp INNER JOIN f6001 c ON c.id_tdoc = a.id_tdo INNER JOIN f0014 d ON d.id_ent = a.id_cli INNER JOIN f60031 e ON e.id_cot = a.id_cot INNER JOIN f4005 f ON f.id_prod = e.id_prod WHERE a.id_cot = {$id}";
+        $sql = "SELECT a.id_emp, a.id_tdo, a.num_tdo, a.fecha_comp, a.fecha_venci, a.id_cli, d.nom_ent, a.id_moneda, a.tasa_cambio, a.id_vend, e.id_prod, f.nom_prod, e.can_det, e.uni_vta, e.pre_unit, e.pre_vta,  e.iva_prod, e.sub_total, a.nro_control, a.oc_cliente, fn_alm_in_out(a.id_emp, 'S', c.tipo_codigo, '$xtipo', a.num_tdo) alm_out, fn_alm_in_out(a.id_emp, 'E', c.tipo_codigo, '$xtipo', a.num_tdo) alm_in, fn_saldo_act_inv(a.id_emp, f.id_prod, IFNULL( fn_alm_in_out(a.id_emp, 'S', c.tipo_codigo, '$xtipo', a.num_tdo),'$id_alm'), a.fecha_comp) stock, a.descrip_cot, d.c_consig FROM f6003 a INNER JOIN f0011 b ON b.id_emp = a.id_emp INNER JOIN f6001 c ON c.id_tdoc = a.id_tdo INNER JOIN f0014 d ON d.id_ent = a.id_cli INNER JOIN f60031 e ON e.id_cot = a.id_cot INNER JOIN f4005 f ON f.id_prod = e.id_prod WHERE a.id_cot = {$id}";
         return $r = DB::query($sql);
     }
     static function consulta_adic01($id_emp, $fecha_precio){

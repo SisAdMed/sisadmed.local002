@@ -322,7 +322,7 @@ async function dat_form_com(id, fuente = false) {
 				$(".especial_contrib").show();
 			}
 
-			show_tasa();
+			show_tasa(); 
 			item = 0;
 			xvalor = 1;
 			

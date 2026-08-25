@@ -171,7 +171,7 @@ function initClientes() {
 			render: function (data, type, row) {
 				var t_menu = "";
 				if (permisos_cre == 1 && permisos_cre == 1) {
-					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id_ent}"><i class="fa fa-edit"></i></a>     `;
+					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/gestion/${row.token_edit}"><i class="fa fa-edit"></i></a>     `;
 				}
 				if (permisos_del == 1) {
 					t_menu += `<button id="Data" data-id="${row.id_ent}" data-name="${row.nom_ent}" data-code = "${row.rif_ent}" type="button" class="btn btn-danger btn-xs btn-delete-index"><i class="fa fa-trash"></i></button>`;
@@ -200,6 +200,20 @@ function initClientes() {
 					status = "Inactivo"; clase = "badge-danger";
 				} else if (row.status == 9) {
 					status = "Por aprobar"; clase = "badge-warning";
+				}else if (row.status == 2) {
+					status = "Desincorporado"; clase = "badge-warning";
+				}else if (row.status == 3) {
+					status = "A punto de perder limite"; clase = "badge-warning";
+				}else if (row.status == 4) {
+					status = "Mala paga"; clase = "badge-warning";
+				}else if (row.status == 5) {
+					status = "Lista negra"; clase = "badge-warning";
+				}else if (row.status == 6) {
+					status = "Bloqueado por exceder dias o limite de credito"; clase = "badge-warning";
+				}else if (row.status == 7) {
+					status = "Perdió el credito por no usar"; clase = "badge-warning";
+				}else if (row.status == 8) {
+					status = "Internos"; clase = "badge-warning";
 				}
 				return `<span class="badge ${clase}">${status}</span>`;
 			}
@@ -272,7 +286,9 @@ function initCXCDocument() {
 				if (permisos_del == 1) {
 					t_menu += `<button id="Data" data-id="${row.id_cot}" data-name="${row.nom_tdoc}" data-code = "${row.num_tdo}" type="button" class="btn btn-danger btn-xs btn-delete-index"><i class="fa fa-trash"></i></button>`;
 				}
-				t_menu += `     <a type="button" class="btn btn-primary btn-xs" href="${base_url}/${origen}/print_CXCDocument/${row.id_cot}" target="_blank" title='Imprimir asiento'><i class="fa fa-print"></i> </a>`;
+				if (row.status == 1) {
+					t_menu += `     <a type="button" class="btn btn-primary btn-xs" href="${base_url}/${origen}/print_CXCDocument/${row.id_cot}" target="_blank" title='Imprimir asiento'><i class="fa fa-print"></i> </a>`;
+				}
 				return t_menu;
 			},
 		},
@@ -329,10 +345,7 @@ function initConfigCXCTable() {
 			render: function (data, type, row) {
 				var t_menu = "";
 				if (permisos_cre == 1 && permisos_cre == 1) {
-					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/edit/${row.id_config}"><i class="fa fa-edit"></i></a>     `;
-				}
-				if (permisos_del == 1) {
-					t_menu += `<button id="Data" data-id="${row.id_config}" data-name="${row.nom_empresa}" data-code = "${row.nom_empresa}" type="button" class="btn btn-danger btn-xs btn-delete-index"><i class="fa fa-trash"></i></button>`;
+					t_menu += `<a type="button" class="btn btn-warning btn-xs" href="${base_url}/${origen}/gestion/${row.token_edit}"><i class="fa fa-edit"></i></a>     `;
 				}
 				return t_menu;
 			},
@@ -383,12 +396,12 @@ $("#modal_DocAfectadoCXC").on("show.bs.modal", function () {
 					{ data: "nom_tdoc", title: "Descripción" },
 					{ data: "num_tdo", title: "Número", className: "text-right" },
 					{ data: "nro_control", title: "Control", className: "text-right" },
-					{ data: "fecha_comp", render: $.fn.dataTable.render.moment( FROM_PATTERN, TO_PATTERN ),title: "Fecha Emi."},
-					{ data: "fecha_venci", render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN), title: "Fecha Venc."},
-					{ data: "codigo_moneda", title: "Moneda", className: "text-center"},
-					{ data: "tasa_cambio", className: "text-right", render: DataTable.render.number(".", ",", 8), title: "Tasa Cambio"},
-					{ data: "mon_doc", className: "text-right", title: "Monto Doc.", render: DataTable.render.number(".", ",", 2)},						
-					{ data: "sal_doc", className: "text-right", title: "Saldo Doc.", render: DataTable.render.number(".", ",", 2)},
+					{ data: "fecha_comp", render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN), title: "Fecha Emi." },
+					{ data: "fecha_venci", render: $.fn.dataTable.render.moment(FROM_PATTERN, TO_PATTERN), title: "Fecha Venc." },
+					{ data: "codigo_moneda", title: "Moneda", className: "text-center" },
+					{ data: "tasa_cambio", className: "text-right", render: DataTable.render.number(".", ",", 8), title: "Tasa Cambio" },
+					{ data: "mon_doc", className: "text-right", title: "Monto Doc.", render: DataTable.render.number(".", ",", 2) },
+					{ data: "sal_doc", className: "text-right", title: "Saldo Doc.", render: DataTable.render.number(".", ",", 2) },
 				],
 				language: {
 					url: `${base_url}/Assets/json/es-ES.json`,
@@ -405,15 +418,21 @@ $("#modal_DocAfectadoCXC").on("show.bs.modal", function () {
 	});
 });
 $("body").on("click", "#tblmodal_DocAfectadoCXC tr", function () {
+	new_tasa_cambioNC = 0;
 	var row_select = $(this).closest("tr");
 	var datosFila = row_select
-			.find("td")
-			.map(function () {
-				return $(this).text();
-			})
-			.get();
-			docAfectado = datosFila[3] + "/" + datosFila[5] + "/" + datosFila[9] + "/" + datosFila[4] + "/" + datosFila[7] ;
+		.find("td")
+		.map(function () {
+			return $(this).text();
+		})
+		.get();
+	docAfectado = datosFila[3] + "/" + datosFila[5] + "/" + datosFila[9] + "/" + datosFila[4] + "/" + datosFila[7];
 	$("#doc_afectado").val(docAfectado);
-	$("#id_afectado").val( datosFila[0]);
+	$("#doc_afectado").attr('title', docAfectado);
+	new_monedaNC = datosFila[7];
+	new_tasa_cambioNC = datosFila[8];
+	$("#id_afectado").val(datosFila[0]);
+	$("#doc_afectado").prop('readonly', true);
+	$("#id_afectado").trigger('change');
 	$("#modal_DocAfectadoCXC").modal("hide");
 });

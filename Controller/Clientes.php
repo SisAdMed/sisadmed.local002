@@ -1,60 +1,72 @@
 <?php
-class Clientes extends Controller{
-    public function __construct(){
+
+class Clientes extends Controller
+{
+    public function __construct()
+    {
         Auth::noAuth();
         parent::__construct();
         Permisos::getPermisos(53);
     }
-    public function index($tipo){
+    public function index($tipo)
+    {
         if (empty($_SESSION['permisosMod']['r'])) {
             header('Location:' . base_url . '/Perfil');
         }
         $objeto = ClientesModel::all();
         $this->views->getView($this, "index", [
             'page_name' => "Consulta de Clientes",
-            'function_js' => "Clientes.js",
-            'function_js_mod' => "CXCFun.js",
+            'function_js' => "Clientes.js?v=" . SITE_VERSION,
+            'function_js_mod' => "CXCFun.js?v=" . SITE_VERSION,
             'objeto' => to_obj($objeto)
         ]);
     }
-    public function nuevo(){
+    public function nuevo()
+    {
         $this->views->getView($this, "nuevo", [
             'page_name' => "Nuevo Cliente",
-            'function_js' => "Clientes.js"
+            'function_js' => "Clientes.js?v=" . SITE_VERSION,
+            'function_js_mod' => "CXCFun.js?v=" . SITE_VERSION,
         ]);
     }
-    public function listar_paises(){
+    public function listar_paises()
+    {
         $objeto = ClientesModel::listar_paises();
         echo json_encode($objeto);
     }
-    public function listar_estados(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function listar_estados()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_pais = $_POST['id_pais'];
             $objeto = ClientesModel::listar_estados($id_pais);
             echo json_encode($objeto, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function listar_ciudades(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function listar_ciudades()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_edo = $_POST['id_edo'];
             $objeto = ClientesModel::listar_ciudades($id_edo);
             echo json_encode($objeto);
         }
     }
-    public function listar_vendedores(){
+    public function listar_vendedores()
+    {
         $objeto = ClientesModel::listar_vendedores();
         echo json_encode($objeto);
     }
-    public function listar_clientes(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function listar_clientes()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $tip_ent = $_POST['tip_ent'];
             $id_emp = $_POST['id_emp'];
             $objeto = ClientesModel::listar_clientes($tip_ent, $id_emp);
             echo json_encode($objeto);
         }
     }
-    public function edit($id) {
-        if(Permisos::read()){
+    public function edit(int $id)
+    {
+        if (Permisos::read()) {
             $id = intval(limpiar($id));
             if ($id > 0) {
                 $r = ClientesModel::edit($id);
@@ -62,81 +74,92 @@ class Clientes extends Controller{
                     Alertas::new('El registro no existe', 'warning');
                     header('Location:' . base_url . '/Clientes');
                 }
-            $this->views->getView($this, "edit", [
-                'page_name' => "Editando el cliente " . $r[0]['rif_ent'] . ' - ' . html_entity_decode($r[0]['nom_ent']),
-                'function_js' => "Clientes.js",
-                'r' => to_obj($r),
-            ]);
-        } else {
-            header('Location:' . base_url . '/Clientes');
-        }
+                $this->views->getView($this, "edit", [
+                    'page_name' => "Editando el cliente " . $r[0]['rif_ent'] . ' - ' . html_entity_decode($r[0]['nom_ent']),
+                    'function_js' => "Clientes.js?v=" . SITE_VERSION,
+                    'function_js_mod' => "CXCFun.js?v=" . SITE_VERSION,
+                    'r' => to_obj($r),
+                ]);
+            } else {
+                header('Location:' . base_url . '/Clientes');
+            }
             return;
         }
         Alertas::new('No tiene permiso para realizar esta acción', 'warning');
         header('Location:' . base_url . '/Clientes');
     }
-    public function consulta_vend(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function consulta_vend()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_ent = $_POST['id_ent'];
             $objeto = ClientesModel::consulta_vend($id_ent);
             echo json_encode($objeto);
         }
     }
-    public function listar_dpto_ent(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function listar_dpto_ent()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $objeto = ClientesModel::listar_dpto_ent();
             echo json_encode($objeto);
         }
     }
-    public function listar_codigos_area(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function listar_codigos_area()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $objeto = ClientesModel::listar_codigos_area();
             echo json_encode($objeto);
         }
     }
-    public function consulta_motivo(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function consulta_motivo()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
             $r = ClientesModel::consulta_motivo($id);
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
     //Total clientes
-    public function tot_cli(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function tot_cli()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $r = ClientesModel::tot_cli();
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
     //Mostrar datos de clientes
-    public function show_row(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function show_row()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
             $r = ClientesModel::show_row($id);
+            header('Content-Type: application/json; charset=utf8mb4');
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
     //Llenar combp de Status de Entidad (Clientes)
-    public function statusEntidad(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function statusEntidad()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
             $r = ClientesModel::statusEntidad($id);
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
     //Llenar combo Días de Crédito
-    public function listar_dias_credito(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function listar_dias_credito()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $r = ClientesModel::listar_dias_credito();
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function val_ent_rif() {
+    public function val_ent_rif()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
             $rows = to_obj(ClientesModel::total_rows($id));
             $jsonData = array();
-            if ($rows[0]->total !=0) {
+            if ($rows[0]->total != 0) {
                 $jsonData['success'] = 1;
                 $jsonData['message'] = 'Registro ya existe...';
             } else {
@@ -147,19 +170,29 @@ class Clientes extends Controller{
         }
     }
     //Llenar combo Tipos de Clientes agregado el 04-07-2025 a las 10:43:00 por José vargas
-    public function listar_tipos_clientes(){
+    public function listar_tipos_clientes()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $r = ClientesModel::listar_tipos_clientes();
             echo json_encode($r, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function cargar_screen_main(){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    public function cargar_screen_main()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $datos_tabla = [];
             $r = ClientesModel::all();
-            echo json_encode($r, JSON_UNESCAPED_UNICODE);
+            // Creamos los tokens para cada acción
+            foreach ($r as $p) {
+                $datos_tabla[] = array_merge($p, [
+                    "token_edit" => encriptar_url(json_encode(['accion' => 'edit', 'id' => $p['id_ent']]))
+                ]);
+            }
+            echo json_encode($datos_tabla, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function destroy() {
+    public function destroy()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $dataJson = [];
             $id = $_POST['id'];
@@ -192,7 +225,8 @@ class Clientes extends Controller{
             echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
         }
     }
-    public function store(){
+    public function store()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $modo = 'modify_user';
             $data = array();
@@ -201,9 +235,11 @@ class Clientes extends Controller{
             foreach ($_POST as $key => $value) {
                 $$key = $value;
             }
-            if (empty($id)) {                
+            if (empty($id)) {
                 $modo = 'create_user';
             }
+            //Valdiar si tiene imagen
+            $view_internet = (isset($internet) && !empty($internet)) ? 1 : 0;
             try {
                 $data += [
                     'tip_ent' => limpiar($tip_ent),
@@ -229,6 +265,9 @@ class Clientes extends Controller{
                     'req_exc_rat' => (isset($req_exc_rat) && !empty($req_exc_rat)) ? 1 : 0,
                     'contr_esp' => (isset($contr_esp) && !empty($contr_esp)) ? 1 : 0,
                     'id_por_ret_iva' => (isset($id_por_ret_iva) && $id_por_ret_iva > 0) ? $id_por_ret_iva : null,
+                    'cant_dec' => (!empty($cant_dec) && $cant_dec > 0) ? $cant_dec : 4,
+                    'view_internet' => $view_internet,
+                    'url' => $url ?? '',                    
                 ];
                 //Si el usuarios es administrador
                 if ($_SESSION['administrator'] == 1) {
@@ -239,14 +278,14 @@ class Clientes extends Controller{
                         'id_tipocliente' => $id_tipocliente,
                         'status' => $status,
                     ];
-                }                                
+                }
                 if (empty($_POST['id'])) {
                     $id = ClientesModel::guardar($data);
                     $id_ent_con = $id;
                     $title = "Registro se ha agregado satisfactoriamente";
                     Alertas::new(sprintf('El cliente %s se ha creado exitosamente con el id %s', $data['nom_ent'], $id));
                 } else {
-                    $id = ClientesModel::actualizar($id, $data);
+                    $id_upd = ClientesModel::actualizar($id, $data);
                     $id_ent_con = $id;
                     $title = "Registro se ha actualizado satisfactoriamente";
                     Alertas::new(sprintf('El cliente %s se ha modificado exitosamente con el id %s', $data['nom_ent'], $id_ent_con));
@@ -269,11 +308,53 @@ class Clientes extends Controller{
                         $iddc = ClientesModel::guardar_contactos($id, $data_det_cont);
                     }
                 }
+                //Almacenar Logo del Cliente
+                if ($view_internet == 0) {
+                    $log_ent = ClientesModel::getlogoEnt($id_ent_con);
+                    $logo_ent = $log_ent['logo_ent'];
+                    if ($logo_ent) {
+                        $rutalogo = ROOT .  $logo_ent;
+                        if (file_exists(($rutalogo))) {
+                            unlink($rutalogo);
+                        }
+                    }
+                    $data = [
+                        'id_ent' => $id_ent_con,
+                        'logo_ent' => ' ',
+                    ];
+                }
+                ClientesModel::actualizar($id_ent_con, $data);
+                if (isset($_FILES['logo_ent']) && $_FILES['logo_ent']['error'] === UPLOAD_ERR_OK) {
+                    $ruta = ROOT . DS .  'Assets' . DS . 'img' . DS . 'customers';
+                    if (!is_dir($ruta)) {
+                        mkdir($ruta, 0777, true);
+                        chmod($ruta, 0777);
+                    }
+                    $log_ent = ClientesModel::getlogoEnt($id_ent_con);
+                    $logo_ent = $log_ent['logo_ent'];
+                    if ($logo_ent) {
+                        $rutalogo = ROOT .  $logo_ent;
+                        if (file_exists(($rutalogo))) {
+                            unlink($rutalogo);
+                        }
+                    }
+                    $nombredelLogo = $_FILES['logo_ent']['name'];
+                    $ruta = ROOT . DS .  'Assets' . DS . 'img' . DS . 'customers';
+                    $rutalogo = $ruta . DS .  $nombredelLogo;
+                    //Buscar si ya existe un logo previamentecargado
+                    if (move_uploaded_file($_FILES['logo_ent']['tmp_name'], $rutalogo)) {
+                        $data = [
+                            'id_ent' => $id_ent_con,
+                            'logo_ent' =>$nombredelLogo,
+                        ];
+                        ClientesModel::actualizar($id_ent_con, $data);
+                    }
+                }
                 $msg = "Se ha salvado satisfactoriamente el Cliente $rif_ent $nom_ent";
                 $dataJson = [
                     'title' => $title,
                     'icon' => 'success',
-                    'msg' => $msg,                    
+                    'msg' => $msg,
                 ];
             } catch (\PDOException $e) {
                 $title = "Se ha presentado un error, intente luego";
@@ -282,6 +363,66 @@ class Clientes extends Controller{
                     'title' => $title,
                     'icon' => "error",
                     'msg' => $msg
+                ];
+            }
+            echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);
+        }
+    }
+    public function gestion($token = null)
+    {
+        if (!$token) {
+            return;
+        }
+        $datos = desencriptar_url($token);        
+        switch ($datos['accion']) {
+            case 'edit':
+                $this->edit($datos['id']);
+                break;
+            default:
+                // Acción no permitida
+                break;
+        }
+    }
+    public function remove_logo_url()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $dataJson = [];
+            $id_ent = $_POST['id'];
+            try {
+                $log_ent = ClientesModel::getlogoEnt($id_ent);
+                $logo_ent = $log_ent['logo_ent'];
+                if ($logo_ent) {
+                    $rutalogo = ROOT .  $logo_ent;
+                    if (file_exists(($rutalogo))) {
+                        unlink($rutalogo);
+                    }
+                    $data = [
+                        'id_ent' => $id_ent,
+                        'view_internet' => 0,
+                        'logo_ent' => null,
+                    ];
+                    ClientesModel::actualizar($id_ent, $data);
+                    $dataJson = [
+                        'status' => true,
+                        'msg' => 'Logo eliminado',
+                        'icon' => 'success',
+                        'title' => 'Logo eliminado satisfactoriamente'
+                    ];
+                } else {
+                    $dataJson = [
+                        'status' => false,
+                        'msg' => 'No se encontró un logo para eliminar',
+                        'icon' => 'error',
+                        'title' => 'Error'
+                    ];
+                }
+            } catch (\PDOException $e) {
+                $msg = sprintf("Error código: %s, Descripción del Error: %s", $e->getCode(), $e->getMessage());
+                $dataJson = [
+                    'status' => false,
+                    'msg' => $msg,
+                    'icon' => 'error',
+                    'title' => 'Error'
                 ];
             }
             echo json_encode($dataJson, JSON_UNESCAPED_UNICODE);

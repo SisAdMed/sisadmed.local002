@@ -22,7 +22,7 @@ class PDF extends FPDF{
     //Totales
     public $sub_total_foot;
 
-    public function __construct($r){
+    public function __construct($r){        
         parent::__construct();
         $this->rif_empresa = $r[0]->rif_empresa;
         $this->ruta_logo = IMG .'companies/' . $r[0]->logo;
@@ -77,7 +77,9 @@ class PDF extends FPDF{
         $this->SetFont('Arial','',7);
         $this->cell(20, 4, 'Nombre:');
         $this->SetFont('Arial','B',7);
-        $this->cell(30, 4, htmlentities($this->nom_ent), 0);
+        //$this->cell(30, 4, htmlentities($this->nom_ent), 0);         
+          $cadena = iconv("UTF-8", "ISO-8859-1", html_entity_decode($this->nom_ent));   
+          $this->cell(30, 4, ($cadena), 0);
         //Fecha
         $this->Cell(60);
         $this->SetFont('Arial','',7, 0, 1);
@@ -98,6 +100,10 @@ class PDF extends FPDF{
             //$this->SetFont('Arial','',7, 0, 1);
             //$this->cell(20, 4, 'Fecha:', 0);
         //}
+        if(substr($this->nom_ent, 60,120) > ''){
+            $this->SetFont('Arial','B',7);
+            $this->cell(30, 4, html_entity_decode(substr($this->nom_ent, 60,120)), 0,1);
+        }
         //RIF
         $this->SetFont('Arial','',7, 0, 1);
         $this->cell(20, 4, 'RIF:');
@@ -125,7 +131,10 @@ class PDF extends FPDF{
         }
 
         $this->SetFont('Arial','B',7);
-        $this->MultiCell(90, 4, htmlentities($this->dir_ent . ' ' . strtoupper($this->nombre_ciudad) . ' ' . strtoupper($this->nombre_edo) . ' ' . strtoupper($this->nombre_pais)));
+        $dir_ent = iconv("UTF-8", "ISO-8859-1", html_entity_decode($this->dir_ent));     
+        //$dir_ent = mb_convert_encoding($this->dir_ent, 'ISO-8859-1', 'UTF-8');
+        //debug($dir_ent);
+        $this->MultiCell(90, 4, ($dir_ent . ' ' . strtoupper($this->nombre_ciudad) . ' ' . strtoupper($this->nombre_edo) . ' ' . strtoupper($this->nombre_pais)));
         if($this->doc_afectado != null){
             $this->cell(80);
             $this->cell(40, 4, 'Documento afectado Factura: ' . $this->porciones[0] . ' de fecha  ' . $this->porciones[1] . ' Monto ' . $this->porciones[2] . ' Control ' . $this->porciones[3], 0, 1);
@@ -232,21 +241,25 @@ for ($i = 0; $i < count($r); $i++) {
     $pdf->Cell(120);
     $pdf->Cell(5, 3, htmlentities($r[$i]->mon_iva ? '16.00' : '(E)'), 0, 0, 'C');
     $pdf->Cell(10, 3, 1, 0, 0, 'R');
-    $pdf->Cell(15, 3, number_format($r[$i]->monto, 2), 0, 0, 'R');
+    $xmonto = $r[$i]->monto;  
+    if($r[0]->id_cli == 11)  {
+        $xmonto = abs($xmonto);
+    }
+    $pdf->Cell(15, 3, number_format($xmonto, 2), 0, 0, 'R');
     if($r[$i]->codigo_moneda != $r[$i]->moneda_emp){
-        $pdf->Cell(20, 3, number_format($r[$i]->monto, 2), 0, 0, 'R');
-        $pdf->Cell(20, 3, number_format($r[$i]->monto * $r[$i]->tasa_cambio, 2), 0, 1, 'R');
+        $pdf->Cell(20, 3, number_format($xmonto, 2), 0, 0, 'R');
+        $pdf->Cell(20, 3, number_format($xmonto * $r[$i]->tasa_cambio, 2), 0, 1, 'R');
     }else{
-        $pdf->Cell(40, 3, number_format($r[$i]->monto * $r[$i]->tasa_cambio, 2), 0, 1, 'R');
+        $pdf->Cell(40, 3, number_format($xmonto * $r[$i]->tasa_cambio, 2), 0, 1, 'R');
     }
     //Acumular variables
-     $sub_total += $r[$i]->monto;
+     $sub_total += $xmonto;
     if($r[$i]->mon_iva){
-        $mon_base += $r[$i]->monto;
+        $mon_base += $xmonto;
         $mon_exe += 0;
     }else{
         $mon_base += 0;
-        $mon_exe += $r[$i]->monto;
+        $mon_exe += $xmonto;
     }
     //Realizar rompimiento cada 50 registros
     $rows++;

@@ -12,25 +12,35 @@ let admin = '';
 //Cargar confiuraciones generales
 //Atributos de DataTable de Index
 
-function IndexDataTable(url, table, report, xcolums, xcol_def = "", xInit = "") {
+function IndexDataTable(url, table, report, xcolums, xcol_def = "", xInit = "", xorder = 1, xdir = "DESC") {
 	//Crear DataTable
 	var val_url = `${base_url}/${url}/cargar_screen_main`;
+	report = report + " ";
 	tableIndex = $(table).DataTable({
 		destroy: true,
 		clear: true,
-		serverside: true,
+		serverSide: false,
 		deferRender: true,
 		colResize: true,
 		responsive: true,
-		autoWidth: true,		
+		autoWidth: true,
 		ajax: {
 			url: val_url,
 			method: "POST",
 			dataSrc: "",
-			data: {},
 			dataType: "json",
 			beforeSend: function () {
-				loader.show();
+				// Muestra una ventana de SweetAlert2 con spinner activo
+				Swal.fire({
+					title: 'Cargando...',
+					text: `Procesando los registros de ${report}, por favor espere.`,
+					allowOutsideClick: false,
+					allowEscapeKey: false,
+					showConfirmButton: false,
+					didOpen: () => {
+						Swal.showLoading(); // Inicia la animación de carga
+					}
+				});
 			},
 			complete: function (data) {
 				loader.hide();
@@ -49,11 +59,14 @@ function IndexDataTable(url, table, report, xcolums, xcol_def = "", xInit = "") 
 		},
 		columns: xcolums,
 		columnDefs: xcol_def,
-		initComplete: xInit,
+		initComplete: function (settings, json) {
+			xInit,
+				Swal.close();
+		},
 		language: {
 			url: `${base_url}/Assets/json/es-ES.json`,
 		},
-		// mostrar botones de exportacion
+		// mostrar botones de exportacion		
 		dom: "<'row'<'col-sm-4'l><'col-sm-4 text-center'B><'col-sm-4'f>>" +
 			"<'row'<'col-sm-12'tr>>" +
 			"<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -73,6 +86,11 @@ function IndexDataTable(url, table, report, xcolums, xcol_def = "", xInit = "") 
 				className: "btn btn-warning",
 				title:
 					report + new Date().toISOString().replace(/[\-\:\.]/g, ""),
+				exportOptions: {
+					// 'orthogonal: export' le dice a DataTables: 
+					// "Ignora el render.number de la pantalla y búscame el número puro original de la BD"
+					orthogonal: 'export'
+				}
 			},
 			{
 				extend: "pdfHtml5",
@@ -96,7 +114,7 @@ function IndexDataTable(url, table, report, xcolums, xcol_def = "", xInit = "") 
 			[5, 10, 25, 50, "Todos"],
 		],
 		iDisplayLength: 5,
-		order: [[1, "DESC"]],
+		order: [[xorder, xdir.toLowerCase()]],
 	}).buttons().container().appendTo(table + '_wrapper .col-md-6:eq(0)');
 }
 //Inicio de Aplicaciones
@@ -631,11 +649,329 @@ function get_empresa_config(id_emp) {
 $(document).on("click", ".refresh-button", function () {
 	// Busca la tabla por su ID de forma directa
 	var table = $('#tblIndexMain').DataTable();
-	table.ajax.reload(null, false);
+	table.ajax.reload(function (json) {
+		if (typeof Swal !== 'undefined') {
+			Swal.close();
+		}
+	}, false);
 });
 //Decodificar valroes con caracteres especiales
 function decodificarHTML(html) {
-    var txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
+	var txt = document.createElement("textarea");
+	txt.innerHTML = html;
+	return txt.value;
+}
+//Mostrar Modal de Oroductos
+$("#modal-productos").on("shown.bs.modal", async function (e) {
+	let url = "";
+	let datos = "";
+	if (tipo_fac != "N") {
+		id_alm_res = $("#id_alm").val();
+		if (id_alm_res == undefined) {
+			id_alm_res = false;
+		}
+	}
+	id_emp = $("#id_emp").val();
+	if (!id_emp) {
+		id_emp = 0;
+	}
+	id_alm_sal = $("#id_alm_sal").val();
+
+	if (id_alm_sal) {
+		id_alm = id_alm_sal;
+	}
+	id_ubi_sal = $("#id_ubi_sal").val();
+	if (id_ubi_sal) {
+		id_ubi = id_ubi_sal;
+	}
+	id_tdo_cfg = await tip_doc_fac(id_emp);
+	id_alm_ppal = id_tdo_cfg["id_alm"];
+	stock = id_tdo_cfg["cot_stock"];
+	if (tipo_fac == "F" || tipo_fac == "NF" || tipo_fac == "N") {
+		stock = id_tdo_cfg["fac_stock"];
+	}
+	if (id_alm_ppal == id_alm) {
+		almSalPpal = true;
+	}
+	if (origen_COM == 0) {
+		if (almSalPpal || equivale) {
+			datos = { stock: stock, id_emp: "0" };
+			url = `${base_url}/Productos/listar_productos_modal`;
+		} else if (
+			(c_consig == 1 && tipo_fac == "F") ||
+			(c_consig == 1 && tipo_fac == "N") ||
+			(c_consig == 1 && tipo_fac == "NF")
+		) {
+			id_alm = $("#id_alm").val();
+			if ($("#id_alm_def").val()) {
+				id_alm = $("#id_alm_def").val();
+			}
+			datos = { id_alm: id_alm, id_ubi: id_ubi };
+			url = `${base_url}/Productos/listar_productos_modal_consig`;
+		} else if (c_consig == 0 && tipo_fac == "F") {
+			datos = { stock: stock, id_emp: "0" };
+			url = `${base_url}/Productos/listar_productos_modal`;
+		} else if (id_alm_res && mov_inv == false) {
+			if (tipo_fac == "N") {
+				id_cli = 0;
+			}
+			datos = { id_alm: id_alm_res, id_cli, id_cli };
+			url = `${base_url}/Productos/listar_productos_modal_reserva`;
+		} else {
+			datos = { stock: stock, id_emp: "0" };
+			url = `${base_url}/Productos/listar_productos_modal`;
+		}
+	} else {
+		datos = { stock: 0, id_emp: id_emp };
+		url = `${base_url}/Productos/listar_productos_modal`;
+	}
+	$("#tblModalProd").DataTable().clear();
+	$("#tblModalProd").DataTable().destroy();
+	var tblModal = $("#tblModalProd").DataTable({
+		aProcessing: true,
+		aServerSide: true,
+		fnCreatedRow: function (rowEl, data) {
+			$(rowEl).attr("id", data.id_prod)
+				.attr("title", "Haga clic para seleccionar este producto")
+				.addClass("btn-seleccionar-prod-modal")
+				.css("cursor", "pointer") // Para que el mouse cambie a la manito y el usuario sepa que es cliqueable
+				.data("id", data.id_prod)
+				.data("nombre", data.nom_prod)
+				.data("stock", data.stock)
+				.data("univta", data.uni_ven_prod || 1) // Si el backend no la manda, por defecto 1
+				.data("precio", data.pv1 || 0)
+				.data("lote", data.lote);
+
+		},
+		order: [[3, "asc"]],
+		ajax: {
+			url: url,
+			type: "POST",
+			deferRender: true,
+			data: datos,
+			dataSrc: "",
+			select: true,
+		},
+		language: {
+			url: `${base_url}/Assets/json/es-ES.json`,
+		},
+		columns: [
+			{ data: "id_prod" },
+			{ data: "cod_prod" },
+			{ data: "cod2_prod" },
+			{ data: "nom_prod" },
+			{ data: "ref_prod" },
+			{ data: "nom_fab" },
+			{ data: "stock" },
+			{ data: "lote" },
+		],
+		columnDefs: [
+			{
+				targets: 0,
+				visible: false,
+				searchable: false,
+			},
+			{
+				targets: 6,
+				className: "text-right",
+			},
+			{
+				targets: 7,
+				visible: false,
+				searchable: false,
+			},
+		],
+	});
+});
+//Seleccionar un producto en especifico
+// Variable para recordar qué item se va a modificar
+$(document).on("click", "#tblModalProd tbody tr", function () {
+	// 1. Obtener la fila seleccionada en DataTables
+	var tableModal = $('#tblModalProd').DataTable();
+	var data = tableModal.row(this).data();
+	if (!data) return;
+	// 2. Extraer el valor del item guardado
+	var item = $('#modal-productos').data('item-activo');
+	var suffix = item ? item : ''; // Maneja selectores dinámicos (#id_prod1) o únicos (#id_prod)
+	// 3. Extraer y normalizar datos
+	var id_prod = data.id_prod || data[0];
+	var nom_pro = typeof decodeHTMLEntities === "function" 
+        ? decodeHTMLEntities(data.nom_prod || data[1]) 
+        : (data.nom_prod || data[1]);
+	var tieneLote = parseInt(data.lote || data[7], 10) === 1;
+	// 4. Asignar valores a los inputs
+	$("#id_prod" + suffix).val(id_prod);
+    $("#nom_prod" + suffix).val(nom_pro).attr('title', nom_pro);
+	$("#lote" + suffix).prop('readonly', !tieneLote).prop('required', tieneLote);
+    $("#fec_venc" + suffix).prop('readonly', !tieneLote).prop('required', tieneLote);
+	// 5. Configurar validaciones de Lote y Fecha de Vencimiento
+    $("#lote" + suffix)
+        .prop('readonly', !tieneLote)
+        .prop('required', tieneLote);
+
+    $("#fec_venc" + suffix)
+        .prop('readonly', !tieneLote)
+        .prop('required', tieneLote);
+
+    // 6. Asignar ubicación por defecto si aplica
+    if (typeof id_ubi_cfg !== 'undefined' && id_ubi_cfg) {
+        $("#id_ubi" + suffix).val(id_ubi_cfg);
+        $("#nom_ubi" + suffix).val(nom_ubi_cfg || '').attr('title', nom_ubi_cfg || '');
+    }
+
+    // 7. Consulta adicional si el tipo de factura lo requiere
+    if (typeof tipo_fac !== 'undefined' && tipo_fac !== "X") {
+        ConsultarProducto(id_prod, item, "", "", "Z", typeof c_consig !== 'undefined' ? c_consig : '', tipo_fac);
+    }
+
+    // 8. Cerrar modal y disparar evento solo en el campo modificado
+    $("#modal-productos").modal("hide");
+    $("#id_prod" + suffix).trigger("change");	
+});
+//Buscar Producto
+$(document).on('click', '.btn-buscar-producto', function (e) {
+	e.preventDefault();
+	// Obtener el número de ítem de la fila actual (1, 2, 3...)
+	var item = $(this).data('item');
+	// Guardar el número de ítem en el modal (usando data o en el input hidden #item)
+	$('#modal-productos').data('item-activo', item);
+	// o $('#item').val(item);
+
+	// Abrir el modal
+	$('#modal-productos').modal('show');
+});
+//Poblar Modal de Ubicaciones
+$("#modal-ubicaciones").on("show.bs.modal", function (e) {
+	let url = "";
+	let datos = new FormData();
+	url = `${base_url}/Ubicaciones/listar_ubicaciones`;
+	$("#tblModalUbicaciones").DataTable().clear();
+	$("#tblModalUbicaciones").DataTable().destroy();
+	var tblModal = $("#tblModalUbicaciones").DataTable({
+		aProcessing: true,
+		aServerSide: true,
+		fnCreatedRow: function (rowEl, data) {
+			$(rowEl).attr("id", data.id_ubi);
+		},
+		processing: true,
+		ajax: {
+			url: url,
+			type: "POST",
+			deferRender: true,
+			data: { id_emp: id_emp, agrupa: "" },
+			dataSrc: "",
+		},
+		language: {
+			url: `${base_url}/Assets/json/es-ES.json`,
+		},
+		columns: [{ data: "id_ubi" }, { data: "cod_ubi" }, { data: "nom_ubi" }],
+		columnDefs: [
+			{
+				targets: 0,
+				visible: false,
+				searchable: false,
+			},
+		],
+	});
+});
+//Seleccionar registro marcado del Modal de Ubicaciones y mostrarlo en el formulario
+$(document).on("click", "#tblModalUbicaciones tbody tr", function () {
+	// 1. Obtener la fila seleccionada en DataTables
+	var tableModal = $('#tblModalUbicaciones').DataTable();
+	var data = tableModal.row(this).data();
+	if (!data) {
+		return;
+	} else {
+		// 2. Extraer el valor del item guardado
+		var item = $('#modal-ubicaciones').data('item-activo');
+		if (item) {
+			// 3. Obtener los valores según las columnas de tu modal (por índice o por nombre de clave)
+			// Ejemplo si data es array: data[0] = Código, data[1] = Nombre
+			// Ejemplo si data es objeto: data.id_ubi / data.nom_ubi
+			var idUbi = data.id_ubi || data[0];
+			var nomUbi = data.nom_ubi || data[1];
+			// 4. Asignar los valores a los inputs específicos de esa fila
+			$('#id_ubi' + item).val(idUbi);
+			$('#nom_ubi' + item).val(nomUbi).attr('title', nomUbi);
+		} else {
+			$("#id_ubi").val(id_ubi);
+			$("#id_ubi").trigger("change");
+		}
+	}
+	$("#modal-ubicaciones").modal("hide");
+});
+//Buscar Ubicacion
+$(document).on('click', '.btn-buscar-ubicacion', function (e) {
+	e.preventDefault();
+	// Obtener el número de ítem de la fila actual (1, 2, 3...)
+	var item = $(this).data('item');
+	// Guardar el número de ítem en el modal (usando data o en el input hidden #item)
+	$('#modal-ubicaciones').data('item-activo', item);
+	// o $('#item').val(item);
+
+	// Abrir el modal
+	$('#modal-ubicaciones').modal('show');
+});
+// Coloca la clave PÚBLICA (Public Key) que generaste previamente
+const VAPID_PUBLIC_KEY = 'BGhSxPWMmmWwhGtTvzaE_nCe6q96yIYZu10dpEAQWP5XFH1-Hdo7sQw-oFWSNF9aep8aOoMpeSC_A8T6TBedaes';
+
+function urlBase64ToUint8Array(base64String) {
+	const padding = '='.repeat((4 - base64String.length % 4) % 4);
+	const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+	const rawData = window.atob(base64);
+	const outputArray = new Uint8Array(rawData.length);
+	for (let i = 0; i < rawData.length; ++i) {
+		outputArray[i] = rawData.charCodeAt(i);
+	}
+	return outputArray;
+}
+
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+	window.addEventListener('load', function () {
+		navigator.serviceWorker.register('/Assets/app/js/sw.js')
+			.then(function (swReg) {
+				//console.log('Service Worker de SisAdMed registrado con éxito:', swReg);
+				solicitarPermisoNotificaciones(swReg);
+			})
+			.catch(function (error) {
+				console.error('Error al registrar el Service Worker:', error);
+			});
+	});
+}
+
+function solicitarPermisoNotificaciones(swReg) {
+	Notification.requestPermission().then(function (permission) {
+		if (permission === 'granted') {
+			swReg.pushManager.subscribe({
+				userVisibleOnly: true,
+				applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+			})
+				.then(function (subscription) {
+					// Enviar objeto de suscripción al backend PHP vía AJAX
+					guardarSuscripcionEnServidor(subscription);
+				})
+				.catch(function (err) {
+					console.error('Error al suscribir al servicio Push:', err);
+				});
+		} else {
+			console.warn('El usuario denegó los permisos de notificación.');
+		}
+	});
+}
+
+function guardarSuscripcionEnServidor(subscription) {
+	const url = `${base_url}/Usuarios?action=subscribe`;
+	fetch(url, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(subscription)
+	})
+		.then(response => response.json())
+		.then(data => {
+			//console.log(data);
+			//console.log('Suscripción guardada en el servidor:', data);
+		})
+		.catch(err => console.error('Error enviando suscripción al backend:', err));
 }

@@ -1,112 +1,133 @@
 <?php
 // Modificado el 19-02-2026 a las 09:37:00, por José Vargas, paa agregar la funcion para guardar los registros de auditoria en las tablas con la fehc ay hora local de Venezuela, ya que se estaba guardando por defecto conla hora del servidor de la nube, daondo diferencias en horas. La funcion es getAuditoria.
-function headerAdmin($data = ""){
+function headerAdmin(array $data)
+{
     $view_header = "Views/Templates/header.php";
     require_once($view_header);
+    return;
 }
-function footerAdmin($data = ""){
+function footerAdmin(array $data)
+{
     $view_footer = "Views/Templates/footer.php";
     require_once($view_footer);
+    return;
 }
-function get_favicon(){
+function get_favicon()
+{
     $path = FAVICON;
     $favicon = SITE_FAVICON;
-    $type = ''; 
+    $type = '';
     $href = '';
     $placeholder = '<link rel="shortcut icon" href="%s" type="%s">';
     switch (pathinfo($path . $favicon, PATHINFO_EXTENSION)) {
         case 'ico';
-        $type = 'image/vnd.microsoft.icon';
-        $href = $path . $favicon;
-        break;
+            $type = 'image/vnd.microsoft.icon';
+            $href = $path . $favicon;
+            break;
         case 'png';
-        $type = 'image/png';
-        $href = $path . $favicon;
-        break;
+            $type = 'image/png';
+            $href = $path . $favicon;
+            break;
         case 'gif';
-        $type = 'image/gif';
-        $href = $path . $favicon;
-        break;
+            $type = 'image/gif';
+            $href = $path . $favicon;
+            break;
         case 'svg';
-        $type = 'image/svg+xml';
-        $href = $path . $favicon;
-        break;
+            $type = 'image/svg+xml';
+            $href = $path . $favicon;
+            break;
         case 'jpg';
-        $type = 'image/jpg';
-        $href = $path . $favicon;
-        break;
+            $type = 'image/jpg';
+            $href = $path . $favicon;
+            break;
         default:
-        return false;
-        break;
+            return false;
+            break;
     }
     return sprintf($placeholder, $href, $type);
 }
-function debug($data){
+function debug($data)
+{
     $format = print_r('<pre>');
     $format .= print_r($data);
     $format .= print_r('</pre>');
     return $format;
 }
-function get_logo(){
+function get_logo()
+{
     $default_logo = SITE_LOGO;
     $placeholder_image = 'https://via.placeholder.com/150x60';
-    if (!is_file(IMAGE_PATH.$default_logo)){
+    if (!is_file(IMAGE_PATH . $default_logo)) {
         return $placeholder_image;
     }
     return IMG . $default_logo;
 }
-function limpiar($datos){
+function limpiar($datos)
+{
     $datos = trim($datos);
     $datos = htmlentities($datos, ENT_QUOTES, SITE_CHARSET);
     //$datos = utf8_decode($datos);
     $datos = iso8859_1_to_utf8($datos);
     return $datos;
 }
-function iso8859_1_to_utf8(string $s): string {
+function iso8859_1_to_utf8(string $s): string
+{
     $s .= $s;
     $len = \strlen($s);
 
     for ($i = $len >> 1, $j = 0; $i < $len; ++$i, ++$j) {
         switch (true) {
-            case $s[$i] < "\x80": $s[$j] = $s[$i]; break;
-            case $s[$i] < "\xC0": $s[$j] = "\xC2"; $s[++$j] = $s[$i]; break;
-            default: $s[$j] = "\xC3"; $s[++$j] = \chr(\ord($s[$i]) - 64); break;
+            case $s[$i] < "\x80":
+                $s[$j] = $s[$i];
+                break;
+            case $s[$i] < "\xC0":
+                $s[$j] = "\xC2";
+                $s[++$j] = $s[$i];
+                break;
+            default:
+                $s[$j] = "\xC3";
+                $s[++$j] = \chr(\ord($s[$i]) - 64);
+                break;
         }
     }
 
     return substr($s, 0, $j);
 }
 //Corregir acentos
-function acentos_cadena($cadena) {
-   $search = explode(",","á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,Ã¡,Ã©,Ã­,Ã³,Ãº,Ã±,ÃÃ¡,ÃÃ©,ÃÃ­,ÃÃ³,ÃÃº,ÃÃ±,Ã“,Ã ,Ã‰,Ã ,Ãš,â€œ,â€ ,Â¿,ü");
-   $replace = explode(",","á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,Ó,Á,É,Í,Ú,\",\",¿,&uuml;");
-   $cadena= str_replace($search, $replace, $cadena);
+function acentos_cadena($cadena)
+{
+    $search = explode(",", "á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,Ã¡,Ã©,Ã­,Ã³,Ãº,Ã±,ÃÃ¡,ÃÃ©,ÃÃ­,ÃÃ³,ÃÃº,ÃÃ±,Ã“,Ã ,Ã‰,Ã ,Ãš,â€œ,â€ ,Â¿,ü");
+    $replace = explode(",", "á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,Ó,Á,É,Í,Ú,\",\",¿,&uuml;");
+    $cadena = str_replace($search, $replace, $cadena);
 
-   return $cadena;
+    return $cadena;
 }
-function to_obj($array){
+function to_obj($array)
+{
     return json_decode(json_encode($array));
 }
-function agrupador($agrupa){
-    if($agrupa == "S"){
+function agrupador($agrupa)
+{
+    if ($agrupa == "S") {
         echo '<option selected value="S">Si</option>
         <option value="N">No</option>';
-    }elseif($agrupa == "N"){
+    } elseif ($agrupa == "N") {
         echo '<option selected value="N">No</option>
         <option value="S">Si</option>';
-    }else{
+    } else {
         echo '<option value="" selected disabled>Seleccione...</option>
         <option value="S">Si</option>
         <option value="N">No</option>';
     }
 }
-function status($status){
-    if($status == "1"){
+function status($status)
+{
+    if ($status == "1") {
         echo '<option selected value="1">Activo</option>
         <option value="0">Inactivo</option>
         <option value="1">Activo</option>
         <option value="9">Por aprobar</option>';
-    }elseif($status == "0"){
+    } elseif ($status == "0") {
         echo '<option selected value="0">Inactivo</option>
         <option value="0">Inactivo</option>
         <option value="1">Activo</option>
@@ -116,126 +137,140 @@ function status($status){
         <option value="0">Inactivo</option>
         <option value="1">Activo</option>
         <option value="9">Por aprobar</option>';
-    }else{
+    } else {
         echo '<option value="" disabled>Seleccione...</option>
         <option value="0">Inactivo</option>
         <option value="1" selected>Activo</option>
         <option value="9">Por aprobar</option>';
     }
 }
-function statusEntidad($id){
+function statusEntidad($id)
+{
     $p = DB::query("SELECT * FROM f0015");
     echo '<option value="">Seleccione...</option>';
     $p1 = to_obj($p);
     foreach ($p1 as $value) {
-        if($id == $value->id_sta ){
-            echo '<option selected value="'.$value->id_sta .'">'.$value->nom_sta.'</option>';
-        }else{
-            echo '<option value="'.$value->id_sta .'">'.$value->nom_sta.'</option>';
+        if ($id == $value->id_sta) {
+            echo '<option selected value="' . $value->id_sta . '">' . $value->nom_sta . '</option>';
+        } else {
+            echo '<option value="' . $value->id_sta . '">' . $value->nom_sta . '</option>';
         }
     }
 }
-function formatFecha($fecha){
+function formatFecha($fecha)
+{
     return date("d-m-Y", strtotime($fecha));
 }
-function formatFechaSlash($fecha){
+function formatFechaSlash($fecha)
+{
     return date("d/m/Y", strtotime($fecha));
 }
-function formatFechaHora($fecha){
+function formatFechaHora($fecha)
+{
     return date("d-m-Y H:i:s", strtotime($fecha));
 }
-function formatFechaYMD($fecha){
+function formatFechaYMD($fecha)
+{
     return date("Y-m-d", strtotime($fecha));
 }
-function formatNumber($monto, $dec){ 
+function formatNumber($monto, $dec)
+{
     return number_format(floatval($monto), $dec, ",", ".");
 }
-function selEmpresa($id){
+function selEmpresa($id)
+{
     $p = DB::query("SELECT * FROM f0011");
     echo '<option value="">Seleccione...</option>';
     $p1 = to_obj($p);
     foreach ($p1 as $value) {
-        if($id == $value->id_emp){
-            echo '<option selected value="'.$value->id_emp.'">'.$value->nombre_emp.'</option>';
-        }else{
-            echo '<option value="'.$value->id_emp.'">'.$value->nombre_emp.'</option>';
+        if ($id == $value->id_emp) {
+            echo '<option selected value="' . $value->id_emp . '">' . $value->nombre_emp . '</option>';
+        } else {
+            echo '<option value="' . $value->id_emp . '">' . $value->nombre_emp . '</option>';
         }
     }
 }
-function SelMonedas($id){
+function SelMonedas($id)
+{
     $sm = DB::query("SELECT * FROM f0005");
     echo '<option value="">Seleccione...</option>';
     $m1 = to_obj($sm);
     foreach ($m1 as $value) {
-        if($id == $value->id_moneda){
-            echo '<option selected value="'.$value->id_moneda.'">'.$value->nombre_moneda.'</option>';
-        }else{
-            echo '<option value="'.$value->id_moneda.'">'.$value->nombre_moneda.'</option>';
+        if ($id == $value->id_moneda) {
+            echo '<option selected value="' . $value->id_moneda . '">' . $value->nombre_moneda . '</option>';
+        } else {
+            echo '<option value="' . $value->id_moneda . '">' . $value->nombre_moneda . '</option>';
         }
     }
 }
-function selPais($id){
+function selPais($id)
+{
     $sm = DB::query("SELECT * FROM f0004");
     echo '<option value="">Seleccione...</option>';
     $m1 = to_obj($sm);
     foreach ($m1 as $value) {
-        if($id == $value->id_pais){
-            echo '<option selected value="'.$value->id_pais.'">'.$value->nombre_pais.'</option>';
-        }else{
-            echo '<option value="'.$value->id_pais.'">'.$value->nombre_pais.'</option>';
+        if ($id == $value->id_pais) {
+            echo '<option selected value="' . $value->id_pais . '">' . $value->nombre_pais . '</option>';
+        } else {
+            echo '<option value="' . $value->id_pais . '">' . $value->nombre_pais . '</option>';
         }
     }
 }
-function selEstado($id){
+function selEstado($id)
+{
     $sm = DB::query("SELECT * FROM f00041");
     echo '<option value="">Seleccione...</option>';
     $m1 = to_obj($sm);
     foreach ($m1 as $value) {
-        if($id == $value->id_edo){
-            echo '<option selected value="'.$value->id_edo.'">'.$value->nombre_edo.'</option>';
-        }else{
-            echo '<option value="'.$value->id_edo.'">'.$value->nombre_edo.'</option>';
+        if ($id == $value->id_edo) {
+            echo '<option selected value="' . $value->id_edo . '">' . $value->nombre_edo . '</option>';
+        } else {
+            echo '<option value="' . $value->id_edo . '">' . $value->nombre_edo . '</option>';
         }
     }
 }
-function selCiudad($id){
+function selCiudad($id)
+{
     $sm = DB::query("SELECT * FROM f00042");
     echo '<option value="">Seleccione...</option>';
     $m1 = to_obj($sm);
     foreach ($m1 as $value) {
-        if($id == $value->id_ciudad){
-            echo '<option selected value="'.$value->id_ciudad.'">'.$value->nombre_ciudad.'</option>';
-        }else{
-            echo '<option value="'.$value->id_ciudad.'">'.$value->nombre_ciudad.'</option>';
+        if ($id == $value->id_ciudad) {
+            echo '<option selected value="' . $value->id_ciudad . '">' . $value->nombre_ciudad . '</option>';
+        } else {
+            echo '<option value="' . $value->id_ciudad . '">' . $value->nombre_ciudad . '</option>';
         }
     }
 }
-function selCteCble($id){
+function selCteCble($id)
+{
     $r = DB::query("SELECT * FROM f0010 WHERE status = 1 AND agrupa_cta = 'N'");
     echo '<option value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_cta){
-            echo '<option selected value="'.$value->id_cta.'">'. str_pad($value->cod_cta, 20) . ' - ' . $value->nombre_cta.'</option>';
-        }else{
-            echo '<option value="'.$value->id_cta.'">'.str_pad($value->cod_cta, 20) . ' - ' . $value->nombre_cta.'</option>';
+        if ($id == $value->id_cta) {
+            echo '<option selected value="' . $value->id_cta . '">' . str_pad($value->cod_cta, 20) . ' - ' . $value->nombre_cta . '</option>';
+        } else {
+            echo '<option value="' . $value->id_cta . '">' . str_pad($value->cod_cta, 20) . ' - ' . $value->nombre_cta . '</option>';
         }
     }
 }
-function SelAuxCtb($id){
+function SelAuxCtb($id)
+{
     $r = DB::query("SELECT * FROM f0009 WHERE status_aux = 1 AND agrupa_aux = 'N'");
     echo '<option value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_aux){
-            echo '<option selected value="'.$value->id_aux.'">'. str_pad($value->cod_aux, 20) . ' - ' . $value->nombre_aux.'</option>';
-        }else{
-            echo '<option value="'.$value->id_aux.'">'.str_pad($value->cod_aux, 20) . ' - ' . $value->nombre_aux.'</option>';
+        if ($id == $value->id_aux) {
+            echo '<option selected value="' . $value->id_aux . '">' . str_pad($value->cod_aux, 20) . ' - ' . $value->nombre_aux . '</option>';
+        } else {
+            echo '<option value="' . $value->id_aux . '">' . str_pad($value->cod_aux, 20) . ' - ' . $value->nombre_aux . '</option>';
         }
     }
 }
 //Tipos de Cuentas Activo, Pasico, Capital, etc.
-function seltipoCuenta($status){
+function seltipoCuenta($status)
+{
     $selected = "";
     $selectedA = "";
     $selectedP = "";
@@ -246,40 +281,41 @@ function seltipoCuenta($status){
     $selectedT = "";
     $selectedO = "";
 
-    if($status == "A"){
+    if ($status == "A") {
         $selectedA = "selected";
-    }elseif($status == "P"){
+    } elseif ($status == "P") {
         $selectedP = "selected";
-    }elseif($status == "C"){
+    } elseif ($status == "C") {
         $selectedC = "selected";
-    }elseif($status == "I"){
+    } elseif ($status == "I") {
         $selectedI = "selected";
-    }elseif($status == "S"){
+    } elseif ($status == "S") {
         $selectedS = "selected";
-    }elseif($status == "E"){
+    } elseif ($status == "E") {
         $selectedE = "selected";
-    }elseif($status == "T"){
+    } elseif ($status == "T") {
         $selectedT = "selected";
-    }elseif($status == "O"){
+    } elseif ($status == "O") {
         $selectedO = "selected";
-    }else{
+    } else {
         $selected = "selected";
     }
 
     //    <option '.$selectedS.'  value="S">Costo</option>
 
-    echo '<option '.$selected.' disabled value="">Seleccione...</option>
-    <option '.$selectedA.'  value="A">Activo</option>
-    <option '.$selectedP.'  value="P">Pasivo</option>
-    <option '.$selectedC.'  value="C">Capital</option>
-    <option '.$selectedI.'  value="I">Ingreso</option>
-    <option '.$selectedS.'  value="S">Costo</option>
-    <option '.$selectedE.'  value="E">Egreso</option>
-    <option '.$selectedT.'  value="T">Contra</option>
-    <option '.$selectedO.'  value="O">Percontra</option>';
+    echo '<option ' . $selected . ' disabled value="">Seleccione...</option>
+    <option ' . $selectedA . '  value="A">Activo</option>
+    <option ' . $selectedP . '  value="P">Pasivo</option>
+    <option ' . $selectedC . '  value="C">Capital</option>
+    <option ' . $selectedI . '  value="I">Ingreso</option>
+    <option ' . $selectedS . '  value="S">Costo</option>
+    <option ' . $selectedE . '  value="E">Egreso</option>
+    <option ' . $selectedT . '  value="T">Contra</option>
+    <option ' . $selectedO . '  value="O">Percontra</option>';
 }
 //Tipos de Movimientos de Inventario
-function selTipMovINV($tipo){
+function selTipMovINV($tipo)
+{
     $selected = "";
     $selectedE = "";
     $selectedS = "";
@@ -287,55 +323,58 @@ function selTipMovINV($tipo){
     $selectedT = "";
     $selectedC = "";
 
-    if($tipo == "E"){
+    if ($tipo == "E") {
         $selectedE = "selected";
-    }elseif($tipo == "S"){
+    } elseif ($tipo == "S") {
         $selectedS = "selected";
-    }elseif($tipo == "R"){
+    } elseif ($tipo == "R") {
         $selectedR = "selected";
-    }elseif($tipo == "T"){
+    } elseif ($tipo == "T") {
         $selectedT = "selected";
     } elseif ($tipo == "C") {
         $selectedC = "selected";
-    }else{
+    } else {
         $selected = "selected";
     }
 
-    echo '<option '.$selected.' value="">Seleccione..</option>
-    <option '.$selectedE.' value ="E">Entrada</option>
-    <option '.$selectedS.' value ="S">Salida</option>
-    <option '.$selectedR.' value ="R">Reintegro</option>
-    <option '.$selectedT.' value ="T">Transferencia entre Almacenes</option>
-    <option '.$selectedC.' value ="C">Transferencia entre Empresas</option>';
+    echo '<option ' . $selected . ' value="">Seleccione..</option>
+    <option ' . $selectedE . ' value ="E">Entrada</option>
+    <option ' . $selectedS . ' value ="S">Salida</option>
+    <option ' . $selectedR . ' value ="R">Reintegro</option>
+    <option ' . $selectedT . ' value ="T">Transferencia entre Almacenes</option>
+    <option ' . $selectedC . ' value ="C">Transferencia entre Empresas</option>';
 }
 //Tipos de Movimientos de Salida
-function selTipMovSal($id_emp, $id){
+function selTipMovSal($id_emp, $id)
+{
     $r = DB::query("SELECT * FROM f4006 WHERE id_emp = {$id_emp} AND tipo_tmoinv = 'S' AND status = 1");
     echo '<option disable value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_tmoinv){
-            echo '<option selected value="'.$value->id_tmoinv.'">'. str_pad($value->cod_tmoinv, 2) . ' - ' . $value->nom__tmoinv.'</option>';
-        }else{
-            echo '<option value="'.$value->id_tmoinv.'">'.str_pad($value->cod_tmoinv, 2) . ' - ' . $value->nom__tmoinv.'</option>';
+        if ($id == $value->id_tmoinv) {
+            echo '<option selected value="' . $value->id_tmoinv . '">' . str_pad($value->cod_tmoinv, 2) . ' - ' . $value->nom__tmoinv . '</option>';
+        } else {
+            echo '<option value="' . $value->id_tmoinv . '">' . str_pad($value->cod_tmoinv, 2) . ' - ' . $value->nom__tmoinv . '</option>';
         }
     }
 }
 //Almacen
-function selAlmacen( $id){
+function selAlmacen($id)
+{
     $r = DB::query("SELECT * FROM f4002 WHERE status = 1");
     echo '<option disable value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_alm){
-            echo '<option selected value="'.$value->id_alm.'">'. $value->nom_alm.'</option>';
-        }else{
-            echo '<option value="'.$value->id_alm.'">'.$value->nom_alm.'</option>';
+        if ($id == $value->id_alm) {
+            echo '<option selected value="' . $value->id_alm . '">' . $value->nom_alm . '</option>';
+        } else {
+            echo '<option value="' . $value->id_alm . '">' . $value->nom_alm . '</option>';
         }
     }
 }
 //Tipos de Documentos CxC
-function selTipDocCxC($tipo){
+function selTipDocCxC($tipo)
+{
     $selected = "";
     $selectedF = "";
     $selectedP = "";
@@ -347,39 +386,40 @@ function selTipDocCxC($tipo){
     $selectedE = "";
     $selectedZ = "";
 
-    if($tipo == "F"){
+    if ($tipo == "F") {
         $selectedF = "selected";
-    }elseif($tipo == "P"){
+    } elseif ($tipo == "P") {
         $selectedP = "selected";
-    }elseif($tipo == "C"){
+    } elseif ($tipo == "C") {
         $selectedC = "selected";
-    }elseif($tipo == "B"){
+    } elseif ($tipo == "B") {
         $selectedB = "selected";
-    }elseif($tipo == "N"){
+    } elseif ($tipo == "N") {
         $selectedN = "selected";
-    }elseif($tipo == "R"){
+    } elseif ($tipo == "R") {
         $selectedR = "selected";
-    }elseif($tipo == "D"){
+    } elseif ($tipo == "D") {
         $selectedD = "selected";
-    }elseif($tipo == "E"){
+    } elseif ($tipo == "E") {
         $selectedE = "selected";
-    }elseif($tipo == "Z"){
+    } elseif ($tipo == "Z") {
         $selectedZ = "selected";
     }
 
-    echo '<option '.$selected.' disabled value="">Seleccione..</option>
-    <option '.$selectedF.' value ="F">Factura</option>
-    <option '.$selectedP.' value ="P">Presupuesto</option>
-    <option '.$selectedC.' value ="C">Nota de Crédito</option>
-    <option '.$selectedB.' value ="B">Nota de Débito</option>
-    <option '.$selectedN.' value ="N">Nota de Entrega</option>
-    <option '.$selectedR.' value ="R">Recepción S.T.</option>
-    <option '.$selectedD.' value ="D">Nota de Devolución</option>
-    <option '.$selectedE.' value ="E">Entrega S.T.</option>
-    <option '.$selectedZ.' value ="Z">Nota de Entrega No Fiscal</option>';
+    echo '<option ' . $selected . ' disabled value="">Seleccione..</option>
+    <option ' . $selectedF . ' value ="F">Factura</option>
+    <option ' . $selectedP . ' value ="P">Presupuesto</option>
+    <option ' . $selectedC . ' value ="C">Nota de Crédito</option>
+    <option ' . $selectedB . ' value ="B">Nota de Débito</option>
+    <option ' . $selectedN . ' value ="N">Nota de Entrega</option>
+    <option ' . $selectedR . ' value ="R">Recepción S.T.</option>
+    <option ' . $selectedD . ' value ="D">Nota de Devolución</option>
+    <option ' . $selectedE . ' value ="E">Entrega S.T.</option>
+    <option ' . $selectedZ . ' value ="Z">Nota de Entrega No Fiscal</option>';
 }
 //Tipos de Documentos CxP
-function selTipDocCxP($tipo){
+function selTipDocCxP($tipo)
+{
     $selected = "";
     $selectedM = "";
     $selectedO = "";
@@ -390,85 +430,89 @@ function selTipDocCxP($tipo){
     $selectedV = "";
     $selectedG = "";
 
-    if($tipo == "M"){
+    if ($tipo == "M") {
         $selectedM = "selected";
-    }elseif($tipo == "O"){
+    } elseif ($tipo == "O") {
         $selectedO = "selected";
-    }elseif($tipo == "T"){
+    } elseif ($tipo == "T") {
         $selectedT = "selected";
-    }elseif($tipo == "X"){
+    } elseif ($tipo == "X") {
         $selectedX = "selected";
-    }elseif($tipo == "A"){
+    } elseif ($tipo == "A") {
         $selectedA = "selected";
-    }elseif($tipo == "B"){
+    } elseif ($tipo == "B") {
         $selectedB = "selected";
-    }elseif($tipo == "V"){
+    } elseif ($tipo == "V") {
         $selectedV = "selected";
-    }elseif($tipo == "G"){
+    } elseif ($tipo == "G") {
         $selectedG = "selected";
     }
-    echo '<option '.$selected.' value="">Seleccione..</option>
-    <option '.$selectedM.' value ="M">Factura</option>
-    <option '.$selectedO.' value ="O">Orden de Compra</option>
-    <option '.$selectedT.' value ="T">Nota de Entrega</option>
-    <option '.$selectedX.' value ="X">Recepción S.T.</option>
-    <option '.$selectedA.' value ="A">Nota de Crédito</option>
-    <option '.$selectedB.' value ="B">Nota de Débito</option>
-    <option '.$selectedV.' value ="V">Nota de Devolución</option>
-    <option '.$selectedG.' value ="G">Entrega S.T.</option>';
+    echo '<option ' . $selected . ' value="">Seleccione..</option>
+    <option ' . $selectedM . ' value ="M">Factura</option>
+    <option ' . $selectedO . ' value ="O">Orden de Compra</option>
+    <option ' . $selectedT . ' value ="T">Nota de Entrega</option>
+    <option ' . $selectedX . ' value ="X">Recepción S.T.</option>
+    <option ' . $selectedA . ' value ="A">Nota de Crédito</option>
+    <option ' . $selectedB . ' value ="B">Nota de Débito</option>
+    <option ' . $selectedV . ' value ="V">Nota de Devolución</option>
+    <option ' . $selectedG . ' value ="G">Entrega S.T.</option>';
 }
 //Seleccionar origen Nacional/Importado
-function SelOrigen($id){
+function SelOrigen($id)
+{
     $selected = "";
     $selectedN = "";
     $selectedI = "";
 
-    if($id == "N"){
+    if ($id == "N") {
         $selectedN = "selected";
-    }elseif($id == "I"){
+    } elseif ($id == "I") {
         $selectedI = "selected";
     }
 
-    echo '<option '.$selected.' value="">Seleccione...</option>
-        <option '.$selectedN.' value="N">Nacional</option>
-        <option '.$selectedI.' value="I">Importado</option>';
+    echo '<option ' . $selected . ' value="">Seleccione...</option>
+        <option ' . $selectedN . ' value="N">Nacional</option>
+        <option ' . $selectedI . ' value="I">Importado</option>';
 }
 //Presentacion de Productos
-function SelPresentacion($id){
+function SelPresentacion($id)
+{
     $r = DB::query("SELECT * FROM f4004 WHERE status = 1");
     echo '<option disable value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_pre){
-            echo '<option selected value="'.$value->id_pre.'">'. $value->nom_pre.'</option>';
-        }else{
-            echo '<option value="'.$value->id_pre.'">'.$value->nom_pre.'</option>';
+        if ($id == $value->id_pre) {
+            echo '<option selected value="' . $value->id_pre . '">' . $value->nom_pre . '</option>';
+        } else {
+            echo '<option value="' . $value->id_pre . '">' . $value->nom_pre . '</option>';
         }
     }
 }
 //Presentacion de Productos
-function SelFabricante($id){
+function SelFabricante($id)
+{
     $r = DB::query("SELECT * FROM f4003 WHERE status = 1");
     echo '<option disable value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_fab){
-            echo '<option selected value="'.$value->id_fab.'">'. $value->nom_fab.'</option>';
-        }else{
-            echo '<option value="'.$value->id_fab.'">'.$value->nom_fab.'</option>';
+        if ($id == $value->id_fab) {
+            echo '<option selected value="' . $value->id_fab . '">' . $value->nom_fab . '</option>';
+        } else {
+            echo '<option value="' . $value->id_fab . '">' . $value->nom_fab . '</option>';
         }
     }
 }
 //Grupo de Productos
-function SelGrupo($id){
+function SelGrupo($id)
+{
     $r = DB::query("SELECT * FROM f4007 WHERE status = 1 ORDER BY grupo_nombre");
     echo '<option disable value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_grupo){
-            echo '<option selected value="'.$value->id_grupo.'">'. $value->grupo_nombre.'</option>';
-        }else{
-            echo '<option value="'.$value->id_grupo.'">'.$value->grupo_nombre.'</option>';
+        if ($id == $value->id_grupo) {
+            echo '<option selected value="' . $value->id_grupo . '">' . $value->grupo_nombre . '</option>';
+        } else {
+            echo '<option value="' . $value->id_grupo . '">' . $value->grupo_nombre . '</option>';
         }
     }
 }
@@ -487,92 +531,97 @@ function SelSubGrupo($id)
     }
 }
 //Seleccionar Vendedores
-function SelVendedores($id){
+function SelVendedores($id)
+{
     $r = DB::query("SELECT * FROM f0016 WHERE status = 1");
     echo '<option disable value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_vend){
-            echo '<option selected value="'.$value->id_vend.'">'. $value->nom_vend . ' ' .  $value->ape_vend.'</option>';
-        }else{
-            echo '<option value="'.$value->id_vend.'">'.$value->nom_vend . ' ' .  $value->ape_vend.'</option>';
+        if ($id == $value->id_vend) {
+            echo '<option selected value="' . $value->id_vend . '">' . $value->nom_vend . ' ' .  $value->ape_vend . '</option>';
+        } else {
+            echo '<option value="' . $value->id_vend . '">' . $value->nom_vend . ' ' .  $value->ape_vend . '</option>';
         }
     }
 }
 //Obtener ID de Compañia
-function getIdCompany($cia){
+function getIdCompany($cia)
+{
     return $r = DB::query("SELECT id_emp FROM f0011 WHERE nombre_emp = {$cia}");
 }
 //Escribir en la console
-function write_to_console($data) {
+function write_to_console($data)
+{
     $console = $data;
-    if (is_array($console)){
+    if (is_array($console)) {
         $console = implode(',', $console);
     }
     echo "<script>console.log('Console: " . $console . "' );</script>";
 }
 //Obtener Tipo de Comprobante por defecto
-function comprobante_defecto($id, $origen, $tag){
-    if($origen == "O"){
+function comprobante_defecto($id, $origen, $tag)
+{
+    if ($origen == "O") {
         $r = DB::query("SELECT id_tipcom FROM f0013 WHERE id_emp = {$id}");
     }
     //listar_tipos_comprobantes($r->id_tipcom, $tag);
 }
-function SelTipoComprobantes($id){
+function SelTipoComprobantes($id)
+{
     $r = DB::query("SELECT * FROM f0019 WHERE status = 1");
     echo '<option disable value="">Seleccione...</option>';
     $r = to_obj($r);
     foreach ($r as $value) {
-        if($id == $value->id_tipcom){
-            echo '<option selected value="'.$value->id_tipcom.'">'. $value->nombre_tipcom .'</option>';
-        }else{
-            echo '<option value="'.$value->id_tipcom.'">'.$value->nombre_tipcom . '</option>';
+        if ($id == $value->id_tipcom) {
+            echo '<option selected value="' . $value->id_tipcom . '">' . $value->nombre_tipcom . '</option>';
+        } else {
+            echo '<option value="' . $value->id_tipcom . '">' . $value->nombre_tipcom . '</option>';
         }
     }
 }
-function curl_dolar_bcv_old() {
+function curl_dolar_bcv_old()
+{
     //Validar si existe la tasa, si existe no se guarda;
-    include ROOT .'/Models/CambiosModel.php';
+    include ROOT . '/Models/CambiosModel.php';
     //Tasa Oficial
     $data1 = file_get_contents("https://ve.dolarapi.com/v1/dolares/oficial");
     $data2 = json_decode($data1);
     $data = array();
     $id_moneda = 2;
-    $USD ='';
+    $USD = '';
     $fecha = Date('Y-m-d');
     //$fecha = substr($data2->fechaActualizacion,0,10);
     $xtasa = $data2->promedio;
     $exist = CambiosModel::exist_rate_change($id_moneda, $fecha);
-    if(!$exist){
+    if (!$exist) {
         try {
-        //Guardar Tasa del ultimo día
-        $xtasa = 0;
-        //$fecha1 = explode(' ', $fecha);
-        //$fecha2 = explode('=', $fecha1[6]);
-        $fecha3 = $fecha;
-        $xtasa = str_replace(',', '.', $xtasa);
-        $xtasa = (double)filter_var($xtasa, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+            //Guardar Tasa del ultimo día
+            $xtasa = 0;
+            //$fecha1 = explode(' ', $fecha);
+            //$fecha2 = explode('=', $fecha1[6]);
+            $fecha3 = $fecha;
+            $xtasa = str_replace(',', '.', $xtasa);
+            $xtasa = (float)filter_var($xtasa, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
-        $data = [
-            'fecha_cambio' => $fecha3,
-            'id_moneda' => $id_moneda,
-            'cambio_compra' => $xtasa,
-            'cambio_venta' => $xtasa,
-            'create_user' => $_SESSION['id_user']
-        ];
-        $exist = CambiosModel::exist_rate_change($id_moneda, $fecha3);
-        if(!$exist){
-            $id = CambiosModel::guardar($data);
-        }else{
-        }
+            $data = [
+                'fecha_cambio' => $fecha3,
+                'id_moneda' => $id_moneda,
+                'cambio_compra' => $xtasa,
+                'cambio_venta' => $xtasa,
+                'create_user' => $_SESSION['id_user']
+            ];
+            $exist = CambiosModel::exist_rate_change($id_moneda, $fecha3);
+            if (!$exist) {
+                $id = CambiosModel::guardar($data);
+            } else {
+            }
         } catch (PDOException $e) {
             echo $e->getMessage();
-        }finally{
-
+        } finally {
         }
-    }else{
+    } else {
         $exist = CambiosModel::exist_rate_change($id_moneda, $fecha);
-        if(!$exist){
+        if (!$exist) {
             $data = [
                 'fecha_cambio' => $fecha3,
                 'id_moneda' => $id_moneda,
@@ -583,9 +632,9 @@ function curl_dolar_bcv_old() {
             $id = CambiosModel::guardar($data);
             $fecha3 = $fecha;
             $xtasa = str_replace(',', '.', $xtasa);
-            $xtasa = (double)filter_var($xtasa, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+            $xtasa = (float)filter_var($xtasa, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
             $USD = $xtasa;
-        }else{
+        } else {
             $fecha3 = $exist[0]['fecha_cambio'];
             $data = [
                 'fecha_cambio' => $fecha3,
@@ -595,87 +644,99 @@ function curl_dolar_bcv_old() {
                 'create_user' => $_SESSION['id_user']
             ];
             $id = CambiosModel::actualizar($exist[0]['id_cambio'], $data);
-            $USD = number_format($exist[0]['cambio_venta'],8);
+            $USD = number_format($exist[0]['cambio_venta'], 8);
             $USD = str_replace('.', ',', $xtasa);
             $fecha = date('d-m-Y', strtotime($exist[0]['fecha_cambio']));
         }
-        
     }
     return $retorna = array('fecha' => $fecha, 'bcv' => $USD); //armo el array de retorno
 }
 function curl_dolar_bcv(){
-    include ROOT .'/Models/CambiosModel.php';
-    
+    include ROOT . '/Models/CambiosModel.php';
+    $id_moneda = 2;
+    $fecha = date('Y-m-d');    
+    $tasa = 0;    
+    $tasa_dol = CambiosModel::exist_rate_change($id_moneda, $fecha); 
+    $xfecha = $tasa_dol[0]['fecha_cambio'];
+    $fecha = date('d-m-Y', strtotime($xfecha));
+    $tasa = number_format($tasa_dol[0]['cambio_venta'], 4, ",", ".");    
+    return $retorna = array('fecha' => $fecha, 'bcv' => $tasa); //armo el array de retorno    
+}
+function curl_dolar_bcv_ol1()
+{
+    include ROOT . '/Models/CambiosModel.php';
+
     $url = 'https://www.bcv.org.ve';
     $active = pingDomain($url);
     //if($active){
-        include 'simple_html_dom.php';
-        $arrContextOptions = array(
-            "ssl" => array(
-                "verify_peer" => false,
-                "verify_peer_name" => false,
-            ),
-        );
-        $fecha = Date('Y-m-d');
-        $tasa = '';
-        $id_moneda = 2;
-        $headers = @get_headers($url);
-        $htmlsite = file_get_html($url, false, stream_context_create($arrContextOptions));
-        $element_data = $htmlsite->find('div[id="dolar"]', 0);
-        $element_date = $htmlsite->find('span[property="dc:date"]', 0);
-        //echo $element_data->tag; 
-        //echo $element_data->outertext;
-        //echo $element_data->innertext;
-        $texto = explode(' ', $element_data->plaintext);
-        //Fecha
-        $fecha_ori = explode(' ', $element_date->outertext);
-        $fecha_ori = $fecha_ori[4];
-        $fecha_ori = str_replace("content=", '', $fecha_ori);
-        $fecha = substr($fecha_ori, 1, 10);
+    include 'simple_html_dom.php';
+    $arrContextOptions = array(
+        "ssl" => array(
+            "verify_peer" => false,
+            "verify_peer_name" => false,
+        ),
+    );
+    $fecha = Date('Y-m-d');
+    $tasa = '';
+    $id_moneda = 2;
+    $headers = @get_headers($url);
+    $htmlsite = file_get_html($url, false, stream_context_create($arrContextOptions));
+    $element_data = $htmlsite->find('div[id="dolar"]', 0);
+    $element_date = $htmlsite->find('span[property="dc:date"]', 0);
+    //echo $element_data->tag; 
+    //echo $element_data->outertext;
+    //echo $element_data->innertext;
+    $texto = explode(' ', $element_data->plaintext);
+    //Fecha
+    $fecha_ori = explode(' ', $element_date->outertext);
+    $fecha_ori = $fecha_ori[4];
+    $fecha_ori = str_replace("content=", '', $fecha_ori);
+    $fecha = substr($fecha_ori, 1, 10);
 
-        //Moneda
-        $moneda_ori = trim($texto[29]);
-        $tasa_ori = str_replace(',', '.', $texto[85]);
-        $id_moneda_ori = CambiosModel::getIdMoneda($moneda_ori);
-        $id_moneda = $id_moneda_ori['id_moneda'];
-        //Tasa
-        $tasa = $tasa_ori;
-        //Validar si existe la tasa
-        $exist = CambiosModel::exist_rate_change($id_moneda, $fecha);
-        $data = array();
-        if (!$exist) {
-            $data = [
-                'fecha_cambio' => $fecha,
-                'id_moneda' => $id_moneda,
-                'cambio_compra' => $tasa,
-                'cambio_venta' => $tasa,
-                'create_user' => $_SESSION['id_user']
-            ];
-            $id = CambiosModel::guardar($data);
-        }
-        $tasa = number_format($tasa, 8, ",", ".");
-        $fecha = formatFecha($fecha);
-        return $retorna = array('fecha' => $fecha, 'bcv' => $tasa); //armo el array de retorno
+    //Moneda
+    $moneda_ori = trim($texto[29]);
+    $tasa_ori = str_replace(',', '.', $texto[85]);
+    $id_moneda_ori = CambiosModel::getIdMoneda($moneda_ori);
+    $id_moneda = $id_moneda_ori['id_moneda'];
+    //Tasa
+    $tasa = $tasa_ori;
+    //Validar si existe la tasa
+    $exist = CambiosModel::exist_rate_change($id_moneda, $fecha);
+    $data = array();
+    if (!$exist) {
+        $data = [
+            'fecha_cambio' => $fecha,
+            'id_moneda' => $id_moneda,
+            'cambio_compra' => $tasa,
+            'cambio_venta' => $tasa,
+            'create_user' => $_SESSION['id_user']
+        ];
+        $id = CambiosModel::guardar($data);
+    }
+    $tasa = number_format($tasa, 8, ",", ".");
+    $fecha = formatFecha($fecha);
+    return $retorna = array('fecha' => $fecha, 'bcv' => $tasa); //armo el array de retorno
     //}
-    
+
 }
-function curl_dolar_par() {
+function curl_dolar_par()
+{
     $data = array();
     $id_moneda = 6;
     $USD = 0;
     $fecha = Date('Y-m-d');
     $exist = CambiosModel::exist_rate_change($id_moneda, $fecha);
-    if($exist){
+    if ($exist) {
         $xfecha = $exist[0]['fecha_cambio'];
         $fecha = date('d-m-Y', strtotime($xfecha));
-        $USD = number_format($exist[0]['cambio_venta'],8);
+        $USD = number_format($exist[0]['cambio_venta'], 8);
         $USD = str_replace('.', ',', $USD);
-    }else{
+    } else {
         $exist = CambiosModel::query("SELECT * FROM f0012 WHERE id_moneda = {$id_moneda} AND fecha_cambio <= '$fecha' ORDER BY fecha_cambio DESC LIMIT 1");
-        if($exist){
+        if ($exist) {
             $xfecha = $exist[0]['fecha_cambio'];
             $fecha = date('d-m-Y', strtotime($xfecha));
-            $USD = number_format($exist[0]['cambio_venta'],8);
+            $USD = number_format($exist[0]['cambio_venta'], 8);
             $USD = str_replace('.', ',', $USD);
         }
     }
@@ -751,7 +812,8 @@ function curl_dolar_par() {
     return $retorna = array('fecha' => $fecha, 'bcv' => $USD); //armo el array de retorno
 }
 //Funcion para quitar format a un campo monto formateado
-function convert_string_to_number($num){
+function convert_string_to_number($num)
+{
     // Eliminar todos los puntos
     $numero_sin_puntos = preg_replace('/\./', '', $num);
     // Reemplazar la coma por un punto
@@ -759,18 +821,21 @@ function convert_string_to_number($num){
     return floatval($numero_formateado);
 }
 //Función para saber la tasa de IVA a una Fecha determianda
-function xvatTax($fecha, $vatTax){
-     $r = VatTaxModel::ratevatTax($fecha, $vatTax);
-     return $r;
-     //echo json_encode($r, JSON_UNESCAPED_UNICODE);
+function xvatTax($fecha, $vatTax)
+{
+    $r = VatTaxModel::ratevatTax($fecha, $vatTax);
+    return $r;
+    //echo json_encode($r, JSON_UNESCAPED_UNICODE);
 }
 //Validar empresa de Cia y cambio
-function datos_cia($id_emp, $fecha){
+function datos_cia($id_emp, $fecha)
+{
     $r = CotizacionesModel::consulta_adic01($id_emp, $fecha);
     return $r;
 }
 //Validar si un pagina web esta activa
-function pingDomain($url){
+function pingDomain($url)
+{
     $headers = @get_headers($url);
     if ($headers && strpos($headers[0], '200')) {
         return true;
@@ -778,11 +843,13 @@ function pingDomain($url){
         return false;
     }
 }
-function html($string){
-    return htmlspecialchars($string, REPLACE_FLAGS, CHARSET);
+function html(string $string)
+{
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
 //Obtener fecha y hora para guardar en los campos de auditoria
-function getAuditoria(){
+function getAuditoria() 
+{
     // 1. Definir la zona horaria deseada
     $timezone = new DateTimeZone('America/Caracas'); // Ejemplo: Venezuela
     // 2. Crear objeto DateTime con la hora actual en esa zona
@@ -790,4 +857,79 @@ function getAuditoria(){
     // 3. Obtener el timestamp (segundos desde 1970)
     $timestamp = $date->format('Y-m-d H:i:s');
     return $timestamp;
+}
+
+function encriptar_url(string $data) {
+    // Convertimos el array de datos en un string (ej: "editar-5")
+    $dato_serializado = is_array($data) ? json_encode($data) : $data;
+    $encriptado = openssl_encrypt($dato_serializado, METODO_CIFRADO, LLAVE_SECRETA, 0, IV_SECRETO);
+    // Usamos urlencode para que sea seguro pasarlo por la barra de direcciones
+    return urlencode(base64_encode($encriptado));
+}
+
+function desencriptar_url(string $token) {
+    $token_base64 = base64_decode(urldecode($token));
+    $desencriptado = openssl_decrypt($token_base64, METODO_CIFRADO, LLAVE_SECRETA, 0, IV_SECRETO);
+    // Intentamos decodificar si era un JSON, si no, devolvemos el string
+    $resultado = json_decode($desencriptado, true);
+    return $resultado ? $resultado : $desencriptado;
+}
+//Función Helper en PHP para transformar Enlaces de YouTube
+function parsearYoutubeEmbed(string $url)
+{
+    if (empty($url)) return null;
+    preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $url, $match);
+    return isset($match[1]) ? "https://www.youtube.com/embed/" . $match[1] : $url;
+}
+//
+function validarYSanearMediaCarrusel(array $files, int $index, string $directorioDestino): string
+{
+    if (!isset($files['error'][$index]) || $files['error'][$index] !== UPLOAD_ERR_OK) {
+        throw new \Exception("Error al subir el archivo con índice [{$index}]. Código: " . ($files['error'][$index] ?? 'desconocido'));
+    }
+
+    $tmpName   = $files['tmp_name'][$index];
+    $origName  = $files['name'][$index];
+    $extension = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+
+    $formatosPermitidos = ['jpg', 'jpeg', 'png', 'webp', 'mp4'];
+    if (!in_array($extension, $formatosPermitidos)) {
+        throw new \Exception("El archivo [{$origName}] no tiene un formato válido (JPG, PNG, WEBP o MP4).");
+    }
+
+    // Validar tipo MIME real
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $tmpName);
+    finfo_close($finfo);
+
+    $mimesValidos = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'];
+    if (!in_array($mimeType, $mimesValidos)) {
+        throw new \Exception("El tipo de archivo MIME [{$mimeType}] no es permitido.");
+    }
+
+    // Generar nombre seguro único
+    $prefijo = ($extension === 'mp4') ? 'VID_CAR' : 'IMG_CAR';
+    $nuevoNombre = $prefijo . '_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
+
+    if (!is_dir($directorioDestino)) {
+        mkdir($directorioDestino, 0775, true);
+    }
+
+    if (!move_uploaded_file($tmpName, $directorioDestino . $nuevoNombre)) {
+        throw new \Exception("No se pudo mover el archivo multimedia al directorio de destino.");
+    }
+
+    return $nuevoNombre;
+}
+
+// Función auxiliar para sanear y limitar la longitud de los mensajes
+function sanearMensajeOverlay($texto)
+{
+    if (empty($texto)) {
+        return null;
+    }
+    // Eliminar etiquetas HTML y espacios adicionales
+    $textoLimpio = trim(strip_tags($texto));
+    // Limitar a 255 caracteres
+    return mb_substr($textoLimpio, 0, 255);
 }

@@ -22,12 +22,12 @@ class PDF extends FPDF{
         $this->movem_number = $r[0]->movem_number;
         $this->cod_tmocxc = $r[0]->cod_tmocxc;
         $this->nom_ent = $r[0]->nom_ent;
-        $this->movem_descrip = $r[0]->movem_descrip;
+        $this->movem_descrip = $r[0]->movem_descrip;        
     }
     // Cabecera de página
     function Header(){
          // Logo
-         $this->Image($this->ruta_logo,10, 8, 50, 0, 'PNG');
+         //$this->Image($this->ruta_logo,10, 8, 50, 0, 'PNG');
         // Arial bold 15
         $this->SetFont('Arial','B', 7);
         // Movernos a la derecha

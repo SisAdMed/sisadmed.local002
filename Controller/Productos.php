@@ -1,28 +1,46 @@
 <?php
-class Productos extends Controller{
+ini_set('memory_limit', '-1');
+class Productos extends Controller
+{
 	public function __construct(){
 		Auth::noAuth();
 		parent::__construct();
-		Permisos::getPermisos(52);
+		Permisos::getPermisos(52); 
 	}
 	public function index(){
 		if (empty($_SESSION['permisosMod']['r'])) {
 			header('Location:' . base_url . '/Perfil');
 		}
-		$objeto = ProductosModel::all();
 		$this->views->getView($this, "index", [
 			'page_name' => "Consulta de Productos",
-			'function_js' => "Productos.js",
-			'function_js_mod' => "INVFun.js",
-			'objeto' => to_obj($objeto)
+			'function_js' => "Productos.js?v=" . SITE_VERSION,
+			'function_js_mod' => "INVFun.js?v=" . SITE_VERSION,		
 		]);
 	}
 	public function nuevo(){
 		$this->views->getView($this, "nuevo", [
 			'page_name' => "Nuevo Producto",
-			'function_js' => "Productos.js",
-			'function_js_mod' => "INVFun.js",
+			'function_js' => "Productos.js?v=" . SITE_VERSION,
+			'function_js_mod' => "INVFun.js?v=" . SITE_VERSION,
 		]);
+	}
+	public function change_utility(){		
+		$this->views->getView($this, "maspricha", [
+			'page_name' => "Cambio de Utilidad Masivo",
+			'function_js' => "Productos.js?v=" . SITE_VERSION,
+			'function_js_mod' => "INVFun.js?v=" . SITE_VERSION,
+		]);
+	}
+	public function change_utility_data(){
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {			
+			$id_prod = $_POST['id_prod'];	
+			$id_fab = "";
+			if(isset($_POST['id_fab'])){
+				$id_fab = implode(',', $_POST['id_fab']);
+			}				
+			$r = ProductosModel::change_utility_data($id_prod, $id_fab);
+			echo json_encode($r, JSON_UNESCAPED_UNICODE);
+		}
 	}
 	public function edit(string $idn){
 		$valor = '';
@@ -40,8 +58,8 @@ class Productos extends Controller{
 			}
 			$this->views->getView($this, "edit", [
 				'page_name' => "Editando el registro " . $r['nom_prod'],
-				'function_js' => "Productos.js",
-				'function_js_mod' => "INVFun.js",
+				'function_js' => "Productos.js?v=" . SITE_VERSION,
+				'function_js_mod' => "INVFun.js?v=" . SITE_VERSION,
 				'r' => to_obj($r),
 				'valor' => $valor
 			]);
@@ -167,12 +185,11 @@ class Productos extends Controller{
 	}
 	//Mostrar imagenes del producto
 	function showImg(){
-		if($_SERVER["REQUEST_METHOD"] == 'POST'){
+		if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 			$id = $_POST['id'];
 			$img = ProductosModel::showImg($id);
 			echo json_encode($img);
 		}
-		
 	}
 	//Total productos
 	public function tot_prod(){
@@ -280,57 +297,14 @@ class Productos extends Controller{
 		}
 	}
 	public function cargar_screen_main(){
-		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-			$datos_tabla = [];
-			$r = ProductosModel::all();
-			// Creamos los tokens para cada acción
-			foreach($r as $p){
-				$token_editar = encriptar_url(json_encode(['accion' => 'edit', 'id' => $p['id_prod']]));
-				$datos_tabla[] = [
-					'adicional' => $p['adicional'],
-					'admin' => $p['admin'],
-					'alto' => $p['alto'],
-					'ancho' => $p['ancho'],
-					'bultos' => $p['bultos'],
-					'cod2_prod' => $p['cod2_prod'],					
-					'cod_prod' => $p['cod_prod'],
-					'con_cons_prod' => $p['con_cons_prod'],
-					'conv_prod_cons' => $p['conv_prod_cons'],
-					'costo_prod' => $p['costo_prod'],
-					'des_prod' => $p['des_prod'],
-					'door_costo' => $p['door_costo'],
-					'door_prod' => $p['door_prod'],
-					'empaque' => $p['empaque'],
-					'flete_prod' => $p['flete_prod'],
-					'fotos' => $p['fotos'],
-					'gen_prod' => $p['gen_prod'],
-					'grupo_nombre' => $p['grupo_nombre'],
-					'id_prod' => $p['id_prod'],
-					'interno_prod' => $p['interno_prod'],
-					'iva_prod' => $p['iva_prod'],
-					'largo' => $p['largo'],					
-					'lote_prod' => $p['lote_prod'],
-					'nom_fab' => $p['nom_fab'],
-					'nom_pre' => $p['nom_pre'],
-					'nom_prod' => $p['nom_prod'],
-					'origen' => $p['origen'],
-					'otros_prod' => $p['otros_prod'],
-					'recar2_prod' => $p['recar2_prod'],
-					'recar_prod' => $p['recar_prod'],
-					'ref_prod' => $p['ref_prod'],
-					'status' => $p['status'],
-					'stock' => $p['stock'],
-					'uni_com_prod' => $p['uni_com_prod'],
-					'uni_ven_prod' => $p['uni_ven_prod'],
-					'venta2_prod' => $p['venta2_prod'],
-					'ventas_prod' => $p['ventas_prod'],
-					'creado_por' => $p['creado_por'],
-					'create_date' => $p['create_date'],
-					'modificado_por' => $p['modificado_por'],
-					'modify_date' => $p['modify_date'],
-					"token_edit"  => $token_editar,
-				];
-			}
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {			
+			$datos_tabla = [];			
+			$r = ProductosModel::cargar_screen_main();
+			foreach ($r as $p) {
+				$datos_tabla[] = array_merge($p, [
+					"token_edit" => encriptar_url(json_encode(['accion' => 'edit', 'id' => $p['id_prod']]))
+				]);
+			}					
 			echo json_encode($datos_tabla, JSON_UNESCAPED_UNICODE);
 		}
 	}
@@ -408,7 +382,7 @@ class Productos extends Controller{
 		}
 	}
 	public function store(){
-		if ($_SERVER["REQUEST_METHOD"] == "POST") {					
+		if ($_SERVER["REQUEST_METHOD"] == "POST") {
 			$data = array();
 			$dataJson = array();
 			//Asignar valores a variables
@@ -418,9 +392,12 @@ class Productos extends Controller{
 			foreach ($_POST as $key => $value) {
 				$$key = $value;
 			}
+			$modu = 'modify_user';
+            $modd = 'modify_date';
 			if (empty($id)) {
-				$modo = "create_user";
-			}
+				$modu = "create_user";
+                $modd = "create_date";
+			}		
 			try {
 				$data += [
 					'cod_prod' => $cod_prod,
@@ -431,27 +408,30 @@ class Productos extends Controller{
 					'id_sub_grupo' => $id_sub_grupo,
 					'conv_prod_cons' => $conv_prod_cons,
 					'id_fab' => $id_fab,
-					'id_fab_fac' => $id_fab_fac ? : null,
+					'id_fab_fac' => $id_fab_fac ?: null,
+					'estado_id' => $estado_id ? : null,
 					'ref_prod' => $ref_prod,
 					'gen_prod' => $gen_prod,
 					'des_prod' => $des_prod,
 					'uni_com_prod' => $uni_com_prod ?: 0,
 					'uni_ven_prod' => $uni_ven_prod ?: 0,
 					'iva_prod' => !empty($iva_prod) ? 1 : 0,
-					'con_cons_prod' => $con_cons_prod ? : 0,
+					'con_cons_prod' => $con_cons_prod ?: 0,
 					'lote_prod' => !empty($lote_prod) ? 1 : 0,
 					'interno_prod' => !empty($interno_prod) ? 1 : 0,
 					'door_prod' => !empty($door_prod) ? 1 : 0,
 					'status' => $status,
-					'alto' => convert_string_to_number($alto) ? : 0,
-					'ancho' => convert_string_to_number($ancho) ? : 0,
-					'largo' => convert_string_to_number($largo) ? : 0,
+					'alto' => convert_string_to_number($alto) ?: 0,
+					'ancho' => convert_string_to_number($ancho) ?: 0,
+					'largo' => convert_string_to_number($largo) ?: 0,
 					'origen' => $origen,
 					'id_presen1' => $id_presen1,
 					'id_presen2' => $id_presen2,
 					'stock_minimo' => $stock_minimo ?:  0,
-					'commet_prod' => $commet_prod
-				];				
+					'commet_prod' => $commet_prod,
+					$modu => $_SESSION['id_user'],
+                    $modd => getAuditoria(),
+				];
 				if ($_SESSION['administrator'] == 1) {
 					$costo_prod = convert_string_to_number($costo_prod) ?: 0;
 					$flete_prod = convert_string_to_number($flete_prod) ?: 0;
@@ -472,23 +452,19 @@ class Productos extends Controller{
 						'ventas_prod' => $ventas_prod,
 						'recar2_prod' => $recar2_prod,
 						'venta2_prod' => $venta2_prod,
-					];					
+					];
 				}
-				if (empty($id)) {
-					$modo = 'create_user';
-					$data += [$modo => $_SESSION['id_user']];
+				if (empty($id)) {					
 					$id = ProductosModel::guardar($data);
 					$title = "Se ha guardado el Producto satisfactoriamente";
-				} else {
-					$modo = 'modify_user';
-					$data += [$modo => $_SESSION['id_user']];
+				} else {					
 					$id = ProductosModel::actualizar($_POST['id'], $data);
 					$id = $_POST['id'];
 					$title = "Se ha modificado el Producto satisfactoriamente";
 				}
 				$icon = "success";
 				//Guardar Etiqueta
-				if (isset($nomcor_prod) && !empty($nomcor_prod)) {					
+				if (isset($nomcor_prod) && !empty($nomcor_prod)) {
 					$data = array();
 					$data += [
 						'id_prod' => intval($id),
@@ -511,7 +487,7 @@ class Productos extends Controller{
 						$data += [$modo => $_SESSION['id_user']];
 						$r = ProductosModel::guardar_etiqueta($data);
 					}
-				}							
+				}
 				//ALmacenar Imagenes
 				if (isset($_FILES['url_photo']) && (count($_FILES['url_photo']) != 0)) {
 					$ruta = ROOT . DS . 'Assets' . DS . 'img' . DS . 'products';
@@ -568,24 +544,24 @@ class Productos extends Controller{
 		}
 	}
 	public function show_row(){
-		if($_SERVER["REQUEST_METHOD"] == 'POST'){
+		if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 			$id = $_POST['id'];
 			$r = ProductosModel::show_row($id);
 			echo json_encode($r, JSON_UNESCAPED_UNICODE);
 		}
 	}
 	public function gestion($token = null){
-		if(!$token){
+		if (!$token) {
 			return;
 		}
-		$datos = desencriptar_url($token);	
+		$datos = desencriptar_url($token);
 		switch ($datos['accion']) {
-        case 'edit':
-            $this->edit($datos['id']);
-            break;
-        default:
-            // Acción no permitida
-            break;
-    }
+			case 'edit':
+				$this->edit($datos['id']);
+				break;
+			default:
+				// Acción no permitida
+				break;
+		}
 	}
 }

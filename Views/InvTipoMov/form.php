@@ -6,7 +6,7 @@
             <select autofocus class="form-control" name="id_emp" id="id_emp"></select>
         </div>
     </div>
-    <div class="row">
+    <div class="row"> 
         <div class="form-group col-md-2 col-sm-2 col-xs-12">
             <label for="cod_tmoinv">Código<span class="required">*</span></label>
             <input autofocus type="text" class="form-control" id="cod_tmoinv" name="cod_tmoinv" onkeyup="mayusculas(this);" >

@@ -41,10 +41,11 @@ if(isset($_SESSION['administrador']) && $_SESSION['administrator'] != 1){
         <link rel="stylesheet" href="<?= CSS ?>/OverlayScrollbars.min.css">
         <!-- Daterange picker -->
         <link rel="stylesheet" href="<?= CSS ?>/daterangepicker.css">
-        <!--Color Picker-->|
+        <!--Color Picker-->
         <link rel="stylesheet" href="<?= CSS ?>/bootstrap-colorpicker.min.css">
         <!-- summernote -->
-        <!-- <link rel="stylesheet" href="<?= CSS ?>/css/summernote-bs4.min.css"> -->
+        <link rel="stylesheet" href="<?= CSS ?>/summernote-bs4.min.css">
+        
         <!-- Select 2 -->
         <link rel="stylesheet" href="<?= CSS ?>/select2.min.css">
         <!-- SweetAlert 2 -->
@@ -64,7 +65,11 @@ if(isset($_SESSION['administrador']) && $_SESSION['administrator'] != 1){
         <!-- FullCalendar -->         
         <link rel="stylesheet" href="<?= CSS ?>/fullcalendar/main.css">
         <!-- Mis estilos -->
-        <link rel="stylesheet" type="text/css" href="<?= ASSETS ?>/app/css/app.css">
+        <!--Font Awesome-->
+        <link rel="stylesheet" href="<?= ASSETS ?>/app/fontawesome/css/fontawesome.min.css">
+        <link rel="stylesheet" type="text/css" href="<?= ASSETS ?>/app/css/app.css?v=<?php echo SITE_VERSION; ?>">
+        <!-- Versión-->
+        <link rel="stylesheet" href="<?= CSS ?>/main.css?v=<?php echo SITE_VERSION; ?>">
     </head>
         <body class="hold-transition sidebar-mini sidebar-collapse layout-footer-fixed text-xs" data-sidebar-expand-on-hover="true">
         <div class="content" style="height: auto;">
@@ -87,7 +92,7 @@ if(isset($_SESSION['administrador']) && $_SESSION['administrator'] != 1){
                     <i class="far fa-bell text-sm"></i>
                     <span id="tot_not" class="badge badge-danger navbar-badge"></span>
                 </a>
-                <div class="tot_notify" style="width:500 px"></div>
+                <div id="tot_notify" style="width:800 px"></div>
                 </li>
                 <li class="dropdown user user-menu open">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">

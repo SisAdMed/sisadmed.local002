@@ -20,6 +20,7 @@
                                 <th>Referencia</th>
                                 <th>Marca</th>
                                 <th class="text-right">Stock</th>
+                                <th>Lote</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

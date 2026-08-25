@@ -13,7 +13,7 @@ class Login extends Controller{
         $data['function_js'] = 'Login.js';
         $this->views->getview($this, 'index', $data);
     }
-    public function ingresar(){
+    public function ingresar(){        
         $arrJson = [];
         $usuario = [];
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -52,7 +52,7 @@ class Login extends Controller{
             } else {
                 $arrJson = ['error' => $val->getErrors()];
             }
-        }
+        }        
         echo json_encode($arrJson, JSON_UNESCAPED_UNICODE);
     }
     public function ChangePassword(){
